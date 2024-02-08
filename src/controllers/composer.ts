@@ -61,7 +61,7 @@ type ComposerData = {
     req: Request<object, object, ComposerData>,
     timestamp: number,
     content: string,
-    anonymous: boolean,
+    anonymous?: boolean,
     fromQueue: boolean,
     tid?: number,
     cid?: number,
