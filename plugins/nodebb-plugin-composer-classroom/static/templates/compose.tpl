@@ -23,6 +23,10 @@
 			<div class="display-scheduler pull-right{{{ if !canSchedule }}} hidden{{{ end }}}">
 				<i class="fa fa-clock-o"></i>
 			</div>
+			<div class="display-anonymous-posting">
+				<input class="mdl-switch__input" type="checkbox" name="anonymousPostEnabled" />
+				<span class="mdl-switch__label"><strong>Post anonymously</strong></span>
+			</div>
 			<!-- ENDIF isTopicOrMain -->
 			<!-- IF showHandleInput -->
 			<div class="col-sm-3 col-md-12">
