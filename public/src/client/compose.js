@@ -6,6 +6,7 @@ define('forum/compose', ['hooks'], function (hooks) {
 
     Compose.init = function () {
         const container = $('.composer');
+        console.log(container);
 
         if (container.length) {
             hooks.fire('action:composer.enhance', {
