@@ -12,6 +12,7 @@ define('composer', [
 	'composer/resize',
 	'composer/autocomplete',
 	'composer/scheduler',
+	'composer/anonymous',
 	'scrollStop',
 	'topicThumbs',
 	'api',
@@ -22,7 +23,7 @@ define('composer', [
 	'search',
 	'screenfull',
 ], function (taskbar, translator, uploads, formatting, drafts, tags,
-	categoryList, preview, resize, autocomplete, scheduler, scrollStop,
+	categoryList, preview, resize, autocomplete, scheduler, anonymous, scrollStop,
 	topicThumbs, api, bootbox, alerts, hooks, messagesModule, search, screenfull) {
 	var composer = {
 		active: undefined,
@@ -323,6 +324,8 @@ define('composer', [
 
 		categoryList.init(postContainer, composer.posts[post_uuid]);
 		scheduler.init(postContainer, composer.posts);
+
+		anonymous.init(postContainer);
 
 		formatting.addHandler(postContainer);
 		formatting.addComposerButtons();
