@@ -11,7 +11,13 @@ define('composer/anonymous', [], function () {
         state.isToggled = false;
 
         displayBtn = $postContainer[0].querySelector('.display-anonymous-posting')
-        console.log(displayBtn)
+
+        displayBtn.addEventListener('click', handleClick)
+    }
+
+    function handleClick() {
+        state.isToggled = !state.isToggled;
+        console.log(state.isToggled);
     }
 
     return anonymous;
