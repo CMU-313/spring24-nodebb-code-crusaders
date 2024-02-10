@@ -15,6 +15,10 @@ define('composer/anonymous', [], function () {
         displayBtn.addEventListener('click', handleClick)
     }
 
+    anonymous.getBtnState = function () {
+        return state.isToggled;
+    }
+
     function handleClick() {
         state.isToggled = !state.isToggled;
         console.log(state.isToggled);
