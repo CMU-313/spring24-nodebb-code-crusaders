@@ -50,7 +50,12 @@
 			<div class="display-scheduler pull-right hidden-sm hidden-xs{{{ if !canSchedule }}} hidden{{{ end }}}">
 				<i class="fa fa-clock-o"></i>
 			</div>
-
+			
+			<div class="display-anonymous-posting">
+				<input class="mdl-switch__input" type="checkbox" name="anonymousPostEnabled" />
+				<span class="mdl-switch__label"><strong>Post anonymously</strong></span>
+			</div>
+			
 			<div class="btn-group pull-right action-bar hidden-sm hidden-xs">
 				<button class="btn btn-default composer-discard" data-action="discard" tabindex="-1"><i class="fa fa-times"></i> [[topic:composer.discard]]</button>
 
