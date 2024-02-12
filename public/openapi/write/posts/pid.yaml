@@ -64,6 +64,8 @@ get:
                     type: boolean
                   downvoted:
                     type: boolean
+                  best_response:
+                    type: boolean
 put:
   tags:
     - posts
