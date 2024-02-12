@@ -695,6 +695,7 @@ define('composer', [
 				handle: handleEl ? handleEl.val() : undefined,
 				title: titleEl.val(),
 				content: bodyEl.val(),
+				anonymous: anonymous.getBtnState(),
 				thumb: thumbEl.val() || '',
 				cid: categoryList.getSelectedCid(),
 				tags: tags.getTags(post_uuid),
@@ -707,6 +708,7 @@ define('composer', [
 				tid: postData.tid,
 				handle: handleEl ? handleEl.val() : undefined,
 				content: bodyEl.val(),
+				anonymous: anonymous.getBtnState(),
 				toPid: postData.toPid,
 			};
 		} else if (action === 'posts.edit') {
@@ -717,6 +719,7 @@ define('composer', [
 				pid: postData.pid,
 				handle: handleEl ? handleEl.val() : undefined,
 				content: bodyEl.val(),
+				anonymous: anonymous.getBtnState(),
 				title: titleEl.val(),
 				thumb: thumbEl.val() || '',
 				tags: tags.getTags(post_uuid),

@@ -248,12 +248,12 @@ async function giveDefaultGlobalPrivileges() {
 }
 
 async function enableDefaultPlugins() {
-    winston.info('Enabling default plugins\n');
+    winston.info('Enabling modified plugins\n');
     const testPlugins = Array.isArray(nconf.get('test_plugins')) ? nconf.get('test_plugins') : [];
     const defaultEnabled = [
         'nodebb-plugin-dbsearch',
         'nodebb-widget-essentials',
-        'nodebb-plugin-composer-default',
+        'nodebb-plugin-composer-classroom',
     ].concat(testPlugins);
 
     winston.info('[install/enableDefaultPlugins] activating default plugins', defaultEnabled);
