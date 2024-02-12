@@ -10,7 +10,7 @@ import { UserObjectSlim } from './user';
 const intFields: string[] = [
     'uid', 'pid', 'tid', 'deleted', 'timestamp',
     'upvotes', 'downvotes', 'deleterUid', 'edited',
-    'replies', 'bookmarks',
+    'replies', 'bookmarks', 'best response'
 ];
 
 interface PostObjectNew {
