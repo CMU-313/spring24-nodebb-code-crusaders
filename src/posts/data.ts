@@ -10,7 +10,7 @@ import { UserObjectSlim } from './user';
 const intFields: string[] = [
     'uid', 'pid', 'tid', 'deleted', 'timestamp',
     'upvotes', 'downvotes', 'deleterUid', 'edited',
-    'replies', 'bookmarks',
+    'replies', 'bookmarks', 'best response'
 ];
 
 interface PostObjectNew {
@@ -31,6 +31,7 @@ interface PostObjectNew {
     replies: number;
     editedISO: string;
     edited: number;
+    bestResponse: boolean;
 }
 
 type dataObj = {
@@ -71,6 +72,9 @@ function modifyPost(post: PostObjectNew, fields: string[]): void {
             // The next line calls a function in a module that has not been updated to TS yet
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             post.editedISO = (post.edited !== 0 ? utils.toISOString(post.edited) : '') as string;
+        }
+        if (post.hasOwnProperty('bestResponse')) {
+            
         }
     }
 }
