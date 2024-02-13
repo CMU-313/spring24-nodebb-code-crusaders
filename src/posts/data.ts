@@ -10,7 +10,7 @@ import { UserObjectSlim } from './user';
 const intFields: string[] = [
     'uid', 'pid', 'tid', 'deleted', 'timestamp',
     'upvotes', 'downvotes', 'deleterUid', 'edited',
-    'replies', 'bookmarks', 'best response',
+    'replies', 'bookmarks',
 ];
 
 interface PostObjectNew {
@@ -31,7 +31,6 @@ interface PostObjectNew {
     replies: number;
     editedISO: string;
     edited: number;
-    bestResponse: boolean;
 }
 
 type dataObj = {
@@ -149,3 +148,4 @@ postData: PostObjectNew | null) => void): Promise<PostObjectNew | null> {
         await plugins.hooks.fire('action:post.setFields', { data: { ...data, pid } });
     };
 }
+
