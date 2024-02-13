@@ -32,6 +32,10 @@ define('composer', [
 		formatting: undefined,
 	};
 
+	// Necessary due to anonymous.ts exporting a module with a default function instead of
+	// a function.
+	const anonymousObject = anonymous.default();
+
 	$(window).off('resize', onWindowResize).on('resize', onWindowResize);
 	onWindowResize();
 
@@ -325,7 +329,7 @@ define('composer', [
 		categoryList.init(postContainer, composer.posts[post_uuid]);
 		scheduler.init(postContainer, composer.posts);
 
-		anonymous.init(postContainer);
+		anonymousObject.init(postContainer);
 
 		formatting.addHandler(postContainer);
 		formatting.addComposerButtons();
@@ -631,7 +635,7 @@ define('composer', [
 		var handleEl = postContainer.find('.handle');
 		var titleEl = postContainer.find('.title');
 		var bodyEl = postContainer.find('textarea');
-		var anonymousToggle = anonymous.getBtnState();
+		var anonymousToggle = anonymousObject.getBtnState();
 		var thumbEl = postContainer.find('input#topic-thumb-url');
 		var onComposeRoute = postData.hasOwnProperty('template') && postData.template.compose === true;
 		const submitBtn = postContainer.find('.composer-submit');
