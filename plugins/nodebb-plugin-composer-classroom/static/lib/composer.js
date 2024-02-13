@@ -631,6 +631,7 @@ define('composer', [
 		var handleEl = postContainer.find('.handle');
 		var titleEl = postContainer.find('.title');
 		var bodyEl = postContainer.find('textarea');
+		var anonymousToggle = anonymous.getBtnState();
 		var thumbEl = postContainer.find('input#topic-thumb-url');
 		var onComposeRoute = postData.hasOwnProperty('template') && postData.template.compose === true;
 		const submitBtn = postContainer.find('.composer-submit');
@@ -695,7 +696,7 @@ define('composer', [
 				handle: handleEl ? handleEl.val() : undefined,
 				title: titleEl.val(),
 				content: bodyEl.val(),
-				anonymous: anonymous.getBtnState(),
+				anonymous: anonymousToggle,
 				thumb: thumbEl.val() || '',
 				cid: categoryList.getSelectedCid(),
 				tags: tags.getTags(post_uuid),
@@ -708,7 +709,7 @@ define('composer', [
 				tid: postData.tid,
 				handle: handleEl ? handleEl.val() : undefined,
 				content: bodyEl.val(),
-				anonymous: anonymous.getBtnState(),
+				anonymous: anonymousToggle,
 				toPid: postData.toPid,
 			};
 		} else if (action === 'posts.edit') {
@@ -719,7 +720,7 @@ define('composer', [
 				pid: postData.pid,
 				handle: handleEl ? handleEl.val() : undefined,
 				content: bodyEl.val(),
-				anonymous: anonymous.getBtnState(),
+				anonymous: anonymousToggle,
 				title: titleEl.val(),
 				thumb: thumbEl.val() || '',
 				tags: tags.getTags(post_uuid),
