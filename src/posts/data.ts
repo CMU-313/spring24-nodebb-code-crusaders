@@ -5,7 +5,7 @@ import { CategoryObject } from './category';
 import { TopicObject } from '../types/topic';
 import { UserObjectSlim } from './user';
 
-// Credit to Skadeven for the TS translation 
+// Referenced @Skadeven's TypeScript translation from P1: https://github.com/CMU-313/NodeBB/pull/237
 
 const intFields: string[] = [
     'uid', 'pid', 'tid', 'deleted', 'timestamp',

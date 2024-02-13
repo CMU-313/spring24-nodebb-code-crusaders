@@ -82,12 +82,14 @@
         <span class="post-tools">
             <a component="post/reply" href="#" class="no-select <!-- IF !privileges.topics:reply -->hidden<!-- ENDIF !privileges.topics:reply -->">[[topic:reply]]</a>
             <a component="post/quote" href="#" class="no-select <!-- IF !privileges.topics:reply -->hidden<!-- ENDIF !privileges.topics:reply -->">[[topic:quote]]</a>
+            {{{ if !../isMainPost}}}
             <div class="display-best-response">
 				<input class="mdl-switch__input" type="checkbox" name="bestResponseEnabled" />
 				<span class="mdl-switch__label"><strong>Mark best response</strong></span>
 		    </div>
+            {{{end}}}
         </span>
-        
+
         <!-- IF !reputation:disabled -->
         <span class="votes">
             <a component="post/upvote" href="#" class="<!-- IF posts.upvoted -->upvoted<!-- ENDIF posts.upvoted -->">
