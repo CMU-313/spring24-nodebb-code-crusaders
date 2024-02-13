@@ -114,6 +114,7 @@ module.exports = function (Topics) {
         const tid = await Topics.create(data);
 
         let postData = data;
+        console.log(postData);
         postData.tid = tid;
         postData.ip = data.req ? data.req.ip : null;
         postData.isMain = true;
