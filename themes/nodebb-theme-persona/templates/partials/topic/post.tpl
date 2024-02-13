@@ -8,7 +8,8 @@
 
     <small class="pull-left">
         <strong>
-            <a href="<!-- IF posts.user.userslug -->{config.relative_path}/user/{posts.user.userslug}<!-- ELSE -->#<!-- ENDIF posts.user.userslug -->" itemprop="author" data-username="{posts.user.username}" data-uid="{posts.user.uid}">{posts.user.displayname}</a>
+            <a href="<!-- IF posts.user.userslug -->{config.relative_path}/user/{posts.user.userslug}<!-- ELSE -->
+                #<!-- ENDIF posts.user.userslug -->" itemprop="author" data-username="{posts.user.username}" data-uid="{posts.user.uid}">{posts.user.displayname} Best Response</a>
         </strong>
 
         <!-- IMPORT partials/topic/badge.tpl -->
@@ -81,6 +82,12 @@
         <span class="post-tools">
             <a component="post/reply" href="#" class="no-select <!-- IF !privileges.topics:reply -->hidden<!-- ENDIF !privileges.topics:reply -->">[[topic:reply]]</a>
             <a component="post/quote" href="#" class="no-select <!-- IF !privileges.topics:reply -->hidden<!-- ENDIF !privileges.topics:reply -->">[[topic:quote]]</a>
+            {{{ if !../isMainPost}}}
+            <div class="display-best-response">
+				<input class="mdl-switch__input" type="checkbox" name="bestResponseEnabled" />
+				<span class="mdl-switch__label"><strong>Mark best response</strong></span>
+		    </div>
+            {{{end}}}
         </span>
 
         <!-- IF !reputation:disabled -->

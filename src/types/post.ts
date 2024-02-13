@@ -17,6 +17,7 @@ export type PostObject = {
   topic: TopicObject;
   category: CategoryObject;
   isMainPost: boolean;
+  bestResponse: boolean;
   replies: number;
   anonymous: boolean
 };

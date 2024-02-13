@@ -66,6 +66,8 @@ get:
                     type: boolean
                   anonymous:
                     type: boolean
+                  best_response:
+                    type: boolean
 put:
   tags:
     - posts
