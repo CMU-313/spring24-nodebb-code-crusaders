@@ -14,11 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 const database_1 = __importDefault(require("../database"));
 const plugins_1 = __importDefault(require("../plugins"));
 const utils_1 = __importDefault(require("../utils"));
-// Credit to Skadeven for the TS translation 
+// Referenced @Skadeven's TypeScript translation from P1: https://github.com/CMU-313/NodeBB/pull/237
 const intFields = [
     'uid', 'pid', 'tid', 'deleted', 'timestamp',
     'upvotes', 'downvotes', 'deleterUid', 'edited',
-    'replies', 'bookmarks', 'best response'
+    'replies', 'bookmarks', 'best response',
 ];
 function modifyPost(post, fields) {
     if (post) {
@@ -37,8 +37,6 @@ function modifyPost(post, fields) {
             // The next line calls a function in a module that has not been updated to TS yet
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             post.editedISO = (post.edited !== 0 ? utils_1.default.toISOString(post.edited) : '');
-        }
-        if (post.hasOwnProperty('bestResponse')) {
         }
     }
 }
