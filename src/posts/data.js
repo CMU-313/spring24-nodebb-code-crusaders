@@ -16,87 +16,40 @@ const database_1 = __importDefault(require("../database"));
 const plugins_1 = __importDefault(require("../plugins"));
 const utils_1 = __importDefault(require("../utils"));
 const intFields = [
-    "uid",
-    "pid",
-    "tid",
-    "deleted",
-    "timestamp",
-    "upvotes",
-    "downvotes",
-    "deleterUid",
-    "edited",
-    "replies",
-    "bookmarks",
-    "anonymous",
+    'uid',
+    'pid',
+    'tid',
+    'deleted',
+    'timestamp',
+    'upvotes',
+    'downvotes',
+    'deleterUid',
+    'edited',
+    'replies',
+    'bookmarks',
+    'anonymous',
 ];
 function default_1(Posts) {
-    Posts.getPostsFields = function (pids, fields) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!Array.isArray(pids) || !pids.length) {
-                return [];
+    function modifyPost(post, fields) {
+        if (post) {
+            // The next line calls a function in a module that has not been updated to TS yet
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            database_1.default.parseIntFields(post, intFields, fields);
+            if (post.hasOwnProperty('upvotes') && post.hasOwnProperty('downvotes')) {
+                post.votes = post.upvotes - post.downvotes;
             }
-            const keys = pids.map((pid) => `post:${pid}`);
-            const postData = yield database_1.default.getObjects(keys, fields);
-            const result = yield plugins_1.default.hooks.fire("filter:post.getFields", {
-                pids,
-                posts: postData,
-                fields,
-            });
-            result.posts.forEach((post) => modifyPost(post, fields));
-            return result.posts;
-        });
-    };
-    Posts.getPostData = function (pid) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const posts = yield Posts.getPostsFields([pid], []);
-            return posts && posts.length ? posts[0] : null;
-        });
-    };
-    Posts.getPostsData = function (pids) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield Posts.getPostsFields(pids, []);
-        });
-    };
-    Posts.getPostField = function (pid, field) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const post = yield Posts.getPostFields(pid, [field]);
-            return post ? post[field] : null;
-        });
-    };
-    Posts.getPostFields = function (pid, fields) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const posts = yield Posts.getPostsFields([pid], fields);
-            return posts ? posts[0] : null;
-        });
-    };
-    Posts.setPostField = function (pid, field, value) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield Posts.setPostFields(pid, { [field]: value });
-        });
-    };
-    Posts.setPostFields = function (pid, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield database_1.default.setObject(`post:${pid}`, data);
-            plugins_1.default.hooks.fire("action:post.setFields", { data: Object.assign(Object.assign({}, data), { pid }) });
-        });
-    };
-}
-exports.default = default_1;
-function modifyPost(post, fields) {
-    if (post) {
-        database_1.default.parseIntFields(post, intFields, fields);
-        if (post.hasOwnProperty("upvotes") && post.hasOwnProperty("downvotes")) {
-            post.votes = post.upvotes - post.downvotes;
-        }
-        if (post.hasOwnProperty("timestamp")) {
-            post.timestampISO = utils_1.default.toISOString(post.timestamp);
-        }
-        if (post.hasOwnProperty("edited")) {
-            post.editedISO = post.edited !== 0 ? utils_1.default.toISOString(post.edited) : "";
+            if (post.hasOwnProperty('timestamp')) {
+                // The next line calls a function in a module that has not been updated to TS yet
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                post.timestampISO = utils_1.default.toISOString(post.timestamp);
+            }
+            if (post.hasOwnProperty('edited')) {
+                // The next line calls a function in a module that has not been updated to TS yet
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                post.editedISO = (post.edited !== 0 ? utils_1.default.toISOString(post.edited) : '');
+            }
         }
     }
-}
-module.exports = function (Posts) {
     Posts.getPostsFields = function (pids, fields) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!Array.isArray(pids) || !pids.length) {
@@ -105,14 +58,14 @@ module.exports = function (Posts) {
             const keys = pids.map(pid => `post:${pid}`);
             // The next line calls a function in a module that has not been updated to TS yet
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-            const postData = yield database_1.default.getObjects(keys, fields);
+            const postData = (yield database_1.default.getObjects(keys, fields));
             // The next line calls a function in a module that has not been updated to TS yet
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-            const result = yield plugins_1.default.hooks.fire('filter:post.getFields', {
+            const result = (yield plugins_1.default.hooks.fire('filter:post.getFields', {
                 pids: pids,
                 posts: postData,
                 fields: fields,
-            });
+            }));
             result.posts.forEach((post) => modifyPost(post, fields));
             return result.posts;
         });
@@ -175,7 +128,11 @@ module.exports = function (Posts) {
             yield database_1.default.setObject(`post:${pid}`, data);
             // The next line calls a function in a module that has not been updated to TS yet
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-            yield plugins_1.default.hooks.fire('action:post.setFields', { data: Object.assign(Object.assign({}, data), { pid }) });
+            yield plugins_1.default.hooks.fire('action:post.setFields', {
+                data: Object.assign(Object.assign({}, data), { pid }),
+            });
         });
     };
-};
+}
+exports.default = default_1;
+;
