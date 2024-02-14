@@ -112,8 +112,6 @@ get:
                                           type: string
                                 timestamp:
                                   type: number
-                                anonymous:
-                                  type: boolean
                                 fromQueue:
                                   type: boolean
                                 timestampISO:
