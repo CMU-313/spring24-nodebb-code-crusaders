@@ -14,7 +14,11 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 			}, 1000);
 		}
 
-		postContainer.on('keyup', 'textarea, input.handle, input.title', saveThrottle);
+		postContainer.on(
+			'keyup',
+			'textarea, input.handle, input.title',
+			saveThrottle
+		);
 		postContainer.on('click', 'input[type="checkbox"]', saveThrottle);
 		postContainer.on('thumb.uploaded', saveThrottle);
 
@@ -29,7 +33,9 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 				open = localStorage.getItem('drafts:open');
 				open = JSON.parse(open) || [];
 			} catch (e) {
-				console.warn('[composer/drafts] Could not read list of open/available drafts');
+				console.warn(
+					'[composer/drafts] Could not read list of open/available drafts'
+				);
 				open = [];
 			}
 			if (open.length) {
@@ -52,7 +58,9 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 
 	// deprecated, for removal v1.14.x
 	drafts.getDraft = function (save_id) {
-		console.warn('[composer/drafts] drafts.getDraft is deprecated! Use drafts.get() instead.');
+		console.warn(
+			'[composer/drafts] drafts.getDraft is deprecated! Use drafts.get() instead.'
+		);
 		return localStorage.getItem(save_id);
 	};
 
@@ -85,21 +93,35 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 	};
 
 	function saveDraft(postContainer, draftIconEl, postData) {
-		if (canSave(app.user.uid ? 'localStorage' : 'sessionStorage') && postData && postData.save_id && postContainer.length) {
+		if (
+			canSave(app.user.uid ? 'localStorage' : 'sessionStorage') &&
+            postData &&
+            postData.save_id &&
+            postContainer.length
+		) {
 			const titleEl = postContainer.find('input.title');
 			const title = titleEl && titleEl.val();
 			var raw = postContainer.find('textarea').val();
 			var storage = getStorage(app.user.uid);
 
-			if (postData.hasOwnProperty('cid') && !postData.save_id.endsWith(':cid:' + postData.cid)) {
+			if (
+				postData.hasOwnProperty('cid') &&
+                !postData.save_id.endsWith(':cid:' + postData.cid)
+			) {
 				// A new cid was selected, the save_id needs updating
-				drafts.removeDraft(postData.save_id);	// First, delete the old draft
-				postData.save_id = postData.save_id.replace(/cid:\d+$/, 'cid:' + postData.cid);	// then create a new save_id
+				drafts.removeDraft(postData.save_id); // First, delete the old draft
+				postData.save_id = postData.save_id.replace(
+					/cid:\d+$/,
+					'cid:' + postData.cid
+				); // then create a new save_id
 			}
 
 			if (raw.length || (title && title.length)) {
 				storage.setItem(postData.save_id, raw);
-				storage.setItem(`${postData.save_id}:uuid`, postContainer.attr('data-uuid'));
+				storage.setItem(
+					`${postData.save_id}:uuid`,
+					postContainer.attr('data-uuid')
+				);
 
 				if (postData.hasOwnProperty('cid')) {
 					// New topic only
@@ -139,7 +161,10 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 	};
 
 	drafts.updateVisibility = function (set, save_id, add) {
-		if (!canSave(app.user.uid ? 'localStorage' : 'sessionStorage') || !save_id) {
+		if (
+			!canSave(app.user.uid ? 'localStorage' : 'sessionStorage') ||
+            !save_id
+		) {
 			return;
 		}
 		var open = [];
@@ -147,7 +172,9 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 			open = localStorage.getItem('drafts:' + set);
 			open = open ? JSON.parse(open) : [];
 		} catch (e) {
-			console.warn('[composer/drafts] Could not read list of open drafts');
+			console.warn(
+				'[composer/drafts] Could not read list of open drafts'
+			);
 			open = [];
 		}
 		var idx = open.indexOf(save_id);
@@ -156,7 +183,7 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 			open.push(save_id);
 		} else if (!add && idx !== -1) {
 			open.splice(idx, 1);
-		}	// otherwise do nothing
+		} // otherwise do nothing
 
 		localStorage.setItem('drafts:' + set, JSON.stringify(open));
 	};
@@ -223,7 +250,9 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 			available = JSON.parse(available) || [];
 			open = JSON.parse(open) || [];
 		} catch (e) {
-			console.warn('[composer/drafts] Could not read list of open/available drafts');
+			console.warn(
+				'[composer/drafts] Could not read list of open/available drafts'
+			);
 			available = [];
 			open = [];
 		}
@@ -250,7 +279,13 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 					return;
 				}
 
-				if (!draft || (draft.text && draft.title && !draft.text.title && !draft.text.length)) {
+				if (
+					!draft ||
+                    (draft.text &&
+                        draft.title &&
+                        !draft.text.title &&
+                        !draft.text.length)
+				) {
 					// Empty content, remove from list of open drafts
 					drafts.updateVisibility('available', save_id);
 					drafts.updateVisibility('open', save_id);
@@ -260,7 +295,10 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 					if (type === 'cid') {
 						composer.newTopic({
 							cid: id,
-							handle: app.user && app.user.uid ? undefined : utils.escapeHTML(draft.handle),
+							handle:
+                                app.user && app.user.uid ?
+                                	undefined :
+                                	utils.escapeHTML(draft.handle),
 							title: utils.escapeHTML(draft.title),
 							body: utils.escapeHTML(draft.text),
 							tags: String(draft.tags || '').split(','),
@@ -270,7 +308,12 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 							if (err) {
 								return alerts.error(err);
 							}
-							composer.newReply(id, undefined, topicObj.title, utils.escapeHTML(draft.text));
+							composer.newReply(
+								id,
+								undefined,
+								topicObj.title,
+								utils.escapeHTML(draft.text)
+							);
 						});
 					} else if (type === 'pid') {
 						composer.editPost(id);
@@ -290,18 +333,21 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 			storage.removeItem(x);
 			return true;
 		} catch (e) {
-			return e instanceof DOMException && (
-				// everything except Firefox
-				e.code === 22 ||
-				// Firefox
-				e.code === 1014 ||
-				// test name field too, because code might not be present
-				// everything except Firefox
-				e.name === 'QuotaExceededError' ||
-				// Firefox
-				e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
-				// acknowledge QuotaExceededError only if there's something already stored
-				(storage && storage.length !== 0);
+			return (
+				e instanceof DOMException &&
+                // everything except Firefox
+                (e.code === 22 ||
+                    // Firefox
+                    e.code === 1014 ||
+                    // test name field too, because code might not be present
+                    // everything except Firefox
+                    e.name === 'QuotaExceededError' ||
+                    // Firefox
+                    e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+                // acknowledge QuotaExceededError only if there's something already stored
+                storage &&
+                storage.length !== 0
+			);
 		}
 	}
 
