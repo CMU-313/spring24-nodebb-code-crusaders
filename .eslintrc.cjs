@@ -66,5 +66,10 @@ function find_compiled_js() {
                     "@typescript-eslint/no-use-before-define": "error",			
                 }
             }
-        ]
+        ],
+        env: {
+            node: true,
+            es6: true,
+            jquery: true,
+        }
     };
