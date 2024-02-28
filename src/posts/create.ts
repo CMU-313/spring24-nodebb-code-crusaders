@@ -15,7 +15,7 @@ interface Posts {
     content: string;
     timestamp?: number;
     isMain?: boolean;
-    anonymous?: boolean;
+    anonymous: boolean;
     toPid?: string;
     ip?: string;
     handle?: string;
@@ -61,7 +61,7 @@ export default function (Posts: Posts) {
     content: string;
     timestamp?: number;
     isMain?: boolean;
-    anonymous?: boolean;
+    anonymous: boolean;
     toPid?: string;
     ip?: string;
     handle?: string;
