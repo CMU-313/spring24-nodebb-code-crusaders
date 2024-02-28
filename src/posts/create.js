@@ -133,4 +133,3 @@ function default_1(Posts) {
     };
 }
 exports.default = default_1;
-;

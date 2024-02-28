@@ -1,29 +1,33 @@
+import JQuery from 'jquery';
+
 type AnonymousObject = {
+  // think this might be an issue with eslint
+  // eslint-disable-next-line no-unused-vars
   init: ($postContainer: JQuery<HTMLElement>) => void;
-  getBtnState: () => boolean;
+  getBtnState: () => number;
 };
 
 export default function (): AnonymousObject {
-	const state: { isToggled: boolean } = {
-		isToggled: false,
+	const state: { isToggled: number } = {
+		isToggled: 0,
 	};
 
 	let displayBtn: Element | null;
 
 	function handleClick(): void {
-		state.isToggled = !state.isToggled;
+		state.isToggled = Math.abs(state.isToggled - 1);
 		console.log(state.isToggled);
 	}
 
 	function init($postContainer: JQuery<HTMLElement>) {
-		state.isToggled = false;
+		state.isToggled = 0;
 
 		displayBtn = $postContainer[0].querySelector('.display-anonymous-posting');
 
 		displayBtn?.addEventListener('click', handleClick);
 	}
 
-	function getBtnState(): boolean {
+	function getBtnState(): number {
 		return state.isToggled;
 	}
 

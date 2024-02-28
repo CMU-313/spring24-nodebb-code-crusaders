@@ -8,8 +8,12 @@
 
     <small class="pull-left">
         <strong>
+            <!-- IF !posts.anonymous -->
             <a href="<!-- IF posts.user.userslug -->{config.relative_path}/user/{posts.user.userslug}<!-- ELSE -->
-                #<!-- ENDIF posts.user.userslug -->" itemprop="author" data-username="{posts.user.username}" data-uid="{posts.user.uid}">{posts.user.displayname} Best Response</a>
+                #<!-- ENDIF posts.user.userslug -->" itemprop="author" data-username="{posts.user.username}" data-uid="{posts.user.uid}">{posts.user.displayname}</a>
+            <!-- ELSE -->
+            <a href="#" itemprop="author" data-username="Anonymous" data-uid="-1">Anonymous</a>
+            <!-- ENDIF !posts.anonymous -->
         </strong>
 
         <!-- IMPORT partials/topic/badge.tpl -->
