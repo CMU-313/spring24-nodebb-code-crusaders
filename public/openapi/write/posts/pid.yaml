@@ -65,9 +65,7 @@ get:
                   downvoted:
                     type: boolean
                   anonymous:
-                    type: boolean
-                  best_response:
-                    type: boolean
+                    type: number
 put:
   tags:
     - posts

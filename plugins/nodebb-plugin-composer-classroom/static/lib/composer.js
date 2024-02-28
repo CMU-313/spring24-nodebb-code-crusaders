@@ -128,6 +128,7 @@ define('composer', [
 			if (
 				!isMobile &&
                 window.location.pathname.startsWith(
+                // eslint-disable-next-line no-mixed-spaces-and-tabs
                 	config.relative_path + '/compose'
                 )
 			) {
@@ -140,6 +141,7 @@ define('composer', [
 			} else if (
 				isMobile &&
                 !window.location.pathname.startsWith(
+                // eslint-disable-next-line no-mixed-spaces-and-tabs
                 	config.relative_path + '/compose'
                 )
 			) {
