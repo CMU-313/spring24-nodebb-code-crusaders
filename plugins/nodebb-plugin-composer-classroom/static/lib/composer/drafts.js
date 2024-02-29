@@ -95,9 +95,9 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 	function saveDraft(postContainer, draftIconEl, postData) {
 		if (
 			canSave(app.user.uid ? 'localStorage' : 'sessionStorage') &&
-            postData &&
-            postData.save_id &&
-            postContainer.length
+			postData &&
+			postData.save_id &&
+			postContainer.length
 		) {
 			const titleEl = postContainer.find('input.title');
 			const title = titleEl && titleEl.val();
@@ -106,7 +106,7 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 
 			if (
 				postData.hasOwnProperty('cid') &&
-                !postData.save_id.endsWith(':cid:' + postData.cid)
+				!postData.save_id.endsWith(':cid:' + postData.cid)
 			) {
 				// A new cid was selected, the save_id needs updating
 				drafts.removeDraft(postData.save_id); // First, delete the old draft
@@ -163,7 +163,7 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 	drafts.updateVisibility = function (set, save_id, add) {
 		if (
 			!canSave(app.user.uid ? 'localStorage' : 'sessionStorage') ||
-            !save_id
+			!save_id
 		) {
 			return;
 		}
@@ -281,10 +281,10 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 
 				if (
 					!draft ||
-                    (draft.text &&
-                        draft.title &&
-                        !draft.text.title &&
-                        !draft.text.length)
+					(draft.text &&
+						draft.title &&
+						!draft.text.title &&
+						!draft.text.length)
 				) {
 					// Empty content, remove from list of open drafts
 					drafts.updateVisibility('available', save_id);
@@ -296,9 +296,9 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 						composer.newTopic({
 							cid: id,
 							handle:
-                                app.user && app.user.uid ?
-                                	undefined :
-                                	utils.escapeHTML(draft.handle),
+								app.user && app.user.uid ?
+									undefined :
+									utils.escapeHTML(draft.handle),
 							title: utils.escapeHTML(draft.title),
 							body: utils.escapeHTML(draft.text),
 							tags: String(draft.tags || '').split(','),
@@ -335,18 +335,18 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 		} catch (e) {
 			return (
 				e instanceof DOMException &&
-                // everything except Firefox
-                (e.code === 22 ||
-                    // Firefox
-                    e.code === 1014 ||
-                    // test name field too, because code might not be present
-                    // everything except Firefox
-                    e.name === 'QuotaExceededError' ||
-                    // Firefox
-                    e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
-                // acknowledge QuotaExceededError only if there's something already stored
-                storage &&
-                storage.length !== 0
+				// everything except Firefox
+				(e.code === 22 ||
+					// Firefox
+					e.code === 1014 ||
+					// test name field too, because code might not be present
+					// everything except Firefox
+					e.name === 'QuotaExceededError' ||
+					// Firefox
+					e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+				// acknowledge QuotaExceededError only if there's something already stored
+				storage &&
+				storage.length !== 0
 			);
 		}
 	}
