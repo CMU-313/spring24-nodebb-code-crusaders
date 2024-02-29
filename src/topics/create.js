@@ -42,8 +42,6 @@ module.exports = function (Topics) {
             topicData.anonymous = 0;
         }
 
-        console.log(`Created topic with anonymous: ${topicData.anonymous}`);
-
         if (Array.isArray(data.tags) && data.tags.length) {
             topicData.tags = data.tags.join(',');
         }

@@ -89,9 +89,21 @@ describe('Topic\'s', () => {
                 cid: topic.categoryId,
                 anonymous: 1,
             }, (err, result) => {
-                console.log('blop');
                 assert.ifError(err);
                 assert(result.topicData.anonymous === 1);
+                done();
+            });
+        });
+
+        it('should default to creating new topics nonanonymously', (done) => {
+            topics.post({
+                uid: topic.userId,
+                title: topic.title,
+                content: topic.content,
+                cid: topic.categoryId,
+            }, (err, result) => {
+                assert.ifError(err);
+                assert.equal(result.topicData.anonymous, 0, 'defaulted to anonymous');
                 done();
             });
         });
@@ -285,6 +297,15 @@ describe('Topic\'s', () => {
                 assert.equal(err, null, 'was created with error');
                 assert.ok(result);
 
+                done();
+            });
+        });
+
+        it('should create a new anonymous reply', (done) => {
+            topics.reply({ uid: topic.userId, content: 'test post', tid: newTopic.tid, anonymous: 1 }, (err, result) => {
+                assert.equal(err, null, 'was created with error');
+                assert.ok(result);
+                assert.equal(result.anonymous, 1, 'was created nonanonymously');
                 done();
             });
         });
