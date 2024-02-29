@@ -36,9 +36,10 @@ module.exports = function (Topics) {
         };
 
         if (data.hasOwnProperty('anonymous')) {
+            console.log(data.anonymous);
             topicData.anonymous = data.anonymous;
         } else {
-            topicData.anonymous = false;
+            topicData.anonymous = 0;
         }
 
         console.log(`Created topic with anonymous: ${topicData.anonymous}`);

@@ -15,7 +15,7 @@ interface Posts {
     content: string;
     timestamp?: number;
     isMain?: boolean;
-    anonymous: boolean;
+    anonymous: number;
     toPid?: string;
     ip?: string;
     handle?: string;
@@ -25,7 +25,7 @@ interface Posts {
     tid: string;
     content: string;
     timestamp: number;
-    anonymous: boolean;
+    anonymous: number;
     toPid?: string;
     ip?: string;
     handle?: string;
@@ -61,7 +61,7 @@ export default function (Posts: Posts) {
     content: string;
     timestamp?: number;
     isMain?: boolean;
-    anonymous: boolean;
+    anonymous: number;
     toPid?: string;
     ip?: string;
     handle?: string;
@@ -81,7 +81,7 @@ export default function (Posts: Posts) {
         const content = contentRaw.toString();
         const timestamp = timestampRaw || Date.now();
         const isMain = isMainRaw || false;
-        const anonymous = anonymousRaw || false;
+        const anonymous = anonymousRaw ? 1 : 0;
 
         if (!uid && parseInt(uid, 10) !== 0) {
             throw new Error('[[error:invalid-uid]]');
@@ -102,7 +102,7 @@ export default function (Posts: Posts) {
       tid: string;
       content: string;
       timestamp: number;
-      anonymous: boolean;
+      anonymous: number;
       toPid?: string;
       ip?: string;
       handle?: string;
@@ -145,7 +145,7 @@ export default function (Posts: Posts) {
         tid: string;
         content: string;
         timestamp: number;
-        anonymous: boolean;
+        anonymous: number;
         toPid?: string;
         ip?: string;
         handle?: string;
@@ -204,7 +204,7 @@ export default function (Posts: Posts) {
         tid: string;
         content: string;
         timestamp: number;
-        anonymous: boolean;
+        anonymous: number;
         toPid?: string;
         ip?: string;
         handle?: string;
