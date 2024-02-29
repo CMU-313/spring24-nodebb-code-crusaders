@@ -81,6 +81,21 @@ describe('Topic\'s', () => {
             });
         });
 
+        it('should create a new topic anonymously', (done) => {
+            topics.post({
+                uid: topic.userId,
+                title: topic.title,
+                content: topic.content,
+                cid: topic.categoryId,
+                anonymous: 1,
+            }, (err, result) => {
+                console.log('blop');
+                assert.ifError(err);
+                assert(result.topicData.anonymous === 1);
+                done();
+            });
+        });
+
         it('should get post count', (done) => {
             socketTopics.postcount({ uid: adminUid }, topic.tid, (err, count) => {
                 assert.ifError(err);
