@@ -44,7 +44,7 @@ function default_1(Posts) {
             const content = contentRaw.toString();
             const timestamp = timestampRaw || Date.now();
             const isMain = isMainRaw || false;
-            const anonymous = anonymousRaw || false;
+            const anonymous = anonymousRaw ? 1 : 0;
             if (!uid && parseInt(uid, 10) !== 0) {
                 throw new Error('[[error:invalid-uid]]');
             }
