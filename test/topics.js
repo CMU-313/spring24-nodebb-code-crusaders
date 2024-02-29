@@ -90,6 +90,7 @@ describe('Topic\'s', () => {
                 anonymous: 1,
             }, (err, result) => {
                 assert.ifError(err);
+                assert(result.topicData.hasOwnProperty('anonymous'));
                 assert(result.topicData.anonymous === 1);
                 done();
             });
@@ -103,6 +104,7 @@ describe('Topic\'s', () => {
                 cid: topic.categoryId,
             }, (err, result) => {
                 assert.ifError(err);
+                assert(result.topicData.hasOwnProperty('anonymous'));
                 assert.equal(result.topicData.anonymous, 0, 'defaulted to anonymous');
                 done();
             });
@@ -305,6 +307,7 @@ describe('Topic\'s', () => {
             topics.reply({ uid: topic.userId, content: 'test post', tid: newTopic.tid, anonymous: 1 }, (err, result) => {
                 assert.equal(err, null, 'was created with error');
                 assert.ok(result);
+                assert(result.hasOwnProperty('anonymous'));
                 assert.equal(result.anonymous, 1, 'was created nonanonymously');
                 done();
             });
