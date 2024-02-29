@@ -12,7 +12,7 @@ const Posts = module.exports;
 
 
 require('./data').default(Posts);
-require('./create').default(Posts);
+require('./create')(Posts);
 require('./delete')(Posts);
 require('./edit')(Posts);
 require('./parse')(Posts);
