@@ -63,6 +63,16 @@ After running the test suite, you can find the coverage report generated in the 
 
 If you want to directly run the linting and testing commands with specific configurations (i.e. only running the test suite on specific files, using `--fix` with ESLint), you can find the underlying commands are in the `package.json` file.
 
+## Installation of Custom Classroom Composer Plugin
+```
+cd plugins/nodebb-plugin-composer-classroom
+npm link
+cd ../../
+npm link nodebb-plugin-composer-classroom
+./nodebb build
+./nodebb reset -p nodebb-plugin-composer-default
+```
+
 ## License
 
 NodeBB is licensed under the **GNU General Public License v3 (GPL-3)** (http://www.gnu.org/copyleft/gpl.html).
