@@ -16,7 +16,6 @@ export default function (): AnonymousObject {
 
 	function handleClick(): void {
 		state.isToggled = Math.abs(state.isToggled - 1);
-		console.log(state.isToggled);
 	}
 
 	function init($postContainer: JQuery<HTMLElement>) {
@@ -24,7 +23,9 @@ export default function (): AnonymousObject {
 
 		displayBtn = $postContainer[0].querySelector('.display-anonymous-posting');
 
-		displayBtn?.addEventListener('click', handleClick);
+		if (displayBtn) {
+			displayBtn.addEventListener('click', handleClick);
+		}
 	}
 
 	function getBtnState(): number {
