@@ -88,6 +88,13 @@ jobs:
         with:
           useLockFile: false
 
+      - name: Install Classroom Composer
+        run: |
+          cd plugins/nodebb-plugin-composer-classroom
+          npm link
+          cd ../../
+          npm link nodebb-plugin-composer-classroom
+
       - name: Setup on MongoDB
         if: startsWith(matrix.database, 'mongo')
         env:
