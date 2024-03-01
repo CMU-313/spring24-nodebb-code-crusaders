@@ -33,6 +33,7 @@ module.exports = function (Topics) {
             lastposttime: 0,
             postcount: 0,
             viewcount: 0,
+            bestPid: 0,
         };
 
         if (data.hasOwnProperty('anonymous')) {

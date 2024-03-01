@@ -404,4 +404,8 @@ module.exports = function (Topics) {
 
         return add.length + (current - remove);
     };
+
+    Topics.setBestReply = async function (tid, pid) {
+        await Topics.setTopicField(tid, 'bestPid', pid);
+    };
 };
