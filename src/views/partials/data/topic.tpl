@@ -6,4 +6,3 @@ data-username="<!-- IF !posts.anonymous -->{posts.user.username}<!-- ELSE -->Ano
 data-userslug="<!-- IF !posts.anonymous -->{posts.user.userslug}<!-- ELSE -->#<!-- ENDIF !posts.anonymous -->" 
 itemscope 
 itemtype="http://schema.org/Comment"
-<!-- IF posts.pid == ../bestPid -->data-best-response="true"<!-- ENDIF posts.pid == ../bestPid -->
