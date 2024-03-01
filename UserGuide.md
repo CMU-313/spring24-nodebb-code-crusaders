@@ -2,9 +2,10 @@
 
 To use this feature, install and enable the nodebb-plugin-composer-classroom plugin and disable the default composer. When making an anonymous post, click the checkbox in the post composer UI before clicking "Submit."
 Posts made this way will be tagged as anonymous in the DB and should display "Anonymous" instead of the author's username.
-Tests for this are present in `test/topics.js`.
+Tests for this are present in `test/topics.js`. Tests focus on topic creation and default behavior, as well as ensuring the topic API is correctly adding anonymous to posts.
+Tests are sufficient due to covering default and generic conditions, and due to the fact that additional impacts for anonymous posting are minimal.
 
-# Installation:
+## Installation:
 From the root directory, run:
 ```
 cd plugins/nodebb-plugin-composer-classroom
