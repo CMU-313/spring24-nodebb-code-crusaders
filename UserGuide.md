@@ -14,3 +14,7 @@ npm link nodebb-plugin-composer-classroom
 ./nodebb build
 ./nodebb reset -p nodebb-plugin-composer-default
 ```
+# Mark Best Response:
+
+To use this feature, simply run NodeBB as usual. As a user, one can mark what they believe is the best response in a thread in the "Mark Best Response" checkbox. This will mark that post as the best response.
+
