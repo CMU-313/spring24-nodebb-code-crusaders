@@ -372,3 +372,13 @@ topicsController.pagination = async function (req, res, next) {
 
     res.json({ pagination: paginationData });
 };
+
+topicsController.setBestReply = async function (req, res) {
+    const { uid, tid, pid } = req.body;
+    const canSetBest = await privileges.posts.can('topics:setBest', pid, uid);
+    if (!canSetBest) {
+        return res.status(403).json('[[error:no-privileges]]');
+    }
+    await topics.setBestReply(tid, pid);
+    res.json('ok');
+};
