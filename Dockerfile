@@ -16,6 +16,12 @@ USER node
 RUN npm install && \
     npm cache clean --force
 
+WORKDIR ./plugins/nodebb-plugin-composer-classroom
+RUN npm link
+
+WORKDIR /usr/src/app
+RUN npm link nodebb-plugin-composer-classroom
+
 COPY --chown=node:node . /usr/src/app
 
 ENV NODE_ENV=production \
@@ -26,4 +32,4 @@ EXPOSE 4567
 
 RUN chmod +x create_config.sh
 
-CMD  ./create_config.sh -n "${SETUP}" && ./nodebb setup || cd plugins/nodebb-plugin-composer-classroom; npm link; cd ../../; npm link nodebb-plugin-composer-classroom; node ./nodebb build; node ./nodebb reset -p nodebb-plugin-composer-default; node ./nodebb start
+CMD  ./create_config.sh -n "${SETUP}" && ./nodebb setup || ./nodebb build; ./nodebb reset -p nodebb-plugin-composer-default; ./nodebb start
