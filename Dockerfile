@@ -26,4 +26,4 @@ EXPOSE 4567
 
 RUN chmod +x create_config.sh
 
-CMD  ./create_config.sh -n "${SETUP}" && ./nodebb setup || ./nodebb build; ./nodebb reset -p nodebb-plugin-composer-default; ./nodebb start
+CMD  ./create_config.sh -n "${SETUP}" && ./nodebb setup || ./nodebb build; ./nodebb reset -p nodebb-plugin-composer-default; ./nodebb activate nodebb-plugin-composer-classroom; ./nodebb start
