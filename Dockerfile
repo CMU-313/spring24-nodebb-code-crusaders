@@ -16,12 +16,6 @@ USER node
 RUN npm install && \
     npm cache clean --force
 
-WORKDIR ./plugins/nodebb-plugin-composer-classroom
-RUN npm link
-
-WORKDIR /usr/src/app
-RUN npm link nodebb-plugin-composer-classroom
-
 COPY --chown=node:node . /usr/src/app
 
 ENV NODE_ENV=production \
