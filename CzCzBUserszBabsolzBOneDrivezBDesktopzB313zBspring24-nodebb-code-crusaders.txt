@@ -1,0 +1,42 @@
+[2024-03-13 21:23:29.096] argv=C:\Users\absol\node_modules\flow-bin\flow-win64-v0.231.0\flow.exe start --flowconfig-name .flowconfig --temp-dir C:\Users\absol\AppData\Local\Temp\flow C:\Users\absol\OneDrive\Desktop\313\spring24-nodebb-code-crusaders
+[2024-03-13 21:23:29.096] lazy_mode=off
+[2024-03-13 21:23:29.097] max_workers=8
+[2024-03-13 21:23:29.097] long_lived_workers=false
+[2024-03-13 21:23:29.097] debug=false
+[2024-03-13 21:23:29.218] Initializing Server (This might take some time)
+[2024-03-13 21:23:29.232] executable=C:\Users\absol\node_modules\flow-bin\flow-win64-v0.231.0\flow.exe
+[2024-03-13 21:23:29.232] version=0.231.0
+[2024-03-13 21:23:29.277] Failed to load saved state: No saved state available
+[2024-03-13 21:23:29.282] Parsing
+[2024-03-13 21:23:30.412] Loading libraries
+[2024-03-13 21:23:30.528] Resolving dependencies
+[2024-03-13 21:23:30.531] Enqueueing nonparallelizable Request 1: status behind 0P+0R+0N=0
+[2024-03-13 21:23:30.618] Indexing files
+[2024-03-13 21:23:30.659] Done
+[2024-03-13 21:23:30.660] Committing transaction: init
+[2024-03-13 21:23:30.660] Committing resolved requires
+[2024-03-13 21:23:30.660] Committing mutator
+[2024-03-13 21:23:30.660] Failed to load recheck stats from "C:\\Users\\absol\\AppData\\Local\\Temp\\flow\\CzCzBUserszBabsolzBOneDrivezBDesktopzB313zBspring24-nodebb-code-crusaders.recheck_stats". Reason: "File doesn't exist"
+[2024-03-13 21:23:30.693] to_merge: Focused: 12, Dependents: 0, Dependencies: 0
+[2024-03-13 21:23:30.693] Calculating dependencies
+[2024-03-13 21:23:30.693] Merging
+[2024-03-13 21:23:30.755] Merge skipped 0 of 12 modules
+[2024-03-13 21:23:30.755] Done
+[2024-03-13 21:23:30.755] Check prep
+[2024-03-13 21:23:30.755] new or changed signatures: 12
+[2024-03-13 21:23:30.755] Check will skip 0 of 12 files
+[2024-03-13 21:23:30.755] Checking files
+[2024-03-13 21:23:31.377] Done
+[2024-03-13 21:23:31.377] Checked set: Focused: 12, Dependents: 0, Dependencies: 0
+[2024-03-13 21:23:31.377] Committing transaction: full check
+[2024-03-13 21:23:31.377] Committing merge
+[2024-03-13 21:23:31.377] Committing mutator
+[2024-03-13 21:23:31.377] Server is READY
+[2024-03-13 21:23:31.378] Took 2.160190 seconds to initialize.
+[2024-03-13 21:23:31.378] Dequeueing nonparallelizable Request 1: status after 0.846944 seconds
+[2024-03-13 21:23:31.378] Running a serial workload
+[2024-03-13 21:23:31.378] Request 1: status
+[2024-03-13 21:23:31.378] Status: OK
+[2024-03-13 21:23:31.378] Finished Request 1: status
+[2024-03-13 21:24:27.020] Killing the worker processes
+Monitor is exiting with status Dfind_died (File watcher (dfind) died)
