@@ -25,7 +25,9 @@ settingsController.email = async (req, res) => {
 
     res.render('admin/settings/email', {
         emails: emails,
-        sendable: emails.filter(e => !e.path.includes('_plaintext') && !e.path.includes('partials')).map(tpl => tpl.path),
+        sendable: emails
+            .filter(e => !e.path.includes('_plaintext') && !e.path.includes('partials'))
+            .map(tpl => tpl.path),
         services: emailer.listServices(),
     });
 };
@@ -75,7 +77,10 @@ settingsController.navigation = async function (req, res) {
 
     allGroups.sort((a, b) => b.system - a.system);
 
-    admin.groups = allGroups.map(group => ({ name: group.name, displayName: group.displayName }));
+    admin.groups = allGroups.map(group => ({
+        name: group.name,
+        displayName: group.displayName,
+    }));
     admin.enabled.forEach((enabled, index) => {
         enabled.index = index;
         enabled.selected = index === 0;

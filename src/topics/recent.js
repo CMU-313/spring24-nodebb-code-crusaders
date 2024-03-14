@@ -1,4 +1,3 @@
-
 'use strict';
 
 const db = require('../database');
@@ -70,7 +69,10 @@ module.exports = function (Topics) {
     Topics.updateRecent = async function (tid, timestamp) {
         let data = { tid: tid, timestamp: timestamp };
         if (plugins.hooks.hasListeners('filter:topics.updateRecent')) {
-            data = await plugins.hooks.fire('filter:topics.updateRecent', { tid: tid, timestamp: timestamp });
+            data = await plugins.hooks.fire('filter:topics.updateRecent', {
+                tid: tid,
+                timestamp: timestamp,
+            });
         }
         if (data && data.tid && data.timestamp) {
             await db.sortedSetAdd('topics:recent', data.timestamp, data.tid);

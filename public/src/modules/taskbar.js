@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('taskbar', ['benchpress', 'translator', 'hooks'], function (Benchpress, translator, hooks) {
     const taskbar = {};
 
@@ -147,14 +146,28 @@ define('taskbar', ['benchpress', 'translator', 'hooks'], function (Benchpress, t
 
     function createTaskbarItem(data, callback) {
         translator.translate(data.options.title, function (taskTitle) {
-            const title = $('<div></div>').text(taskTitle || 'NodeBB Task').html();
+            const title = $('<div></div>')
+                .text(taskTitle || 'NodeBB Task')
+                .html();
 
             const taskbarEl = $('<li></li>')
                 .addClass(data.options.className)
-                .html('<a href="#"' + (data.options.image ? ' style="background-image: url(\'' + data.options.image.replace(/&#x2F;/g, '/') + '\'); background-size: cover;"' : '') + '>' +
-                    (data.options.icon ? '<i class="fa ' + data.options.icon + '"></i> ' : '') +
-                    '<span aria-label="' + title + '" component="taskbar/title">' + title + '</span>' +
-                    '</a>')
+                .html(
+                    '<a href="#"' +
+                        (data.options.image ?
+                            ' style="background-image: url(\'' +
+                              data.options.image.replace(/&#x2F;/g, '/') +
+                              '\'); background-size: cover;"' :
+                            '') +
+                        '>' +
+                        (data.options.icon ? '<i class="fa ' + data.options.icon + '"></i> ' : '') +
+                        '<span aria-label="' +
+                        title +
+                        '" component="taskbar/title">' +
+                        title +
+                        '</span>' +
+                        '</a>'
+                )
                 .attr({
                     title: title,
                     'data-module': data.module,

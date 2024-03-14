@@ -19,11 +19,11 @@ module.exports = function (middleware) {
 
         if (meta.config['csp-frame-ancestors']) {
             headers['Content-Security-Policy'] = `frame-ancestors ${meta.config['csp-frame-ancestors']}`;
-            if (meta.config['csp-frame-ancestors'] === '\'none\'') {
+            if (meta.config['csp-frame-ancestors'] === "'none'") {
                 headers['X-Frame-Options'] = 'DENY';
             }
         } else {
-            headers['Content-Security-Policy'] = 'frame-ancestors \'self\'';
+            headers['Content-Security-Policy'] = "frame-ancestors 'self'";
             headers['X-Frame-Options'] = 'SAMEORIGIN';
         }
 

@@ -205,7 +205,7 @@ UPDATE "legacy_object"
     }
 
     module.expire = async function (key, seconds) {
-        await doExpire(key, new Date(((Date.now() / 1000) + seconds) * 1000));
+        await doExpire(key, new Date((Date.now() / 1000 + seconds) * 1000));
     };
 
     module.expireAt = async function (key, timestamp) {
@@ -235,10 +235,10 @@ SELECT "expireAt"::TEXT
     }
 
     module.ttl = async function (key) {
-        return Math.round((await getExpire(key) - Date.now()) / 1000);
+        return Math.round(((await getExpire(key)) - Date.now()) / 1000);
     };
 
     module.pttl = async function (key) {
-        return await getExpire(key) - Date.now();
+        return (await getExpire(key)) - Date.now();
     };
 };

@@ -145,9 +145,7 @@ module.exports = function (Posts) {
         const [reputation, targetUid, votedPidsToday] = await Promise.all([
             user.getUserField(uid, 'reputation'),
             Posts.getPostField(pid, 'uid'),
-            db.getSortedSetRevRangeByScore(
-                `uid:${uid}:${type}`, 0, -1, '+inf', Date.now() - oneDay
-            ),
+            db.getSortedSetRevRangeByScore(`uid:${uid}:${type}`, 0, -1, '+inf', Date.now() - oneDay),
         ]);
 
         if (reputation < meta.config[`min:rep:${type}`]) {
@@ -207,9 +205,11 @@ module.exports = function (Posts) {
     async function fireVoteHook(postData, uid, type, unvote, voteStatus) {
         let hook = type;
         let current = voteStatus.upvoted ? 'upvote' : 'downvote';
-        if (unvote) { // e.g. unvoting, removing a upvote or downvote
+        if (unvote) {
+            // e.g. unvoting, removing a upvote or downvote
             hook = 'unvote';
-        } else { // e.g. User *has not* voted, clicks upvote or downvote
+        } else {
+            // e.g. User *has not* voted, clicks upvote or downvote
             current = 'unvote';
         }
         // action:post.upvote
@@ -224,7 +224,7 @@ module.exports = function (Posts) {
     }
 
     async function adjustPostVotes(postData, uid, type, unvote) {
-        const notType = (type === 'upvote' ? 'downvote' : 'upvote');
+        const notType = type === 'upvote' ? 'downvote' : 'upvote';
         if (unvote) {
             await db.setRemove(`pid:${postData.pid}:${type}`, uid);
         } else {
@@ -247,7 +247,7 @@ module.exports = function (Posts) {
             return;
         }
         const threshold = meta.config['flags:autoFlagOnDownvoteThreshold'];
-        if (threshold && postData.votes <= (-threshold)) {
+        if (threshold && postData.votes <= -threshold) {
             const adminUid = await user.getFirstAdminUid();
             const reportMsg = await translator.translate(`[[flags:auto-flagged, ${-postData.votes}]]`);
             const flagObj = await flags.create('post', postData.pid, adminUid, reportMsg, null, true);
@@ -261,7 +261,9 @@ module.exports = function (Posts) {
                 downvotes: postData.downvotes,
             }),
         ]);
-        plugins.hooks.fire('action:post.updatePostVoteCount', { post: postData });
+        plugins.hooks.fire('action:post.updatePostVoteCount', {
+            post: postData,
+        });
     };
 
     async function updateTopicVoteCount(postData) {
@@ -269,7 +271,11 @@ module.exports = function (Posts) {
 
         if (postData.uid) {
             if (postData.votes !== 0) {
-                await db.sortedSetAdd(`cid:${topicData.cid}:uid:${postData.uid}:pids:votes`, postData.votes, postData.pid);
+                await db.sortedSetAdd(
+                    `cid:${topicData.cid}:uid:${postData.uid}:pids:votes`,
+                    postData.votes,
+                    postData.pid
+                );
             } else {
                 await db.sortedSetRemove(`cid:${topicData.cid}:uid:${postData.uid}:pids:votes`, postData.pid);
             }

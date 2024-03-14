@@ -1,4 +1,3 @@
-
 'use strict';
 
 const nconf = require('nconf');
@@ -62,10 +61,7 @@ UserEmail.getValidationExpiry = async (uid) => {
 
 UserEmail.expireValidation = async (uid) => {
     const code = await db.get(`confirm:byUid:${uid}`);
-    await db.deleteAll([
-        `confirm:byUid:${uid}`,
-        `confirm:${code}`,
-    ]);
+    await db.deleteAll([`confirm:byUid:${uid}`, `confirm:${code}`]);
 };
 
 UserEmail.canSendValidation = async (uid, email) => {
@@ -116,7 +112,7 @@ UserEmail.sendValidationEmail = async function (uid, options) {
         return;
     }
 
-    if (!options.force && !await UserEmail.canSendValidation(uid, options.email)) {
+    if (!options.force && !(await UserEmail.canSendValidation(uid, options.email))) {
         throw new Error(`[[error:confirm-email-already-sent, ${emailConfirmInterval}]]`);
     }
 
@@ -182,7 +178,11 @@ UserEmail.confirmByCode = async function (code, sessionId) {
     await Promise.all([
         UserEmail.confirmByUid(confirmObj.uid),
         db.delete(`confirm:${code}`),
-        events.log({ type: 'email-change', oldEmail, newEmail: confirmObj.email }),
+        events.log({
+            type: 'email-change',
+            oldEmail,
+            newEmail: confirmObj.email,
+        }),
     ]);
 };
 
@@ -208,5 +208,8 @@ UserEmail.confirmByUid = async function (uid) {
         user.email.expireValidation(uid),
         user.reset.cleanByUid(uid),
     ]);
-    await plugins.hooks.fire('action:user.email.confirmed', { uid: uid, email: currentEmail });
+    await plugins.hooks.fire('action:user.email.confirmed', {
+        uid: uid,
+        email: currentEmail,
+    });
 };

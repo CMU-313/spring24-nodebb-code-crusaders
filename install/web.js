@@ -18,9 +18,7 @@ const { paths } = require('../src/constants');
 const app = express();
 let server;
 
-const formats = [
-    winston.format.colorize(),
-];
+const formats = [winston.format.colorize()];
 
 const timestampFormat = winston.format((info) => {
     const dateString = `${new Date().toISOString()} [${global.process.pid}]`;
@@ -67,17 +65,13 @@ web.install = async function (port) {
     });
     app.set('view engine', 'tpl');
     app.set('views', viewsDir);
-    app.use(bodyParser.urlencoded({
-        extended: true,
-    }));
+    app.use(
+        bodyParser.urlencoded({
+            extended: true,
+        })
+    );
     try {
-        await Promise.all([
-            compileTemplate(),
-            compileLess(),
-            runWebpack(),
-            copyCSS(),
-            loadDefaults(),
-        ]);
+        await Promise.all([compileTemplate(), compileLess(), runWebpack(), copyCSS(), loadDefaults()]);
         setupRoutes();
         launchExpress(port);
     } catch (err) {
@@ -114,7 +108,9 @@ function ping(req, res) {
 function welcome(req, res) {
     const dbs = ['mongo', 'redis', 'postgres'];
     const databases = dbs.map((databaseName) => {
-        const questions = require(`../src/database/${databaseName}`).questions.filter(question => question && !question.hideOnWebInstall);
+        const questions = require(`../src/database/${databaseName}`).questions.filter(
+            question => question && !question.hideOnWebInstall
+        );
 
         return {
             name: databaseName,
@@ -125,7 +121,7 @@ function welcome(req, res) {
     const defaults = require('./data/defaults.json');
 
     res.render('install/index', {
-        url: nconf.get('url') || (`${req.protocol}://${req.get('host')}`),
+        url: nconf.get('url') || `${req.protocol}://${req.get('host')}`,
         launchUrl: launchUrl,
         skipGeneralSetup: !!nconf.get('url'),
         databases: databases,
@@ -149,7 +145,7 @@ function install(req, res) {
     const database = nconf.get('database') || req.body.database || 'mongo';
     const setupEnvVars = {
         ...process.env,
-        NODEBB_URL: nconf.get('url') || req.body.url || (`${req.protocol}://${req.get('host')}`),
+        NODEBB_URL: nconf.get('url') || req.body.url || `${req.protocol}://${req.get('host')}`,
         NODEBB_PORT: nconf.get('port') || 4567,
         NODEBB_ADMIN_USERNAME: nconf.get('admin:username') || req.body['admin:username'],
         NODEBB_ADMIN_PASSWORD: nconf.get('admin:password') || req.body['admin:password'],
@@ -211,11 +207,7 @@ async function launch(req, res) {
             path.join(__dirname, '../build/public', 'installer.min.js'),
         ];
         try {
-            await Promise.all(
-                filesToDelete.map(
-                    filename => fs.promises.unlink(filename)
-                )
-            );
+            await Promise.all(filesToDelete.map(filename => fs.promises.unlink(filename)));
         } catch (err) {
             console.log(err.stack);
         }
@@ -241,17 +233,16 @@ async function compileTemplate() {
         mkdirp(path.dirname(destJs)),
     ]);
 
-    await Promise.all([
-        fs.promises.writeFile(destJs, compiled),
-        fs.promises.writeFile(destTpl, source),
-    ]);
+    await Promise.all([fs.promises.writeFile(destJs, compiled), fs.promises.writeFile(destTpl, source)]);
 }
 
 async function compileLess() {
     try {
         const installSrc = path.join(__dirname, '../public/less/install.less');
         const style = await fs.promises.readFile(installSrc);
-        const css = await less.render(String(style), { filename: path.resolve(installSrc) });
+        const css = await less.render(String(style), {
+            filename: path.resolve(installSrc),
+        });
         await fs.promises.writeFile(path.join(__dirname, '../public/installer.css'), css.css);
     } catch (err) {
         winston.error(`Unable to compile LESS: \n${err.stack}`);
@@ -261,7 +252,8 @@ async function compileLess() {
 
 async function copyCSS() {
     const src = await fs.promises.readFile(
-        path.join(__dirname, '../node_modules/bootstrap/dist/css/bootstrap.min.css'), 'utf8'
+        path.join(__dirname, '../node_modules/bootstrap/dist/css/bootstrap.min.css'),
+        'utf8'
     );
     await fs.promises.writeFile(path.join(__dirname, '../public/bootstrap.min.css'), src);
 }

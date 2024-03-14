@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('forum/topic/replies', ['forum/topic/posts', 'hooks', 'alerts'], function (posts, hooks, alerts) {
     const Replies = {};
 
@@ -34,7 +33,11 @@ define('forum/topic/replies', ['forum/topic/posts', 'hooks', 'alerts'], function
                     hideReplies: config.hasOwnProperty('showNestedReplies') ? !config.showNestedReplies : true,
                 };
                 app.parseAndTranslate('topic', 'posts', tplData, function (html) {
-                    const repliesEl = $('<div>', { component: 'post/replies' }).html(html).hide();
+                    const repliesEl = $('<div>', {
+                        component: 'post/replies',
+                    })
+                        .html(html)
+                        .hide();
                     if (button.attr('data-target-component')) {
                         post.find('[component="' + button.attr('data-target-component') + '"]').html(repliesEl);
                     } else {
@@ -81,7 +84,9 @@ define('forum/topic/replies', ['forum/topic/posts', 'hooks', 'alerts'], function
     };
 
     function incrementCount(post, inc) {
-        const replyCount = $('[component="post"][data-pid="' + post.toPid + '"]').find('[component="post/reply-count"]').first();
+        const replyCount = $('[component="post"][data-pid="' + post.toPid + '"]')
+            .find('[component="post/reply-count"]')
+            .first();
         const countEl = replyCount.find('[component="post/reply-count/text"]');
         const avatars = replyCount.find('[component="post/reply-count/avatars"]');
         const count = Math.max(0, parseInt(countEl.attr('data-replies'), 10) + inc);

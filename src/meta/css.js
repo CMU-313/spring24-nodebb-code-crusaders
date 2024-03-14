@@ -17,9 +17,22 @@ const minifier = require('./minifier');
 const CSS = module.exports;
 
 CSS.supportedSkins = [
-    'cerulean', 'cyborg', 'flatly', 'journal', 'lumen', 'paper', 'simplex',
-    'spacelab', 'united', 'cosmo', 'darkly', 'readable', 'sandstone',
-    'slate', 'superhero', 'yeti',
+    'cerulean',
+    'cyborg',
+    'flatly',
+    'journal',
+    'lumen',
+    'paper',
+    'simplex',
+    'spacelab',
+    'united',
+    'cosmo',
+    'darkly',
+    'readable',
+    'sandstone',
+    'slate',
+    'superhero',
+    'yeti',
 ];
 
 const buildImports = {
@@ -39,7 +52,9 @@ const buildImports = {
             '@import "../../public/less/mixins.less";',
             '@import "../../public/less/global.less";',
             '@import "../../public/less/modals.less";',
-        ].map(str => str.replace(/\//g, path.sep)).join('\n')}`;
+        ]
+            .map(str => str.replace(/\//g, path.sep))
+            .join('\n')}`;
     },
     admin: function (source) {
         return `${source}\n${[
@@ -54,7 +69,9 @@ const buildImports = {
             '@import "../../public/less/jquery-ui.less";',
             '@import (inline) "../node_modules/@adactive/bootstrap-tagsinput/src/bootstrap-tagsinput.css";',
             '@import (inline) "../public/vendor/mdl/material.css";',
-        ].map(str => str.replace(/\//g, path.sep)).join('\n')}`;
+        ]
+            .map(str => str.replace(/\//g, path.sep))
+            .join('\n')}`;
     },
 };
 
@@ -82,12 +99,14 @@ async function getImports(files, prefix, extension) {
             pluginDirectories.push(styleFile);
         }
     });
-    await Promise.all(pluginDirectories.map(async (directory) => {
-        const styleFiles = await file.walk(directory);
-        styleFiles.forEach((styleFile) => {
-            source += `${prefix + path.sep + styleFile}";`;
-        });
-    }));
+    await Promise.all(
+        pluginDirectories.map(async (directory) => {
+            const styleFiles = await file.walk(directory);
+            styleFiles.forEach((styleFile) => {
+                source += `${prefix + path.sep + styleFile}";`;
+            });
+        })
+    );
     return source;
 }
 
@@ -110,8 +129,11 @@ async function getBundleMetadata(target) {
     let skinImport = [];
     if (target === 'client') {
         const themeData = await db.getObjectFields('config', ['theme:type', 'theme:id', 'bootswatchSkin']);
-        const themeId = (themeData['theme:id'] || 'nodebb-theme-persona');
-        const baseThemePath = path.join(nconf.get('themes_path'), (themeData['theme:type'] && themeData['theme:type'] === 'local' ? themeId : 'nodebb-theme-vanilla'));
+        const themeId = themeData['theme:id'] || 'nodebb-theme-persona';
+        const baseThemePath = path.join(
+            nconf.get('themes_path'),
+            themeData['theme:type'] && themeData['theme:type'] === 'local' ? themeId : 'nodebb-theme-vanilla'
+        );
         paths.unshift(baseThemePath);
 
         themeData.bootswatchSkin = skin || themeData.bootswatchSkin;

@@ -41,9 +41,7 @@ notificationsController.get = async function (req, res, next) {
 
     let allFilters = filters.regularFilters;
     if (isPrivileged) {
-        allFilters = allFilters.concat([
-            { separator: true },
-        ]).concat(filters.moderatorFilters);
+        allFilters = allFilters.concat([{ separator: true }]).concat(filters.moderatorFilters);
     }
     const selectedFilter = allFilters.find((filterData) => {
         filterData.selected = filterData.filter === filter;

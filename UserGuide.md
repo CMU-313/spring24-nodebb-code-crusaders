@@ -6,7 +6,9 @@ Tests for this are present in `test/topics.js`. Tests focus on topic creation an
 Tests are sufficient due to covering default and generic conditions, and due to the fact that additional impacts for anonymous posting are minimal.
 
 ## Installation:
+
 From the root directory, run:
+
 ```
 cd plugins/nodebb-plugin-composer-classroom
 npm link
@@ -15,7 +17,7 @@ npm link nodebb-plugin-composer-classroom
 ./nodebb build
 ./nodebb reset -p nodebb-plugin-composer-default
 ```
+
 # Mark Best Response:
 
 To use this feature, simply run NodeBB as usual. As a user, one can mark what they believe is the best response in a thread in the "Mark Best Response" checkbox. This will mark that post as the best response.
-

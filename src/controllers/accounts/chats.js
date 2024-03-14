@@ -36,7 +36,10 @@ chatsController.get = async function (req, res, next) {
             title: '[[pages:chats]]',
         });
     }
-    const room = await messaging.loadRoom(req.uid, { uid: uid, roomId: req.params.roomid });
+    const room = await messaging.loadRoom(req.uid, {
+        uid: uid,
+        roomId: req.params.roomid,
+    });
     if (!room) {
         return next();
     }

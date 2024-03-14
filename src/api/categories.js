@@ -60,10 +60,7 @@ categoriesAPI.getPrivileges = async (caller, cid) => {
 };
 
 categoriesAPI.setPrivilege = async (caller, data) => {
-    const [userExists, groupExists] = await Promise.all([
-        user.exists(data.member),
-        groups.exists(data.member),
-    ]);
+    const [userExists, groupExists] = await Promise.all([user.exists(data.member), groups.exists(data.member)]);
 
     if (!userExists && !groupExists) {
         throw new Error('[[error:no-user-or-group]]');

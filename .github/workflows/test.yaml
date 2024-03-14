@@ -18,8 +18,8 @@ permissions:
 jobs:
   test:
     permissions:
-      checks: write  # for coverallsapp/github-action to create new checks
-      contents: read  # for actions/checkout to fetch code
+      checks: write # for coverallsapp/github-action to create new checks
+      contents: read # for actions/checkout to fetch code
     name: Test
     strategy:
       fail-fast: false
@@ -197,7 +197,7 @@ jobs:
 
   finish:
     permissions:
-      checks: write  # for coverallsapp/github-action to create new checks
+      checks: write # for coverallsapp/github-action to create new checks
     needs: test
     runs-on: ubuntu-latest
     steps:

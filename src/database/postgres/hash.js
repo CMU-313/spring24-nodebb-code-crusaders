@@ -50,7 +50,9 @@ module.exports = function (module) {
             return;
         }
         if (Array.isArray(args[1])) {
-            console.warn('[deprecated] db.setObjectBulk(keys, data) usage is deprecated, please use db.setObjectBulk(data)');
+            console.warn(
+                '[deprecated] db.setObjectBulk(keys, data) usage is deprecated, please use db.setObjectBulk(data)'
+            );
             // conver old format to new format for backwards compatibility
             data = args[0].map((key, i) => [key, args[1][i]]);
         }
@@ -350,25 +352,29 @@ SELECT (h."data" ? $2::TEXT AND h."data"->>$2::TEXT IS NOT NULL) b
                 await helpers.ensureLegacyObjectType(client, key, 'hash');
             }
 
-            const res = await client.query(Array.isArray(key) ? {
-                name: 'incrObjectFieldByMulti',
-                text: `
+            const res = await client.query(
+                Array.isArray(key) ?
+                    {
+                        name: 'incrObjectFieldByMulti',
+                        text: `
 INSERT INTO "legacy_hash" ("_key", "data")
 SELECT UNNEST($1::TEXT[]), jsonb_build_object($2::TEXT, $3::NUMERIC)
 ON CONFLICT ("_key")
 DO UPDATE SET "data" = jsonb_set("legacy_hash"."data", ARRAY[$2::TEXT], to_jsonb(COALESCE(("legacy_hash"."data"->>$2::TEXT)::NUMERIC, 0) + $3::NUMERIC))
 RETURNING ("data"->>$2::TEXT)::NUMERIC v`,
-                values: [key, field, value],
-            } : {
-                name: 'incrObjectFieldBy',
-                text: `
+                        values: [key, field, value],
+                    } :
+                    {
+                        name: 'incrObjectFieldBy',
+                        text: `
 INSERT INTO "legacy_hash" ("_key", "data")
 VALUES ($1::TEXT, jsonb_build_object($2::TEXT, $3::NUMERIC))
 ON CONFLICT ("_key")
 DO UPDATE SET "data" = jsonb_set("legacy_hash"."data", ARRAY[$2::TEXT], to_jsonb(COALESCE(("legacy_hash"."data"->>$2::TEXT)::NUMERIC, 0) + $3::NUMERIC))
 RETURNING ("data"->>$2::TEXT)::NUMERIC v`,
-                values: [key, field, value],
-            });
+                        values: [key, field, value],
+                    }
+            );
             return Array.isArray(key) ? res.rows.map(r => parseFloat(r.v)) : parseFloat(res.rows[0].v);
         });
     };
@@ -378,11 +384,13 @@ RETURNING ("data"->>$2::TEXT)::NUMERIC v`,
             return;
         }
         // TODO: perf?
-        await Promise.all(data.map(async (item) => {
-            for (const [field, value] of Object.entries(item[1])) {
-                // eslint-disable-next-line no-await-in-loop
-                await module.incrObjectFieldBy(item[0], field, value);
-            }
-        }));
+        await Promise.all(
+            data.map(async (item) => {
+                for (const [field, value] of Object.entries(item[1])) {
+                    // eslint-disable-next-line no-await-in-loop
+                    await module.incrObjectFieldBy(item[0], field, value);
+                }
+            })
+        );
     };
 };

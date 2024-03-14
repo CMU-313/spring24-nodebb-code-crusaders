@@ -61,7 +61,11 @@ module.exports = function (Messaging) {
 
     Messaging.isUserInRoom = async (uid, roomId) => {
         const inRoom = await db.isSortedSetMember(`chat:room:${roomId}:uids`, uid);
-        const data = await plugins.hooks.fire('filter:messaging.isUserInRoom', { uid: uid, roomId: roomId, inRoom: inRoom });
+        const data = await plugins.hooks.fire('filter:messaging.isUserInRoom', {
+            uid: uid,
+            roomId: roomId,
+            inRoom: inRoom,
+        });
         return data.inRoom;
     };
 
@@ -77,16 +81,28 @@ module.exports = function (Messaging) {
         const owner = await db.getObjectField(`chat:room:${roomId}`, 'owner');
         const isOwners = uids.map(uid => parseInt(uid, 10) === parseInt(owner, 10));
 
-        const result = await Promise.all(isOwners.map(async (isOwner, index) => {
-            const payload = await plugins.hooks.fire('filter:messaging.isRoomOwner', { uid: uids[index], roomId, owner, isOwner });
-            return payload.isOwner;
-        }));
+        const result = await Promise.all(
+            isOwners.map(async (isOwner, index) => {
+                const payload = await plugins.hooks.fire('filter:messaging.isRoomOwner', {
+                    uid: uids[index],
+                    roomId,
+                    owner,
+                    isOwner,
+                });
+                return payload.isOwner;
+            })
+        );
         return isArray ? result : result[0];
     };
 
     Messaging.addUsersToRoom = async function (uid, uids, roomId) {
         const inRoom = await Messaging.isUserInRoom(uid, roomId);
-        const payload = await plugins.hooks.fire('filter:messaging.addUsersToRoom', { uid, uids, roomId, inRoom });
+        const payload = await plugins.hooks.fire('filter:messaging.addUsersToRoom', {
+            uid,
+            uids,
+            roomId,
+            inRoom,
+        });
 
         if (!payload.inRoom) {
             throw new Error('[[error:cant-add-users-to-chat-room]]');
@@ -104,7 +120,13 @@ module.exports = function (Messaging) {
             Messaging.isRoomOwner(uid, roomId),
             Messaging.getUserCountInRoom(roomId),
         ]);
-        const payload = await plugins.hooks.fire('filter:messaging.removeUsersFromRoom', { uid, uids, roomId, isOwner, userCount });
+        const payload = await plugins.hooks.fire('filter:messaging.removeUsersFromRoom', {
+            uid,
+            uids,
+            roomId,
+            isOwner,
+            userCount,
+        });
 
         if (!payload.isOwner) {
             throw new Error('[[error:cant-remove-users-from-chat-room]]');
@@ -135,10 +157,7 @@ module.exports = function (Messaging) {
             .map(uid => `uid:${uid}:chat:rooms`)
             .concat(uids.map(uid => `uid:${uid}:chat:rooms:unread`));
 
-        await Promise.all([
-            db.sortedSetRemove(`chat:room:${roomId}:uids`, uids),
-            db.sortedSetsRemove(keys, roomId),
-        ]);
+        await Promise.all([db.sortedSetRemove(`chat:room:${roomId}:uids`, uids), db.sortedSetsRemove(keys, roomId)]);
 
         await Promise.all(uids.map(uid => Messaging.addSystemMessage('user-leave', uid, roomId)));
         await updateOwner(roomId);
@@ -152,14 +171,12 @@ module.exports = function (Messaging) {
         const roomKeys = roomIds.map(roomId => `chat:room:${roomId}:uids`);
         await Promise.all([
             db.sortedSetsRemove(roomKeys, uid),
-            db.sortedSetRemove([
-                `uid:${uid}:chat:rooms`,
-                `uid:${uid}:chat:rooms:unread`,
-            ], roomIds),
+            db.sortedSetRemove([`uid:${uid}:chat:rooms`, `uid:${uid}:chat:rooms:unread`], roomIds),
         ]);
 
         await Promise.all(
-            roomIds.map(roomId => updateOwner(roomId))
+            roomIds
+                .map(roomId => updateOwner(roomId))
                 .concat(roomIds.map(roomId => Messaging.addSystemMessage('user-leave', uid, roomId)))
         );
         await updateGroupChatField(roomIds);
@@ -206,7 +223,11 @@ module.exports = function (Messaging) {
         }
 
         await db.setObjectField(`chat:room:${payload.roomId}`, 'roomName', payload.newName);
-        await Messaging.addSystemMessage(`room-rename, ${payload.newName.replace(',', '&#44;')}`, payload.uid, payload.roomId);
+        await Messaging.addSystemMessage(
+            `room-rename, ${payload.newName.replace(',', '&#44;')}`,
+            payload.uid,
+            payload.roomId
+        );
 
         plugins.hooks.fire('action:chat.renameRoom', {
             roomId: payload.roomId,
@@ -216,7 +237,12 @@ module.exports = function (Messaging) {
 
     Messaging.canReply = async (roomId, uid) => {
         const inRoom = await db.isSortedSetMember(`chat:room:${roomId}:uids`, uid);
-        const data = await plugins.hooks.fire('filter:messaging.canReply', { uid: uid, roomId: roomId, inRoom: inRoom, canReply: inRoom });
+        const data = await plugins.hooks.fire('filter:messaging.canReply', {
+            uid: uid,
+            roomId: roomId,
+            inRoom: inRoom,
+            canReply: inRoom,
+        });
         return data.canReply;
     };
 
@@ -245,8 +271,9 @@ module.exports = function (Messaging) {
 
         room.messages = messages;
         room.isOwner = await Messaging.isRoomOwner(uid, room.roomId);
-        room.users = users.filter(user => user && parseInt(user.uid, 10) &&
-            parseInt(user.uid, 10) !== parseInt(uid, 10));
+        room.users = users.filter(
+            user => user && parseInt(user.uid, 10) && parseInt(user.uid, 10) !== parseInt(uid, 10)
+        );
         room.canReply = canReply;
         room.groupChat = room.hasOwnProperty('groupChat') ? room.groupChat : users.length > 2;
         room.usernames = Messaging.generateUsernames(users, uid);
@@ -255,7 +282,11 @@ module.exports = function (Messaging) {
         room.showUserInput = !room.maximumUsersInChatRoom || room.maximumUsersInChatRoom > 2;
         room.isAdminOrGlobalMod = isAdminOrGlobalMod;
 
-        const payload = await plugins.hooks.fire('filter:messaging.loadRoom', { uid, data, room });
+        const payload = await plugins.hooks.fire('filter:messaging.loadRoom', {
+            uid,
+            data,
+            room,
+        });
         return payload.room;
     };
 };

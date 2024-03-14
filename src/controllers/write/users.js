@@ -60,7 +60,10 @@ Users.get = async (req, res) => {
 };
 
 Users.update = async (req, res) => {
-    const userObj = await api.users.update(req, { ...req.body, uid: req.params.uid });
+    const userObj = await api.users.update(req, {
+        ...req.body,
+        uid: req.params.uid,
+    });
     helpers.formatApiResponse(200, res, userObj);
 };
 
@@ -70,12 +73,18 @@ Users.delete = async (req, res) => {
 };
 
 Users.deleteContent = async (req, res) => {
-    await api.users.deleteContent(req, { ...req.params, password: req.body.password });
+    await api.users.deleteContent(req, {
+        ...req.params,
+        password: req.body.password,
+    });
     helpers.formatApiResponse(200, res);
 };
 
 Users.deleteAccount = async (req, res) => {
-    await api.users.deleteAccount(req, { ...req.params, password: req.body.password });
+    await api.users.deleteAccount(req, {
+        ...req.params,
+        password: req.body.password,
+    });
     helpers.formatApiResponse(200, res);
 };
 
@@ -91,7 +100,10 @@ Users.changePicture = async (req, res) => {
 };
 
 Users.updateSettings = async (req, res) => {
-    const settings = await api.users.updateSettings(req, { ...req.body, uid: req.params.uid });
+    const settings = await api.users.updateSettings(req, {
+        ...req.body,
+        uid: req.params.uid,
+    });
     helpers.formatApiResponse(200, res, settings);
 };
 
@@ -173,7 +185,7 @@ const getSessionAsync = util.promisify((sid, callback) => {
 
 Users.revokeSession = async (req, res) => {
     // Only admins or global mods (besides the user themselves) can revoke sessions
-    if (parseInt(req.params.uid, 10) !== req.uid && !await user.isAdminOrGlobalMod(req.uid)) {
+    if (parseInt(req.params.uid, 10) !== req.uid && !(await user.isAdminOrGlobalMod(req.uid))) {
         return helpers.formatApiResponse(404, res);
     }
 
@@ -226,7 +238,10 @@ Users.invite = async (req, res) => {
     }
 
     const max = meta.config.maximumInvites;
-    const emailsArr = emails.split(',').map(email => email.trim()).filter(Boolean);
+    const emailsArr = emails
+        .split(',')
+        .map(email => email.trim())
+        .filter(Boolean);
 
     for (const email of emailsArr) {
         /* eslint-disable no-await-in-loop */
@@ -250,7 +265,11 @@ Users.getInviteGroups = async function (req, res) {
     }
 
     const userInviteGroups = await groups.getUserInviteGroups(req.params.uid);
-    return helpers.formatApiResponse(200, res, userInviteGroups.map(group => group.displayName));
+    return helpers.formatApiResponse(
+        200,
+        res,
+        userInviteGroups.map(group => group.displayName)
+    );
 };
 
 Users.listEmails = async (req, res) => {
@@ -294,11 +313,13 @@ Users.confirmEmail = async (req, res) => {
         return helpers.notAllowed(req, res);
     }
 
-    if (pending) { // has active confirmation request
+    if (pending) {
+        // has active confirmation request
         const code = await db.get(`confirm:byUid:${req.params.uid}`);
         await user.email.confirmByCode(code, req.session.id);
         helpers.formatApiResponse(200, res);
-    } else if (current && current === req.params.email) { // email in user hash (i.e. email passed into user.create)
+    } else if (current && current === req.params.email) {
+        // email in user hash (i.e. email passed into user.create)
         await user.email.confirmByUid(req.params.uid);
         helpers.formatApiResponse(200, res);
     } else {
@@ -337,17 +358,21 @@ Users.getExportByType = async (req, res) => {
     }
 
     res.status(200);
-    res.sendFile(filename, {
-        root: path.join(__dirname, '../../../build/export'),
-        headers: {
-            'Content-Type': mime,
-            'Content-Disposition': `attachment; filename=${filename}`,
+    res.sendFile(
+        filename,
+        {
+            root: path.join(__dirname, '../../../build/export'),
+            headers: {
+                'Content-Type': mime,
+                'Content-Disposition': `attachment; filename=${filename}`,
+            },
         },
-    }, (err) => {
-        if (err) {
-            throw err;
+        (err) => {
+            if (err) {
+                throw err;
+            }
         }
-    });
+    );
 };
 
 Users.generateExportsByType = async (req, res) => {

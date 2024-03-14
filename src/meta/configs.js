@@ -1,4 +1,3 @@
-
 'use strict';
 
 const nconf = require('nconf');
@@ -100,7 +99,7 @@ Configs.list = async function () {
 
 Configs.get = async function (field) {
     const values = await Configs.getFields([field]);
-    return (values.hasOwnProperty(field) && values[field] !== undefined) ? values[field] : null;
+    return values.hasOwnProperty(field) && values[field] !== undefined ? values[field] : null;
 };
 
 Configs.getFields = async function (fields) {
@@ -221,10 +220,7 @@ async function processConfig(data) {
         throw new Error('[[error:invalid-data]]');
     }
 
-    await Promise.all([
-        saveRenderedCss(data),
-        getLogoSize(data),
-    ]);
+    await Promise.all([saveRenderedCss(data), getLogoSize(data)]);
 }
 
 function ensureInteger(data, field, min) {
@@ -259,7 +255,9 @@ async function getLogoSize(data) {
     } catch (err) {
         if (err.code === 'ENOENT') {
             // For whatever reason the x50 logo wasn't generated, gracefully error out
-            winston.warn('[logo] The email-safe logo doesn\'t seem to have been created, please re-upload your site logo.');
+            winston.warn(
+                "[logo] The email-safe logo doesn't seem to have been created, please re-upload your site logo."
+            );
             size = {
                 height: 0,
                 width: 0,

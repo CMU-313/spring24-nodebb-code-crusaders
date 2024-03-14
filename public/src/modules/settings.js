@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
     // eslint-disable-next-line prefer-const
     let Settings;
@@ -293,31 +292,35 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
                 settings = helper.deepClone(settings);
                 settings._ = JSON.stringify(settings._);
             }
-            socket.emit('admin.settings.set', {
-                hash: hash,
-                values: settings,
-            }, function (err) {
-                if (notify) {
-                    if (err) {
-                        alerts.alert({
-                            title: '[[admin/admin:changes-not-saved]]',
-                            type: 'danger',
-                            message: `[[admin/admin/changes-not-saved-message, ${err.message}]]`,
-                            timeout: 5000,
-                        });
-                    } else {
-                        alerts.alert({
-                            title: '[[admin/admin:changes-saved]]',
-                            type: 'success',
-                            message: '[[admin/admin:changes-saved-message]]',
-                            timeout: 2500,
-                        });
+            socket.emit(
+                'admin.settings.set',
+                {
+                    hash: hash,
+                    values: settings,
+                },
+                function (err) {
+                    if (notify) {
+                        if (err) {
+                            alerts.alert({
+                                title: '[[admin/admin:changes-not-saved]]',
+                                type: 'danger',
+                                message: `[[admin/admin/changes-not-saved-message, ${err.message}]]`,
+                                timeout: 5000,
+                            });
+                        } else {
+                            alerts.alert({
+                                title: '[[admin/admin:changes-saved]]',
+                                type: 'success',
+                                message: '[[admin/admin:changes-saved-message]]',
+                                timeout: 2500,
+                            });
+                        }
+                    }
+                    if (typeof callback === 'function') {
+                        callback(err);
                     }
                 }
-                if (typeof callback === 'function') {
-                    callback(err);
-                }
-            });
+            );
         },
         /**
          Sets the settings to use to given settings.
@@ -393,23 +396,27 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
          @param callback The callback to call when done.
          */
         sync: function (hash, wrapper, callback) {
-            socket.emit('admin.settings.get', {
-                hash: hash,
-            }, function (err, values) {
-                if (err) {
-                    if (typeof callback === 'function') {
-                        callback(err);
-                    }
-                } else {
-                    helper.whenReady(function () {
-                        helper.use(values);
-                        helper.initFields(wrapper || 'form');
+            socket.emit(
+                'admin.settings.get',
+                {
+                    hash: hash,
+                },
+                function (err, values) {
+                    if (err) {
                         if (typeof callback === 'function') {
-                            callback();
+                            callback(err);
                         }
-                    });
+                    } else {
+                        helper.whenReady(function () {
+                            helper.use(values);
+                            helper.initFields(wrapper || 'form');
+                            if (typeof callback === 'function') {
+                                callback();
+                            }
+                        });
+                    }
                 }
-            });
+            );
         },
         /**
          Reads the settings from fields and saves them server-side.
@@ -451,7 +458,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
             if (notSaved.length) {
                 alerts.alert({
                     title: 'Attributes Not Saved',
-                    message: "'" + (notSaved.join(', ')) + "' could not be saved. Please contact the plugin-author!",
+                    message: "'" + notSaved.join(', ') + "' could not be saved. Please contact the plugin-author!",
                     type: 'danger',
                     timeout: 5000,
                 });
@@ -462,57 +469,67 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
             callback = callback || function () {};
             const call = formEl.attr('data-socket-get');
 
-            socket.emit(call || 'admin.settings.get', {
-                hash: hash,
-            }, function (err, values) {
-                if (err) {
-                    return callback(err);
-                }
-                // multipe selects are saved as json arrays, parse them here
-                $(formEl).find('select[multiple]').each(function (idx, selectEl) {
-                    const key = $(selectEl).attr('name');
-                    if (key && values.hasOwnProperty(key)) {
-                        try {
-                            values[key] = JSON.parse(values[key]);
-                        } catch (e) {
-                            // Leave the value as is
-                        }
+            socket.emit(
+                call || 'admin.settings.get',
+                {
+                    hash: hash,
+                },
+                function (err, values) {
+                    if (err) {
+                        return callback(err);
                     }
-                });
-
-                // Save loaded settings into ajaxify.data for use client-side
-                ajaxify.data[call ? hash : 'settings'] = values;
-
-                helper.whenReady(function () {
-                    $(formEl).find('[data-sorted-list]').each(function (idx, el) {
-                        getHook(el, 'get').call(Settings, $(el), hash);
-                    });
-                });
-
-                $(formEl).deserialize(values);
-                $(formEl).find('input[type="checkbox"]').each(function () {
-                    $(this).parents('.mdl-switch').toggleClass('is-checked', $(this).is(':checked'));
-                });
-                hooks.fire('action:admin.settingsLoaded');
-
-                // Handle unsaved changes
-                $(formEl).on('change', 'input, select, textarea', function () {
-                    app.flags = app.flags || {};
-                    app.flags._unsaved = true;
-                });
-
-                const saveEl = document.getElementById('save');
-                if (saveEl) {
-                    require(['mousetrap'], function (mousetrap) {
-                        mousetrap.bind('ctrl+s', function (ev) {
-                            saveEl.click();
-                            ev.preventDefault();
+                    // multipe selects are saved as json arrays, parse them here
+                    $(formEl)
+                        .find('select[multiple]')
+                        .each(function (idx, selectEl) {
+                            const key = $(selectEl).attr('name');
+                            if (key && values.hasOwnProperty(key)) {
+                                try {
+                                    values[key] = JSON.parse(values[key]);
+                                } catch (e) {
+                                    // Leave the value as is
+                                }
+                            }
                         });
-                    });
-                }
 
-                callback(null, values);
-            });
+                    // Save loaded settings into ajaxify.data for use client-side
+                    ajaxify.data[call ? hash : 'settings'] = values;
+
+                    helper.whenReady(function () {
+                        $(formEl)
+                            .find('[data-sorted-list]')
+                            .each(function (idx, el) {
+                                getHook(el, 'get').call(Settings, $(el), hash);
+                            });
+                    });
+
+                    $(formEl).deserialize(values);
+                    $(formEl)
+                        .find('input[type="checkbox"]')
+                        .each(function () {
+                            $(this).parents('.mdl-switch').toggleClass('is-checked', $(this).is(':checked'));
+                        });
+                    hooks.fire('action:admin.settingsLoaded');
+
+                    // Handle unsaved changes
+                    $(formEl).on('change', 'input, select, textarea', function () {
+                        app.flags = app.flags || {};
+                        app.flags._unsaved = true;
+                    });
+
+                    const saveEl = document.getElementById('save');
+                    if (saveEl) {
+                        require(['mousetrap'], function (mousetrap) {
+                            mousetrap.bind('ctrl+s', function (ev) {
+                                saveEl.click();
+                                ev.preventDefault();
+                            });
+                        });
+                    }
+
+                    callback(null, values);
+                }
+            );
         },
         save: function (hash, formEl, callback) {
             formEl = $(formEl);
@@ -536,33 +553,37 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
                 });
 
                 const call = formEl.attr('data-socket-set');
-                socket.emit(call || 'admin.settings.set', {
-                    hash: hash,
-                    values: values,
-                }, function (err) {
-                    // Remove unsaved flag to re-enable ajaxify
-                    app.flags._unsaved = false;
+                socket.emit(
+                    call || 'admin.settings.set',
+                    {
+                        hash: hash,
+                        values: values,
+                    },
+                    function (err) {
+                        // Remove unsaved flag to re-enable ajaxify
+                        app.flags._unsaved = false;
 
-                    // Also save to local ajaxify.data
-                    ajaxify.data[call ? hash : 'settings'] = values;
+                        // Also save to local ajaxify.data
+                        ajaxify.data[call ? hash : 'settings'] = values;
 
-                    if (typeof callback === 'function') {
-                        callback(err);
-                    } else if (err) {
-                        alerts.alert({
-                            title: '[[admin/admin:changes-not-saved]]',
-                            message: `[[admin/admin:changes-not-saved-message, ${err.message}]]`,
-                            type: 'error',
-                            timeout: 2500,
-                        });
-                    } else {
-                        alerts.alert({
-                            title: '[[admin/admin:changes-saved]]',
-                            type: 'success',
-                            timeout: 2500,
-                        });
+                        if (typeof callback === 'function') {
+                            callback(err);
+                        } else if (err) {
+                            alerts.alert({
+                                title: '[[admin/admin:changes-not-saved]]',
+                                message: `[[admin/admin:changes-not-saved-message, ${err.message}]]`,
+                                type: 'error',
+                                timeout: 2500,
+                            });
+                        } else {
+                            alerts.alert({
+                                title: '[[admin/admin:changes-saved]]',
+                                type: 'success',
+                                timeout: 2500,
+                            });
+                        }
                     }
-                });
+                );
             }
         },
         check: function (controls) {
@@ -575,18 +596,19 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
                 e.target.removeEventListener('invalid', onTrigger);
             };
 
-            return Array.prototype.map.call(controls, (controlEl) => {
-                const wrapper = controlEl.closest('.form-group');
-                if (wrapper) {
-                    wrapper.classList.remove('has-error');
-                }
+            return Array.prototype.map
+                .call(controls, (controlEl) => {
+                    const wrapper = controlEl.closest('.form-group');
+                    if (wrapper) {
+                        wrapper.classList.remove('has-error');
+                    }
 
-                controlEl.addEventListener('invalid', onTrigger);
-                return controlEl.reportValidity();
-            }).every(Boolean);
+                    controlEl.addEventListener('invalid', onTrigger);
+                    return controlEl.reportValidity();
+                })
+                .every(Boolean);
         },
     };
-
 
     helper.registerReadyJobs(1);
     require([

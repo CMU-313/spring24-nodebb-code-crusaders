@@ -24,11 +24,10 @@ exports.handle404 = function handle404(req, res) {
     if (isClientScript.test(req.url)) {
         res.type('text/javascript').status(404).send('Not Found');
     } else if (
-        !res.locals.isAPI && (
-            req.path.startsWith(`${relativePath}/assets/uploads`) ||
+        !res.locals.isAPI &&
+        (req.path.startsWith(`${relativePath}/assets/uploads`) ||
             (req.get('accept') && !req.get('accept').includes('text/html')) ||
-            req.path === '/favicon.ico'
-        )
+            req.path === '/favicon.ico')
     ) {
         meta.errors.log404(req.path || '');
         res.sendStatus(404);

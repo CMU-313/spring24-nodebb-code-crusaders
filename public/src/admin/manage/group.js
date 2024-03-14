@@ -97,16 +97,18 @@ define('admin/manage/group', [
                 memberPostCids: $('#memberPostCids').val(),
                 disableJoinRequests: $('#group-disableJoinRequests').is(':checked'),
                 disableLeave: $('#group-disableLeave').is(':checked'),
-            }).then(() => {
-                const newName = $('#change-group-name').val();
+            })
+                .then(() => {
+                    const newName = $('#change-group-name').val();
 
-                // If the group name changed, change url
-                if (groupName !== newName) {
-                    ajaxify.go('admin/manage/groups/' + encodeURIComponent(newName), undefined, true);
-                }
+                    // If the group name changed, change url
+                    if (groupName !== newName) {
+                        ajaxify.go('admin/manage/groups/' + encodeURIComponent(newName), undefined, true);
+                    }
 
-                alerts.success('[[admin/manage/groups:edit.save-success]]');
-            }).catch(alerts.error);
+                    alerts.success('[[admin/manage/groups:edit.save-success]]');
+                })
+                .catch(alerts.error);
             return false;
         });
     };
@@ -122,9 +124,11 @@ define('admin/manage/group', [
 
             switch (action) {
             case 'toggleOwnership':
-                api[isOwner ? 'del' : 'put'](`/groups/${ajaxify.data.group.slug}/ownership/${uid}`, {}).then(() => {
-                    ownerFlagEl.toggleClass('invisible');
-                }).catch(alerts.error);
+                api[isOwner ? 'del' : 'put'](`/groups/${ajaxify.data.group.slug}/ownership/${uid}`, {})
+                    .then(() => {
+                        ownerFlagEl.toggleClass('invisible');
+                    })
+                    .catch(alerts.error);
                 break;
 
             case 'kick':
@@ -132,9 +136,11 @@ define('admin/manage/group', [
                     if (!confirm) {
                         return;
                     }
-                    api.del('/groups/' + ajaxify.data.group.slug + '/membership/' + uid).then(() => {
-                        userRow.slideUp().remove();
-                    }).catch(alerts.error);
+                    api.del('/groups/' + ajaxify.data.group.slug + '/membership/' + uid)
+                        .then(() => {
+                            userRow.slideUp().remove();
+                        })
+                        .catch(alerts.error);
                 });
                 break;
             default:

@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('forum/topic/merge', ['search', 'alerts', 'api'], function (search, alerts, api) {
     const Merge = {};
     let modal;
@@ -52,17 +51,19 @@ define('forum/topic/merge', ['search', 'alerts', 'api'], function (search, alert
 
     Merge.addTopic = function (tid, callback) {
         callback = callback || function () {};
-        api.get(`/topics/${tid}`, {}).then(function (topicData) {
-            const title = topicData ? topicData.title : 'No title';
-            if (selectedTids[tid]) {
-                delete selectedTids[tid];
-            } else {
-                selectedTids[tid] = title;
-            }
-            checkButtonEnable();
-            showTopicsSelected();
-            callback();
-        }).catch(alerts.error);
+        api.get(`/topics/${tid}`, {})
+            .then(function (topicData) {
+                const title = topicData ? topicData.title : 'No title';
+                if (selectedTids[tid]) {
+                    delete selectedTids[tid];
+                } else {
+                    selectedTids[tid] = title;
+                }
+                checkButtonEnable();
+                showTopicsSelected();
+                callback();
+            })
+            .catch(alerts.error);
     };
 
     function onTopicClicked(ev) {
@@ -111,13 +112,17 @@ define('forum/topic/merge', ['search', 'alerts', 'api'], function (search, alert
         });
 
         if (tids.length) {
-            app.parseAndTranslate('partials/merge_topics_modal', {
-                config: config,
-                topics: topics,
-            }, function (html) {
-                modal.find('.topics-section').html(html.find('.topics-section').html());
-                modal.find('.merge-main-topic-select').html(html.find('.merge-main-topic-select').html());
-            });
+            app.parseAndTranslate(
+                'partials/merge_topics_modal',
+                {
+                    config: config,
+                    topics: topics,
+                },
+                function (html) {
+                    modal.find('.topics-section').html(html.find('.topics-section').html());
+                    modal.find('.merge-main-topic-select').html(html.find('.merge-main-topic-select').html());
+                }
+            );
         } else {
             modal.find('.topics-section').translateHtml('[[error:no-topics-selected]]');
         }

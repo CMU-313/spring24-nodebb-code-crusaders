@@ -130,7 +130,7 @@ if (process.env.minifier_child) {
 }
 
 async function executeAction(action, fork) {
-    if (fork && (pool.length - free.length) < Minifier.maxThreads) {
+    if (fork && pool.length - free.length < Minifier.maxThreads) {
         return await forkAction(action);
     }
     if (typeof actions[action.act] !== 'function') {
@@ -141,7 +141,11 @@ async function executeAction(action, fork) {
 
 actions.concat = async function concat(data) {
     if (data.files && data.files.length) {
-        const files = await async.mapLimit(data.files, 1000, async ref => await fs.promises.readFile(ref.srcPath, 'utf8'));
+        const files = await async.mapLimit(
+            data.files,
+            1000,
+            async ref => await fs.promises.readFile(ref.srcPath, 'utf8')
+        );
         const output = files.join('\n;');
         await fs.promises.writeFile(data.destPath, output);
     }
@@ -210,19 +214,25 @@ async function minifyAndSave(data) {
 
 Minifier.js = {};
 Minifier.js.bundle = async function (data, minify, fork) {
-    return await executeAction({
-        act: minify ? 'minifyJS' : 'concat',
-        files: data.files,
-        filename: data.filename,
-        destPath: data.destPath,
-    }, fork);
+    return await executeAction(
+        {
+            act: minify ? 'minifyJS' : 'concat',
+            files: data.files,
+            filename: data.filename,
+            destPath: data.destPath,
+        },
+        fork
+    );
 };
 
 Minifier.js.minifyBatch = async function (scripts, fork) {
-    return await executeAction({
-        act: 'minifyJS_batch',
-        files: scripts,
-    }, fork);
+    return await executeAction(
+        {
+            act: 'minifyJS_batch',
+            files: scripts,
+        },
+        fork
+    );
 };
 
 actions.buildCSS = async function buildCSS(data) {
@@ -233,9 +243,11 @@ actions.buildCSS = async function buildCSS(data) {
 
     const postcssArgs = [autoprefixer];
     if (data.minify) {
-        postcssArgs.push(clean({
-            processImportFrom: ['local'],
-        }));
+        postcssArgs.push(
+            clean({
+                processImportFrom: ['local'],
+            })
+        );
     }
     const result = await postcss(postcssArgs).process(lessOutput.css, {
         from: undefined,
@@ -245,12 +257,15 @@ actions.buildCSS = async function buildCSS(data) {
 
 Minifier.css = {};
 Minifier.css.bundle = async function (source, paths, minify, fork) {
-    return await executeAction({
-        act: 'buildCSS',
-        source: source,
-        paths: paths,
-        minify: minify,
-    }, fork);
+    return await executeAction(
+        {
+            act: 'buildCSS',
+            source: source,
+            paths: paths,
+            minify: minify,
+        },
+        fork
+    );
 };
 
 require('../promisify')(exports);

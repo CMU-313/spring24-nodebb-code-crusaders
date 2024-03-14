@@ -1,8 +1,6 @@
 'use strict';
 
-define('forum/topic/delete-posts', [
-    'postSelect', 'alerts', 'api',
-], function (postSelect, alerts, api) {
+define('forum/topic/delete-posts', ['postSelect', 'alerts', 'api'], function (postSelect, alerts, api) {
     const DeletePosts = {};
     let modal;
     let deleteBtn;

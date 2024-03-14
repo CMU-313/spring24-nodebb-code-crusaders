@@ -4,15 +4,8 @@
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
-  "include": [
-    "plugins/**/*",
-    "public/src/**/*",
-    "src/**/*", 
-    "test/**/*",
-  ],
-  "exclude":[
-    "node_modules",
-  ]
+  "include": ["plugins/**/*", "public/src/**/*", "src/**/*", "test/**/*"],
+  "exclude": ["node_modules"]
 }

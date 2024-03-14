@@ -23,62 +23,71 @@ describe('minifier', () => {
     });
 
     const minifier = require('../src/meta/minifier');
-    const scripts = [
-        path.resolve(__dirname, './files/1.js'),
-        path.resolve(__dirname, './files/2.js'),
-    ].map(script => ({
-        srcPath: script,
-        destPath: path.resolve(__dirname, '../test/build', path.basename(script)),
-        filename: path.basename(script),
-    }));
+    const scripts = [path.resolve(__dirname, './files/1.js'), path.resolve(__dirname, './files/2.js')].map(
+        script => ({
+            srcPath: script,
+            destPath: path.resolve(__dirname, '../test/build', path.basename(script)),
+            filename: path.basename(script),
+        })
+    );
 
     it('.js.bundle() should concat scripts', (done) => {
         const destPath = path.resolve(__dirname, '../test/build/concatenated.js');
 
-        minifier.js.bundle({
-            files: scripts,
-            destPath: destPath,
-            filename: 'concatenated.js',
-        }, false, false, (err) => {
-            assert.ifError(err);
+        minifier.js.bundle(
+            {
+                files: scripts,
+                destPath: destPath,
+                filename: 'concatenated.js',
+            },
+            false,
+            false,
+            (err) => {
+                assert.ifError(err);
 
-            assert(file.existsSync(destPath));
+                assert(file.existsSync(destPath));
 
-            assert.strictEqual(
-                fs.readFileSync(destPath).toString().replace(/\r\n/g, '\n'),
-                '(function (window, document) {' +
-                '\n    window.doStuff = function () {' +
-                '\n        document.body.innerHTML = \'Stuff has been done\';' +
-                '\n    };' +
-                '\n})(window, document);' +
-                '\n' +
-                '\n;function foo(name, age) {' +
-                '\n    return \'The person known as "\' + name + \'" is \' + age + \' years old\';' +
-                '\n}' +
-                '\n'
-            );
-            done();
-        });
+                assert.strictEqual(
+                    fs.readFileSync(destPath).toString().replace(/\r\n/g, '\n'),
+                    '(function (window, document) {' +
+                        '\n    window.doStuff = function () {' +
+                        "\n        document.body.innerHTML = 'Stuff has been done';" +
+                        '\n    };' +
+                        '\n})(window, document);' +
+                        '\n' +
+                        '\n;function foo(name, age) {' +
+                        "\n    return 'The person known as \"' + name + '\" is ' + age + ' years old';" +
+                        '\n}' +
+                        '\n'
+                );
+                done();
+            }
+        );
     });
     it('.js.bundle() should minify scripts', (done) => {
         const destPath = path.resolve(__dirname, '../test/build/minified.js');
 
-        minifier.js.bundle({
-            files: scripts,
-            destPath: destPath,
-            filename: 'minified.js',
-        }, true, false, (err) => {
-            assert.ifError(err);
+        minifier.js.bundle(
+            {
+                files: scripts,
+                destPath: destPath,
+                filename: 'minified.js',
+            },
+            true,
+            false,
+            (err) => {
+                assert.ifError(err);
 
-            assert(file.existsSync(destPath));
+                assert(file.existsSync(destPath));
 
-            assert.strictEqual(
-                fs.readFileSync(destPath).toString(),
-                '(function(n,o){n.doStuff=function(){o.body.innerHTML="Stuff has been done"}})(window,document);function foo(n,o){return\'The person known as "\'+n+\'" is \'+o+" years old"}' +
-                '\n//# sourceMappingURL=minified.js.map'
-            );
-            done();
-        });
+                assert.strictEqual(
+                    fs.readFileSync(destPath).toString(),
+                    '(function(n,o){n.doStuff=function(){o.body.innerHTML="Stuff has been done"}})(window,document);function foo(n,o){return\'The person known as "\'+n+\'" is \'+o+" years old"}' +
+                        '\n//# sourceMappingURL=minified.js.map'
+                );
+                done();
+            }
+        );
     });
 
     it('.js.minifyBatch() should minify each script', (done) => {
@@ -93,24 +102,22 @@ describe('minifier', () => {
                 assert.strictEqual(
                     buffer.toString(),
                     '(function(n,o){n.doStuff=function(){o.body.innerHTML="Stuff has been done"}})(window,document);' +
-                    '\n//# sourceMappingURL=1.js.map'
+                        '\n//# sourceMappingURL=1.js.map'
                 );
                 done();
             });
         });
     });
 
-    const styles = [
-        '@import (inline) "./1.css";',
-        '@import "./2.less";',
-    ].join('\n');
-    const paths = [
-        path.resolve(__dirname, './files'),
-    ];
+    const styles = ['@import (inline) "./1.css";', '@import "./2.less";'].join('\n');
+    const paths = [path.resolve(__dirname, './files')];
     it('.css.bundle() should concat styles', (done) => {
         minifier.css.bundle(styles, paths, false, false, (err, bundle) => {
             assert.ifError(err);
-            assert.strictEqual(bundle.code, '.help { margin: 10px; } .yellow { background: yellow; }\n.help {\n  display: block;\n}\n.help .blue {\n  background: blue;\n}\n');
+            assert.strictEqual(
+                bundle.code,
+                '.help { margin: 10px; } .yellow { background: yellow; }\n.help {\n  display: block;\n}\n.help .blue {\n  background: blue;\n}\n'
+            );
             done();
         });
     });
@@ -118,7 +125,10 @@ describe('minifier', () => {
     it('.css.bundle() should minify styles', (done) => {
         minifier.css.bundle(styles, paths, true, false, (err, bundle) => {
             assert.ifError(err);
-            assert.strictEqual(bundle.code, '.help{margin:10px}.yellow{background:#ff0}.help{display:block}.help .blue{background:#00f}');
+            assert.strictEqual(
+                bundle.code,
+                '.help{margin:10px}.yellow{background:#ff0}.help{display:block}.help .blue{background:#00f}'
+            );
             done();
         });
     });
@@ -128,10 +138,13 @@ describe('Build', () => {
     const build = require('../src/meta/build');
 
     before((done) => {
-        async.parallel([
-            async.apply(rimraf, path.join(__dirname, '../build/public')),
-            async.apply(db.sortedSetAdd, 'plugins:active', Date.now(), 'nodebb-plugin-markdown'),
-        ], done);
+        async.parallel(
+            [
+                async.apply(rimraf, path.join(__dirname, '../build/public')),
+                async.apply(db.sortedSetAdd, 'plugins:active', Date.now(), 'nodebb-plugin-markdown'),
+            ],
+            done
+        );
     });
 
     it('should build plugin static dirs', (done) => {
@@ -194,7 +207,6 @@ describe('Build', () => {
             done();
         });
     });
-
 
     /* disabled, doesn't work on gh actions in prod mode
     it('should build bundle files', function (done) {

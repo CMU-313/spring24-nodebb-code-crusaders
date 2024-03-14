@@ -21,7 +21,7 @@ app = window.app || {};
 Object.defineProperty(app, 'isFocused', {
     get() {
         return document.visibilityState === 'visible';
-    }
+    },
 });
 app.currentRoom = null;
 app.widgets = {};
@@ -29,7 +29,9 @@ app.flags = {};
 app.onDomReady = function () {
     $(document).ready(async function () {
         if (app.user.timeagoCode && app.user.timeagoCode !== 'en') {
-            await import(/* webpackChunkName: "timeago/[request]" */ 'timeago/locales/jquery.timeago.' + app.user.timeagoCode);
+            await import(
+                /* webpackChunkName: "timeago/[request]" */ 'timeago/locales/jquery.timeago.' + app.user.timeagoCode
+            );
         }
         app.load();
     });
@@ -67,7 +69,11 @@ if (document.readyState === 'loading') {
             const earlyClick = function (ev) {
                 let btnEl = ev.target.closest('button');
                 const anchorEl = ev.target.closest('a');
-                if (!btnEl && anchorEl && (anchorEl.getAttribute('data-ajaxify') === 'false' || anchorEl.href === '#')) {
+                if (
+                    !btnEl &&
+                    anchorEl &&
+                    (anchorEl.getAttribute('data-ajaxify') === 'false' || anchorEl.href === '#')
+                ) {
                     btnEl = anchorEl;
                 }
                 if (btnEl && !earlyQueue.includes(btnEl)) {
@@ -100,15 +106,15 @@ if (document.readyState === 'loading') {
 
         registerServiceWorker();
 
-        require([
-            'taskbar',
-            'helpers',
-            'forum/pagination',
-            'messages',
-            'search',
-            'forum/header',
-            'hooks',
-        ], function (taskbar, helpers, pagination, messages, search, header, hooks) {
+        require(['taskbar', 'helpers', 'forum/pagination', 'messages', 'search', 'forum/header', 'hooks'], function (
+            taskbar,
+            helpers,
+            pagination,
+            messages,
+            search,
+            header,
+            hooks
+        ) {
             header.prepareDOM();
             taskbar.init();
             helpers.register();
@@ -130,14 +136,21 @@ if (document.readyState === 'loading') {
             let _module;
             try {
                 switch (moduleName) {
-                    case 'bootbox': return require('bootbox');
-                    case 'benchpressjs': return require('benchpressjs');
-                    case 'clipboard': return require('clipboard');
+                    case 'bootbox':
+                        return require('bootbox');
+                    case 'benchpressjs':
+                        return require('benchpressjs');
+                    case 'clipboard':
+                        return require('clipboard');
                 }
                 if (moduleName.startsWith('admin')) {
-                    _module = await import(/* webpackChunkName: "admin/[request]" */ 'admin/' + moduleName.replace(/^admin\//, ''));
+                    _module = await import(
+                        /* webpackChunkName: "admin/[request]" */ 'admin/' + moduleName.replace(/^admin\//, '')
+                    );
                 } else if (moduleName.startsWith('forum')) {
-                    _module = await import(/* webpackChunkName: "forum/[request]" */ 'forum/' + moduleName.replace(/^forum\//, ''));
+                    _module = await import(
+                        /* webpackChunkName: "forum/[request]" */ 'forum/' + moduleName.replace(/^forum\//, '')
+                    );
                 } else {
                     _module = await import(/* webpackChunkName: "modules/[request]" */ 'modules/' + moduleName);
                 }
@@ -148,7 +161,7 @@ if (document.readyState === 'loading') {
         }
         const result = await Promise.all(modules.map(requireModule));
         return single ? result.pop() : result;
-    }
+    };
 
     app.logout = function (redirect) {
         console.warn('[deprecated] app.logout is deprecated, please use logout module directly');
@@ -186,23 +199,27 @@ if (document.readyState === 'loading') {
     };
 
     app.enterRoom = function (room, callback) {
-        callback = callback || function () { };
+        callback = callback || function () {};
         if (socket && app.user.uid && app.currentRoom !== room) {
             const previousRoom = app.currentRoom;
             app.currentRoom = room;
-            socket.emit('meta.rooms.enter', {
-                enter: room,
-            }, function (err) {
-                if (err) {
-                    app.currentRoom = previousRoom;
-                    require(['alerts'], function (alerts) {
-                        alerts.error(err);
-                    });
-                    return;
-                }
+            socket.emit(
+                'meta.rooms.enter',
+                {
+                    enter: room,
+                },
+                function (err) {
+                    if (err) {
+                        app.currentRoom = previousRoom;
+                        require(['alerts'], function (alerts) {
+                            alerts.error(err);
+                        });
+                        return;
+                    }
 
-                callback();
-            });
+                    callback();
+                }
+            );
         }
     };
 
@@ -227,11 +244,11 @@ if (document.readyState === 'loading') {
             .removeClass('active')
             .find('a')
             .filter(function (i, a) {
-                return $(a).attr('href') !== '#' && window.location.hostname === a.hostname &&
-                    (
-                        window.location.pathname === a.pathname ||
-                        window.location.pathname.startsWith(a.pathname + '/')
-                    );
+                return (
+                    $(a).attr('href') !== '#' &&
+                    window.location.hostname === a.hostname &&
+                    (window.location.pathname === a.pathname || window.location.pathname.startsWith(a.pathname + '/'))
+                );
             })
             .parent()
             .addClass('active');
@@ -242,17 +259,20 @@ if (document.readyState === 'loading') {
             return;
         }
         els = els || $('body');
-        els.find('.avatar,img[title].teaser-pic,img[title].user-img,div.user-icon,span.user-icon').one('mouseenter', function (ev) {
-            const $this = $(this);
-            // perf: create tooltips on demand
-            $this.tooltip({
-                placement: placement || $this.attr('title-placement') || 'top',
-                title: $this.attr('title'),
-                container: '#content',
-            });
-            // this will cause the tooltip to show up
-            $this.trigger(ev);
-        });
+        els.find('.avatar,img[title].teaser-pic,img[title].user-img,div.user-icon,span.user-icon').one(
+            'mouseenter',
+            function (ev) {
+                const $this = $(this);
+                // perf: create tooltips on demand
+                $this.tooltip({
+                    placement: placement || $this.attr('title-placement') || 'top',
+                    title: $this.attr('title'),
+                    container: '#content',
+                });
+                // this will cause the tooltip to show up
+                $this.trigger(ev);
+            }
+        );
     };
 
     app.createStatusTooltips = function () {
@@ -316,7 +336,6 @@ if (document.readyState === 'loading') {
         });
     };
 
-
     app.updateUserStatus = function (el, status) {
         if (!el.length) {
             return;
@@ -366,8 +385,8 @@ if (document.readyState === 'loading') {
         return new Promise((resolve, reject) => {
             require(['translator', 'benchpress'], function (translator, Benchpress) {
                 Benchpress.render(template, data, blockName)
-                    .then(rendered => translator.translate(rendered))
-                    .then(translated => translator.unescape(translated))
+                    .then((rendered) => translator.translate(rendered))
+                    .then((translated) => translator.unescape(translated))
                     .then(resolve, reject);
             });
         }).then((html) => {
@@ -383,12 +402,16 @@ if (document.readyState === 'loading') {
     function registerServiceWorker() {
         // Do not register for Safari browsers
         if (!config.useragent.isSafari && 'serviceWorker' in navigator) {
-            navigator.serviceWorker.register(config.relative_path + '/service-worker.js', { scope: config.relative_path + '/' })
+            navigator.serviceWorker
+                .register(config.relative_path + '/service-worker.js', {
+                    scope: config.relative_path + '/',
+                })
                 .then(function () {
                     console.info('ServiceWorker registration succeeded.');
-                }).catch(function (err) {
+                })
+                .catch(function (err) {
                     console.info('ServiceWorker registration failed: ', err);
                 });
         }
     }
-}());
+})();

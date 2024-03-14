@@ -192,7 +192,11 @@ async function saveFileToLocal(uid, folder, uploadedFile) {
     };
 
     await user.associateUpload(uid, upload.url.replace(`${nconf.get('upload_url')}/`, ''));
-    const data = await plugins.hooks.fire('filter:uploadStored', { uid: uid, uploadedFile: uploadedFile, storedFile: storedFile });
+    const data = await plugins.hooks.fire('filter:uploadStored', {
+        uid: uid,
+        uploadedFile: uploadedFile,
+        storedFile: storedFile,
+    });
     return data.storedFile;
 }
 

@@ -1,4 +1,3 @@
-
 'use strict';
 
 const _ = require('lodash');
@@ -36,7 +35,8 @@ module.exports = function (Topics) {
                     teaserPids.push(topic.mainPid);
                 } else if (teaserPost === 'last-post') {
                     teaserPids.push(topic.teaserPid || topic.mainPid);
-                } else { // last-reply and everything else uses teaserPid like `last` that was used before
+                } else {
+                    // last-reply and everything else uses teaserPid like `last` that was used before
                     teaserPids.push(topic.teaserPid);
                 }
             }
@@ -70,7 +70,9 @@ module.exports = function (Topics) {
         });
         await Promise.all(postData.map(p => posts.parsePost(p)));
 
-        const { tags } = await plugins.hooks.fire('filter:teasers.configureStripTags', { tags: utils.stripTags.slice(0) });
+        const { tags } = await plugins.hooks.fire('filter:teasers.configureStripTags', {
+            tags: utils.stripTags.slice(0),
+        });
 
         const teasers = topics.map((topic, index) => {
             if (!topic) {
@@ -87,7 +89,10 @@ module.exports = function (Topics) {
             return topicPost;
         });
 
-        const result = await plugins.hooks.fire('filter:teasers.get', { teasers: teasers, uid: uid });
+        const result = await plugins.hooks.fire('filter:teasers.get', {
+            teasers: teasers,
+            uid: uid,
+        });
         return result.teasers;
     };
 
@@ -112,12 +117,14 @@ module.exports = function (Topics) {
             return teasers;
         }
 
-        return await Promise.all(teasers.map(async (postData) => {
-            if (blockedUids.includes(parseInt(postData.uid, 10))) {
-                return await getPreviousNonBlockedPost(postData, blockedUids);
-            }
-            return postData;
-        }));
+        return await Promise.all(
+            teasers.map(async (postData) => {
+                if (blockedUids.includes(parseInt(postData.uid, 10))) {
+                    return await getPreviousNonBlockedPost(postData, blockedUids);
+                }
+                return postData;
+            })
+        );
     }
 
     async function getPreviousNonBlockedPost(postData, blockedUids) {

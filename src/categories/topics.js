@@ -19,7 +19,11 @@ module.exports = function (Categories) {
         }
         topics.calculateTopicIndices(topicsData, data.start);
 
-        results = await plugins.hooks.fire('filter:category.topics.get', { cid: data.cid, topics: topicsData, uid: data.uid });
+        results = await plugins.hooks.fire('filter:category.topics.get', {
+            cid: data.cid,
+            topics: topicsData,
+            uid: data.uid,
+        });
         return { topics: results.topics, nextStart: data.stop + 1 };
     };
 
@@ -66,7 +70,12 @@ module.exports = function (Categories) {
         const reverse = direction === 'highest-to-lowest';
         if (Array.isArray(set)) {
             const weights = set.map((s, index) => (index ? 0 : 1));
-            normalTids = await db[reverse ? 'getSortedSetRevIntersect' : 'getSortedSetIntersect']({ sets: set, start: start, stop: stop, weights: weights });
+            normalTids = await db[reverse ? 'getSortedSetRevIntersect' : 'getSortedSetIntersect']({
+                sets: set,
+                start: start,
+                stop: stop,
+                weights: weights,
+            });
         } else {
             normalTids = await db[reverse ? 'getSortedSetRevRange' : 'getSortedSetRange'](set, start, stop);
         }
@@ -94,7 +103,11 @@ module.exports = function (Categories) {
     Categories.buildTopicsSortedSet = async function (data) {
         const { cid } = data;
         let set = `cid:${cid}:tids`;
-        const sort = data.sort || (data.settings && data.settings.categoryTopicSort) || meta.config.categoryTopicSort || 'newest_to_oldest';
+        const sort =
+            data.sort ||
+            (data.settings && data.settings.categoryTopicSort) ||
+            meta.config.categoryTopicSort ||
+            'newest_to_oldest';
 
         if (sort === 'most_posts') {
             set = `cid:${cid}:tids:posts`;
@@ -125,7 +138,9 @@ module.exports = function (Categories) {
 
     Categories.getSortedSetRangeDirection = async function (sort) {
         sort = sort || 'newest_to_oldest';
-        const direction = ['newest_to_oldest', 'most_posts', 'most_votes', 'most_views'].includes(sort) ? 'highest-to-lowest' : 'lowest-to-highest';
+        const direction = ['newest_to_oldest', 'most_posts', 'most_votes', 'most_views'].includes(sort) ?
+            'highest-to-lowest' :
+            'lowest-to-highest';
         const result = await plugins.hooks.fire('filter:categories.getSortedSetRangeDirection', {
             sort: sort,
             direction: direction,

@@ -30,12 +30,7 @@ topicsController.get = async function getTopic(req, res, next) {
         return next();
     }
     let postIndex = parseInt(req.params.post_index, 10) || 1;
-    const [
-        userPrivileges,
-        settings,
-        topicData,
-        rssToken,
-    ] = await Promise.all([
+    const [userPrivileges, settings, topicData, rssToken] = await Promise.all([
         privileges.topics.get(tid, req.uid),
         user.getSettings(req.uid),
         topics.getTopicData(tid),
@@ -44,7 +39,7 @@ topicsController.get = async function getTopic(req, res, next) {
 
     let currentPage = parseInt(req.query.page, 10) || 1;
     const pageCount = Math.max(1, Math.ceil((topicData && topicData.postcount) / settings.postsPerPage));
-    const invalidPagination = (settings.usePagination && (currentPage < 1 || currentPage > pageCount));
+    const invalidPagination = settings.usePagination && (currentPage < 1 || currentPage > pageCount);
     if (
         !topicData ||
         userPrivileges.disabled ||
@@ -62,12 +57,24 @@ topicsController.get = async function getTopic(req, res, next) {
         postIndex = await topics.getUserBookmark(tid, req.uid);
     }
 
-    if (!res.locals.isAPI && (!req.params.slug || topicData.slug !== `${tid}/${req.params.slug}`) && (topicData.slug && topicData.slug !== `${tid}/`)) {
-        return helpers.redirect(res, `/topic/${topicData.slug}${postIndex ? `/${postIndex}` : ''}${generateQueryString(req.query)}`, true);
+    if (
+        !res.locals.isAPI &&
+        (!req.params.slug || topicData.slug !== `${tid}/${req.params.slug}`) &&
+        topicData.slug &&
+        topicData.slug !== `${tid}/`
+    ) {
+        return helpers.redirect(
+            res,
+            `/topic/${topicData.slug}${postIndex ? `/${postIndex}` : ''}${generateQueryString(req.query)}`,
+            true
+        );
     }
 
     if (utils.isNumber(postIndex) && topicData.postcount > 0 && (postIndex < 1 || postIndex > topicData.postcount)) {
-        return helpers.redirect(res, `/topic/${tid}/${req.params.slug}${postIndex > topicData.postcount ? `/${topicData.postcount}` : ''}${generateQueryString(req.query)}`);
+        return helpers.redirect(
+            res,
+            `/topic/${tid}/${req.params.slug}${postIndex > topicData.postcount ? `/${topicData.postcount}` : ''}${generateQueryString(req.query)}`
+        );
     }
     postIndex = Math.max(1, postIndex);
     const sort = req.query.sort || settings.topicPostSort;
@@ -142,7 +149,7 @@ function calculateStartStop(page, postIndex, settings) {
         startSkip = Math.max(0, postIndex - Math.ceil(settings.postsPerPage / 2));
     }
 
-    const start = ((page - 1) * settings.postsPerPage) + startSkip;
+    const start = (page - 1) * settings.postsPerPage + startSkip;
     const stop = start + settings.postsPerPage - 1;
     return { start: Math.max(0, start), stop: Math.max(0, stop) };
 }
@@ -188,9 +195,14 @@ async function buildBreadcrumbs(topicData) {
 
 async function addOldCategory(topicData, userPrivileges) {
     if (userPrivileges.isAdminOrMod && topicData.oldCid) {
-        topicData.oldCategory = await categories.getCategoryFields(
-            topicData.oldCid, ['cid', 'name', 'icon', 'bgColor', 'color', 'slug']
-        );
+        topicData.oldCategory = await categories.getCategoryFields(topicData.oldCid, [
+            'cid',
+            'name',
+            'icon',
+            'bgColor',
+            'color',
+            'slug',
+        ]);
     }
 }
 
@@ -299,24 +311,30 @@ function addOGImageTag(res, image) {
         imageUrl = image;
     }
 
-    res.locals.metaTags.push({
-        property: 'og:image',
-        content: imageUrl,
-        noEscape: true,
-    }, {
-        property: 'og:image:url',
-        content: imageUrl,
-        noEscape: true,
-    });
+    res.locals.metaTags.push(
+        {
+            property: 'og:image',
+            content: imageUrl,
+            noEscape: true,
+        },
+        {
+            property: 'og:image:url',
+            content: imageUrl,
+            noEscape: true,
+        }
+    );
 
     if (typeof image === 'object' && image.width && image.height) {
-        res.locals.metaTags.push({
-            property: 'og:image:width',
-            content: String(image.width),
-        }, {
-            property: 'og:image:height',
-            content: String(image.height),
-        });
+        res.locals.metaTags.push(
+            {
+                property: 'og:image:width',
+                content: String(image.width),
+            },
+            {
+                property: 'og:image:height',
+                content: String(image.height),
+            }
+        );
     }
 }
 
@@ -333,7 +351,9 @@ topicsController.teaser = async function (req, res, next) {
     if (!pid) {
         return res.status(404).json('not-found');
     }
-    const postData = await posts.getPostSummaryByPids([pid], req.uid, { stripTags: false });
+    const postData = await posts.getPostSummaryByPids([pid], req.uid, {
+        stripTags: false,
+    });
     if (!postData.length) {
         return res.status(404).json('not-found');
     }

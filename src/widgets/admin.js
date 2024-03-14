@@ -8,10 +8,7 @@ const index = require('./index');
 const admin = module.exports;
 
 admin.get = async function () {
-    const [areas, availableWidgets] = await Promise.all([
-        admin.getAreas(),
-        getAvailableWidgets(),
-    ]);
+    const [areas, availableWidgets] = await Promise.all([admin.getAreas(), getAvailableWidgets()]);
 
     return {
         templates: buildTemplatesFromAreas(areas),
@@ -26,8 +23,16 @@ admin.getAreas = async function () {
         { name: 'Global Header', template: 'global', location: 'header' },
         { name: 'Global Footer', template: 'global', location: 'footer' },
 
-        { name: 'Group Page (Left)', template: 'groups/details.tpl', location: 'left' },
-        { name: 'Group Page (Right)', template: 'groups/details.tpl', location: 'right' },
+        {
+            name: 'Group Page (Left)',
+            template: 'groups/details.tpl',
+            location: 'left',
+        },
+        {
+            name: 'Group Page (Right)',
+            template: 'groups/details.tpl',
+            location: 'right',
+        },
     ];
 
     const areas = await plugins.hooks.fire('filter:widgets.getAreas', defaultAreas);
@@ -54,7 +59,9 @@ async function getAvailableWidgets() {
 async function renderAdminTemplate() {
     const groupsData = await groups.getNonPrivilegeGroups('groups:createtime', 0, -1);
     groupsData.sort((a, b) => b.system - a.system);
-    return await webserver.app.renderAsync('admin/partials/widget-settings', { groups: groupsData });
+    return await webserver.app.renderAsync('admin/partials/widget-settings', {
+        groups: groupsData,
+    });
 }
 
 function buildTemplatesFromAreas(areas) {

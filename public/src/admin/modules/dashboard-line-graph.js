@@ -1,6 +1,13 @@
 'use strict';
 
-define('admin/modules/dashboard-line-graph', ['Chart', 'translator', 'benchpress', 'api', 'hooks', 'bootbox'], function (Chart, translator, Benchpress, api, hooks, bootbox) {
+define('admin/modules/dashboard-line-graph', [
+    'Chart',
+    'translator',
+    'benchpress',
+    'api',
+    'hooks',
+    'bootbox',
+], function (Chart, translator, Benchpress, api, hooks, bootbox) {
     const Graph = {
         _current: null,
     };
@@ -50,19 +57,21 @@ define('admin/modules/dashboard-line-graph', ['Chart', 'translator', 'benchpress
                             display: true,
                         },
                         scales: {
-                            yAxes: [{
-                                id: 'left-y-axis',
-                                ticks: {
-                                    beginAtZero: true,
-                                    precision: 0,
+                            yAxes: [
+                                {
+                                    id: 'left-y-axis',
+                                    ticks: {
+                                        beginAtZero: true,
+                                        precision: 0,
+                                    },
+                                    type: 'linear',
+                                    position: 'left',
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: key,
+                                    },
                                 },
-                                type: 'linear',
-                                position: 'left',
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: key,
-                                },
-                            }],
+                            ],
                         },
                         tooltips: {
                             mode: 'x',
@@ -100,25 +109,27 @@ define('admin/modules/dashboard-line-graph', ['Chart', 'translator', 'benchpress
             const targetEl = $(this);
 
             Benchpress.render('admin/partials/pageviews-range-select', {}).then(function (html) {
-                const modal = bootbox.dialog({
-                    title: '[[admin/dashboard:page-views-custom]]',
-                    message: html,
-                    buttons: {
-                        submit: {
-                            label: '[[global:search]]',
-                            className: 'btn-primary',
-                            callback: submit,
+                const modal = bootbox
+                    .dialog({
+                        title: '[[admin/dashboard:page-views-custom]]',
+                        message: html,
+                        buttons: {
+                            submit: {
+                                label: '[[global:search]]',
+                                className: 'btn-primary',
+                                callback: submit,
+                            },
                         },
-                    },
-                }).on('shown.bs.modal', function () {
-                    const date = new Date();
-                    const today = date.toISOString().slice(0, 10);
-                    date.setDate(date.getDate() - 1);
-                    const yesterday = date.toISOString().slice(0, 10);
+                    })
+                    .on('shown.bs.modal', function () {
+                        const date = new Date();
+                        const today = date.toISOString().slice(0, 10);
+                        date.setDate(date.getDate() - 1);
+                        const yesterday = date.toISOString().slice(0, 10);
 
-                    modal.find('#startRange').val(targetEl.attr('data-startRange') || yesterday);
-                    modal.find('#endRange').val(targetEl.attr('data-endRange') || today);
-                });
+                        modal.find('#startRange').val(targetEl.attr('data-startRange') || yesterday);
+                        modal.find('#endRange').val(targetEl.attr('data-endRange') || today);
+                    });
 
                 function submit() {
                     // NEED TO ADD VALIDATION HERE FOR YYYY-MM-DD

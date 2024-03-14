@@ -24,7 +24,10 @@ module.exports = function (Messaging) {
         const maximumChatMessageLength = meta.config.maximumChatMessageLength || 1000;
         content = String(content).trim();
         let { length } = content;
-        ({ content, length } = await plugins.hooks.fire('filter:messaging.checkContent', { content, length }));
+        ({ content, length } = await plugins.hooks.fire('filter:messaging.checkContent', {
+            content,
+            length,
+        }));
         if (!content) {
             throw new Error('[[error:invalid-chat-message]]');
         }
@@ -58,7 +61,10 @@ module.exports = function (Messaging) {
         await Promise.all([
             Messaging.addRoomToUsers(data.roomId, uids, timestamp),
             Messaging.addMessageToUsers(data.roomId, uids, mid, timestamp),
-            Messaging.markUnread(uids.filter(uid => uid !== String(data.uid)), data.roomId),
+            Messaging.markUnread(
+                uids.filter(uid => uid !== String(data.uid)),
+                data.roomId
+            ),
         ]);
 
         const messages = await Messaging.getMessagesData([mid], data.uid, data.roomId, true);
@@ -69,7 +75,10 @@ module.exports = function (Messaging) {
         messages[0].newSet = isNewSet;
         messages[0].mid = mid;
         messages[0].roomId = data.roomId;
-        plugins.hooks.fire('action:messaging.save', { message: messages[0], data: data });
+        plugins.hooks.fire('action:messaging.save', {
+            message: messages[0],
+            data: data,
+        });
         return messages[0];
     };
 

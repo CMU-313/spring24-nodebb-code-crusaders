@@ -14,8 +14,15 @@ const utils = require('../utils');
 let sanitizeConfig = {
     allowedTags: sanitize.defaults.allowedTags.concat([
         // Some safe-to-use tags to add
-        'sup', 'ins', 'del', 'img', 'button',
-        'video', 'audio', 'iframe', 'embed',
+        'sup',
+        'ins',
+        'del',
+        'img',
+        'button',
+        'video',
+        'audio',
+        'iframe',
+        'embed',
         // 'sup' still necessary until https://github.com/apostrophecms/sanitize-html/pull/422 merged
     ]),
     allowedAttributes: {
@@ -27,9 +34,23 @@ let sanitizeConfig = {
         audio: ['autoplay', 'controls', 'loop', 'muted', 'preload', 'src'],
         embed: ['height', 'src', 'type', 'width'],
     },
-    globalAttributes: ['accesskey', 'class', 'contenteditable', 'dir',
-        'draggable', 'dropzone', 'hidden', 'id', 'lang', 'spellcheck', 'style',
-        'tabindex', 'title', 'translate', 'aria-expanded', 'data-*',
+    globalAttributes: [
+        'accesskey',
+        'class',
+        'contenteditable',
+        'dir',
+        'draggable',
+        'dropzone',
+        'hidden',
+        'id',
+        'lang',
+        'spellcheck',
+        'style',
+        'tabindex',
+        'title',
+        'translate',
+        'aria-expanded',
+        'data-*',
     ],
     allowedClasses: {
         ...sanitize.defaults.allowedClasses,
@@ -60,7 +81,9 @@ module.exports = function (Posts) {
             return postData;
         }
 
-        const data = await plugins.hooks.fire('filter:parse.post', { postData: postData });
+        const data = await plugins.hooks.fire('filter:parse.post', {
+            postData: postData,
+        });
         data.postData.content = translator.escape(data.postData.content);
         if (data.postData.pid) {
             cache.set(pid, data.postData.content);
@@ -70,7 +93,10 @@ module.exports = function (Posts) {
 
     Posts.parseSignature = async function (userData, uid) {
         userData.signature = sanitizeSignature(userData.signature || '');
-        return await plugins.hooks.fire('filter:parse.signature', { userData: userData, uid: uid });
+        return await plugins.hooks.fire('filter:parse.signature', {
+            userData: userData,
+            uid: uid,
+        });
     };
 
     Posts.relativeToAbsolute = function (content, regex) {
@@ -94,9 +120,10 @@ module.exports = function (Posts) {
                             absolute = `//${current[1]}`;
                         }
 
-                        content = content.slice(0, current.index + regex.length) +
-                        absolute +
-                        content.slice(current.index + regex.length + current[1].length);
+                        content =
+                            content.slice(0, current.index + regex.length) +
+                            absolute +
+                            content.slice(current.index + regex.length + current[1].length);
                     }
                 } catch (err) {
                     winston.verbose(err.messsage);

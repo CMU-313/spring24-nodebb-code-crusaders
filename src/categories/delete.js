@@ -11,11 +11,15 @@ const cache = require('../cache');
 
 module.exports = function (Categories) {
     Categories.purge = async function (cid, uid) {
-        await batch.processSortedSet(`cid:${cid}:tids`, async (tids) => {
-            await async.eachLimit(tids, 10, async (tid) => {
-                await topics.purgePostsAndTopic(tid, uid);
-            });
-        }, { alwaysStartAt: 0 });
+        await batch.processSortedSet(
+            `cid:${cid}:tids`,
+            async (tids) => {
+                await async.eachLimit(tids, 10, async (tid) => {
+                    await topics.purgePostsAndTopic(tid, uid);
+                });
+            },
+            { alwaysStartAt: 0 }
+        );
 
         const pinnedTids = await db.getSortedSetRevRange(`cid:${cid}:tids:pinned`, 0, -1);
         await async.eachLimit(pinnedTids, 10, async (tid) => {
@@ -23,7 +27,11 @@ module.exports = function (Categories) {
         });
         const categoryData = await Categories.getCategoryData(cid);
         await purgeCategory(cid, categoryData);
-        plugins.hooks.fire('action:category.delete', { cid: cid, uid: uid, category: categoryData });
+        plugins.hooks.fire('action:category.delete', {
+            cid: cid,
+            uid: uid,
+            category: categoryData,
+        });
     };
 
     async function purgeCategory(cid, categoryData) {

@@ -187,8 +187,7 @@ SocketModules.chats.markRead = async function (socket, roomId) {
     }
 
     // Mark notification read
-    const nids = uidsInRoom.filter(uid => parseInt(uid, 10) !== socket.uid)
-        .map(uid => `chat_${uid}_${roomId}`);
+    const nids = uidsInRoom.filter(uid => parseInt(uid, 10) !== socket.uid).map(uid => `chat_${uid}_${roomId}`);
 
     await notifications.markReadMultiple(nids, socket.uid);
     await user.notifications.pushCount(socket.uid);

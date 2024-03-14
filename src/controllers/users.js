@@ -104,12 +104,30 @@ usersController.renderUsersPage = async function (set, req, res) {
 
 usersController.getUsers = async function (set, uid, query) {
     const setToData = {
-        'users:postcount': { title: '[[pages:users/sort-posts]]', crumb: '[[users:top_posters]]' },
-        'users:reputation': { title: '[[pages:users/sort-reputation]]', crumb: '[[users:most_reputation]]' },
-        'users:joindate': { title: '[[pages:users/latest]]', crumb: '[[global:users]]' },
-        'users:online': { title: '[[pages:users/online]]', crumb: '[[global:online]]' },
-        'users:banned': { title: '[[pages:users/banned]]', crumb: '[[user:banned]]' },
-        'users:flags': { title: '[[pages:users/most-flags]]', crumb: '[[users:most_flags]]' },
+        'users:postcount': {
+            title: '[[pages:users/sort-posts]]',
+            crumb: '[[users:top_posters]]',
+        },
+        'users:reputation': {
+            title: '[[pages:users/sort-reputation]]',
+            crumb: '[[users:most_reputation]]',
+        },
+        'users:joindate': {
+            title: '[[pages:users/latest]]',
+            crumb: '[[global:users]]',
+        },
+        'users:online': {
+            title: '[[pages:users/online]]',
+            crumb: '[[global:online]]',
+        },
+        'users:banned': {
+            title: '[[pages:users/banned]]',
+            crumb: '[[user:banned]]',
+        },
+        'users:flags': {
+            title: '[[pages:users/most-flags]]',
+            crumb: '[[users:most_flags]]',
+        },
     };
 
     if (!setToData[set]) {
@@ -160,11 +178,20 @@ usersController.getUsersAndCount = async function (set, uid, start, stop) {
     async function getUsers() {
         if (set === 'users:online') {
             const count = parseInt(stop, 10) === -1 ? stop : stop - start + 1;
-            const data = await db.getSortedSetRevRangeByScoreWithScores(set, start, count, '+inf', Date.now() - 86400000);
+            const data = await db.getSortedSetRevRangeByScoreWithScores(
+                set,
+                start,
+                count,
+                '+inf',
+                Date.now() - 86400000
+            );
             const uids = data.map(d => d.value);
             const scores = data.map(d => d.score);
             const [userStatus, userData] = await Promise.all([
-                db.getObjectsFields(uids.map(uid => `user:${uid}`), ['status']),
+                db.getObjectsFields(
+                    uids.map(uid => `user:${uid}`),
+                    ['status']
+                ),
                 user.getUsers(uids, uid),
             ]);
 
@@ -179,10 +206,7 @@ usersController.getUsersAndCount = async function (set, uid, start, stop) {
         }
         return await user.getUsersFromSet(set, uid, start, stop);
     }
-    const [usersData, count] = await Promise.all([
-        getUsers(),
-        getCount(),
-    ]);
+    const [usersData, count] = await Promise.all([getUsers(), getCount()]);
     return {
         users: usersData.filter(user => user && parseInt(user.uid, 10)),
         count: count,

@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('forum/chats/search', ['components', 'api', 'alerts'], function (components, api, alerts) {
     const search = {};
 
@@ -18,7 +17,8 @@ define('forum/chats/search', ['components', 'api', 'alerts'], function (componen
             query: username,
             searchBy: 'username',
             paginate: false,
-        }).then(displayResults)
+        })
+            .then(displayResults)
             .catch(alerts.error);
     }
 
@@ -44,15 +44,22 @@ define('forum/chats/search', ['components', 'api', 'alerts'], function (componen
 
     function displayUser(chatsListEl, userObj) {
         function createUserImage() {
-            return (userObj.picture ?
-                '<img src="' + userObj.picture + '" title="' + userObj.username + '" />' :
-                '<div class="user-icon" style="background-color: ' + userObj['icon:bgColor'] + '">' + userObj['icon:text'] + '</div>') +
-                '<i class="fa fa-circle status ' + userObj.status + '"></i> ' + userObj.username;
+            return (
+                (userObj.picture ?
+                    '<img src="' + userObj.picture + '" title="' + userObj.username + '" />' :
+                    '<div class="user-icon" style="background-color: ' +
+                      userObj['icon:bgColor'] +
+                      '">' +
+                      userObj['icon:text'] +
+                      '</div>') +
+                '<i class="fa fa-circle status ' +
+                userObj.status +
+                '"></i> ' +
+                userObj.username
+            );
         }
 
-        const chatEl = $('<li component="chat/search/user"></li>')
-            .attr('data-uid', userObj.uid)
-            .appendTo(chatsListEl);
+        const chatEl = $('<li component="chat/search/user"></li>').attr('data-uid', userObj.uid).appendTo(chatsListEl);
 
         chatEl.append(createUserImage());
         return chatEl;

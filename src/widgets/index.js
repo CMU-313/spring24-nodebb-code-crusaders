@@ -61,7 +61,7 @@ async function renderWidget(widget, uid, options) {
     }
 
     const userLang = config.userLang || meta.config.defaultLang || 'en-GB';
-    const templateData = _.assign({ }, options.templateData, { config: config });
+    const templateData = _.assign({}, options.templateData, { config: config });
     const data = await plugins.hooks.fire(`filter:widget.render:${widget.widget}`, {
         uid: uid,
         area: options,
@@ -177,9 +177,7 @@ widgets.setAreas = async function (areas) {
         templates[area.template][area.location] = JSON.stringify(area.widgets);
     });
 
-    await db.setObjectBulk(
-        Object.keys(templates).map(tpl => [`widgets:${tpl}`, templates[tpl]])
-    );
+    await db.setObjectBulk(Object.keys(templates).map(tpl => [`widgets:${tpl}`, templates[tpl]]));
 };
 
 widgets.reset = async function () {

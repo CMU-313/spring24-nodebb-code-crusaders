@@ -3,7 +3,7 @@ get:
     - admin
   summary: Get language settings
   responses:
-    "200":
+    '200':
       description: A JSON object containing available languages and settings
       content:
         application/json:

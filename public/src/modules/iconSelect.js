@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('iconSelect', ['benchpress', 'bootbox'], function (Benchpress, bootbox) {
     const iconSelect = {};
 
@@ -45,8 +44,12 @@ define('iconSelect', ['benchpress', 'bootbox'], function (Benchpress, bootbox) {
                         label: 'Select',
                         className: 'btn-primary',
                         callback: function () {
-                            const iconClass = $('.bootbox .selected').attr('class') || `fa fa-${$('.bootbox #fa-filter').val()}`;
-                            const categoryIconClass = $('<div></div>').addClass(iconClass).removeClass('fa').removeClass('selected')
+                            const iconClass =
+                                $('.bootbox .selected').attr('class') || `fa fa-${$('.bootbox #fa-filter').val()}`;
+                            const categoryIconClass = $('<div></div>')
+                                .addClass(iconClass)
+                                .removeClass('fa')
+                                .removeClass('selected')
                                 .attr('class');
                             const searchElVal = picker.find('input').val();
 
@@ -66,15 +69,17 @@ define('iconSelect', ['benchpress', 'bootbox'], function (Benchpress, bootbox) {
                 },
             });
 
-            picker.on('show.bs.modal', function () {
-                const modalEl = $(this);
-                const searchEl = modalEl.find('input');
+            picker
+                .on('show.bs.modal', function () {
+                    const modalEl = $(this);
+                    const searchEl = modalEl.find('input');
 
-                if (selected) {
-                    modalEl.find('.' + selected).addClass('selected');
-                    searchEl.val(selected.replace('fa-', ''));
-                }
-            }).modal('show');
+                    if (selected) {
+                        modalEl.find('.' + selected).addClass('selected');
+                        searchEl.val(selected.replace('fa-', ''));
+                    }
+                })
+                .modal('show');
 
             picker.on('shown.bs.modal', function () {
                 const modalEl = $(this);

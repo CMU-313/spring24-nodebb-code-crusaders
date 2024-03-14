@@ -7,7 +7,6 @@ const privileges = require('../privileges');
 
 const sockets = require('../socket.io');
 
-
 module.exports = function (Messaging) {
     Messaging.editMessage = async (uid, mid, roomId, content) => {
         await Messaging.checkContent(content);

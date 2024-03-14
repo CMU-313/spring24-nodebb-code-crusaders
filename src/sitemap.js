@@ -38,25 +38,32 @@ sitemap.render = async function () {
 };
 
 async function getSitemapPages() {
-    const urls = [{
-        url: '',
-        changefreq: 'weekly',
-        priority: 0.6,
-    }, {
-        url: `${nconf.get('relative_path')}/recent`,
-        changefreq: 'daily',
-        priority: 0.4,
-    }, {
-        url: `${nconf.get('relative_path')}/users`,
-        changefreq: 'daily',
-        priority: 0.4,
-    }, {
-        url: `${nconf.get('relative_path')}/groups`,
-        changefreq: 'daily',
-        priority: 0.4,
-    }];
+    const urls = [
+        {
+            url: '',
+            changefreq: 'weekly',
+            priority: 0.6,
+        },
+        {
+            url: `${nconf.get('relative_path')}/recent`,
+            changefreq: 'daily',
+            priority: 0.4,
+        },
+        {
+            url: `${nconf.get('relative_path')}/users`,
+            changefreq: 'daily',
+            priority: 0.4,
+        },
+        {
+            url: `${nconf.get('relative_path')}/groups`,
+            changefreq: 'daily',
+            priority: 0.4,
+        },
+    ];
 
-    const data = await plugins.hooks.fire('filter:sitemap.getPages', { urls: urls });
+    const data = await plugins.hooks.fire('filter:sitemap.getPages', {
+        urls: urls,
+    });
     return data.urls;
 }
 
@@ -68,12 +75,12 @@ sitemap.getPages = async function () {
     const urls = await getSitemapPages();
     if (!urls.length) {
         sitemap.maps.pages = '';
-        sitemap.maps.pagesCacheExpireTimestamp = Date.now() + (1000 * 60 * 60 * 24);
+        sitemap.maps.pagesCacheExpireTimestamp = Date.now() + 1000 * 60 * 60 * 24;
         return sitemap.maps.pages;
     }
 
     sitemap.maps.pages = await urlsToSitemap(urls);
-    sitemap.maps.pagesCacheExpireTimestamp = Date.now() + (1000 * 60 * 60 * 24);
+    sitemap.maps.pagesCacheExpireTimestamp = Date.now() + 1000 * 60 * 60 * 24;
     return sitemap.maps.pages;
 };
 
@@ -101,12 +108,12 @@ sitemap.getCategories = async function () {
 
     if (!categoryUrls.length) {
         sitemap.maps.categories = '';
-        sitemap.maps.categoriesCacheExpireTimestamp = Date.now() + (1000 * 60 * 60 * 24);
+        sitemap.maps.categoriesCacheExpireTimestamp = Date.now() + 1000 * 60 * 60 * 24;
         return sitemap.maps.categories;
     }
 
     sitemap.maps.categories = await urlsToSitemap(categoryUrls);
-    sitemap.maps.categoriesCacheExpireTimestamp = Date.now() + (1000 * 60 * 60 * 24);
+    sitemap.maps.categoriesCacheExpireTimestamp = Date.now() + 1000 * 60 * 60 * 24;
     return sitemap.maps.categories;
 };
 
@@ -131,7 +138,7 @@ sitemap.getTopicPage = async function (page) {
     if (!topicData.length) {
         sitemap.maps.topics[page - 1] = {
             sm: '',
-            cacheExpireTimestamp: Date.now() + (1000 * 60 * 60 * 24),
+            cacheExpireTimestamp: Date.now() + 1000 * 60 * 60 * 24,
         };
         return sitemap.maps.topics[page - 1].sm;
     }
@@ -149,7 +156,7 @@ sitemap.getTopicPage = async function (page) {
 
     sitemap.maps.topics[page - 1] = {
         sm: await urlsToSitemap(topicUrls),
-        cacheExpireTimestamp: Date.now() + (1000 * 60 * 60 * 24),
+        cacheExpireTimestamp: Date.now() + 1000 * 60 * 60 * 24,
     };
 
     return sitemap.maps.topics[page - 1].sm;

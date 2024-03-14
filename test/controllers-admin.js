@@ -25,44 +25,60 @@ describe('Admin Controllers', () => {
     let jar;
 
     before((done) => {
-        async.series({
-            category: function (next) {
-                categories.create({
-                    name: 'Test Category',
-                    description: 'Test category created by testing script',
-                }, next);
+        async.series(
+            {
+                category: function (next) {
+                    categories.create(
+                        {
+                            name: 'Test Category',
+                            description: 'Test category created by testing script',
+                        },
+                        next
+                    );
+                },
+                adminUid: function (next) {
+                    user.create({ username: 'admin', password: 'barbar' }, next);
+                },
+                regularUid: function (next) {
+                    user.create({ username: 'regular', password: 'regularpwd' }, next);
+                },
+                regular2Uid: function (next) {
+                    user.create({ username: 'regular2' }, next);
+                },
+                moderatorUid: function (next) {
+                    user.create({ username: 'moderator', password: 'modmod' }, next);
+                },
             },
-            adminUid: function (next) {
-                user.create({ username: 'admin', password: 'barbar' }, next);
-            },
-            regularUid: function (next) {
-                user.create({ username: 'regular', password: 'regularpwd' }, next);
-            },
-            regular2Uid: function (next) {
-                user.create({ username: 'regular2' }, next);
-            },
-            moderatorUid: function (next) {
-                user.create({ username: 'moderator', password: 'modmod' }, next);
-            },
-        }, async (err, results) => {
-            if (err) {
-                return done(err);
+            async (err, results) => {
+                if (err) {
+                    return done(err);
+                }
+                adminUid = results.adminUid;
+                regularUid = results.regularUid;
+                regular2Uid = results.regular2Uid;
+                moderatorUid = results.moderatorUid;
+                cid = results.category.cid;
+
+                const adminPost = await topics.post({
+                    uid: adminUid,
+                    title: 'test topic title',
+                    content: 'test topic content',
+                    cid: results.category.cid,
+                });
+                assert.ifError(err);
+                tid = adminPost.topicData.tid;
+                pid = adminPost.postData.pid;
+
+                const regularPost = await topics.post({
+                    uid: regular2Uid,
+                    title: "regular user's test topic title",
+                    content: 'test topic content',
+                    cid: results.category.cid,
+                });
+                regularPid = regularPost.postData.pid;
+                done();
             }
-            adminUid = results.adminUid;
-            regularUid = results.regularUid;
-            regular2Uid = results.regular2Uid;
-            moderatorUid = results.moderatorUid;
-            cid = results.category.cid;
-
-            const adminPost = await topics.post({ uid: adminUid, title: 'test topic title', content: 'test topic content', cid: results.category.cid });
-            assert.ifError(err);
-            tid = adminPost.topicData.tid;
-            pid = adminPost.postData.pid;
-
-            const regularPost = await topics.post({ uid: regular2Uid, title: 'regular user\'s test topic title', content: 'test topic content', cid: results.category.cid });
-            regularPid = regularPost.postData.pid;
-            done();
-        });
+        );
     });
 
     it('should 403 if user is not admin', (done) => {
@@ -82,17 +98,25 @@ describe('Admin Controllers', () => {
         groups.join('administrators', adminUid, (err) => {
             assert.ifError(err);
             const dashboards = [
-                '/admin', '/admin/dashboard/logins', '/admin/dashboard/users', '/admin/dashboard/topics', '/admin/dashboard/searches',
+                '/admin',
+                '/admin/dashboard/logins',
+                '/admin/dashboard/users',
+                '/admin/dashboard/topics',
+                '/admin/dashboard/searches',
             ];
-            async.each(dashboards, (url, next) => {
-                request(`${nconf.get('url')}${url}`, { jar: jar }, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 200, url);
-                    assert(body);
+            async.each(
+                dashboards,
+                (url, next) => {
+                    request(`${nconf.get('url')}${url}`, { jar: jar }, (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200, url);
+                        assert(body);
 
-                    next();
-                });
-            }, done);
+                        next();
+                    });
+                },
+                done
+            );
         });
     });
 
@@ -264,35 +288,46 @@ describe('Admin Controllers', () => {
         });
     });
 
-
     it('should load /admin/manage/users?filters=banned', (done) => {
-        request(`${nconf.get('url')}/api/admin/manage/users?filters=banned`, { jar: jar, json: true }, (err, res, body) => {
-            assert.ifError(err);
-            assert.strictEqual(res.statusCode, 200);
-            assert(body);
-            assert.strictEqual(body.users.length, 0);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/api/admin/manage/users?filters=banned`,
+            { jar: jar, json: true },
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.strictEqual(res.statusCode, 200);
+                assert(body);
+                assert.strictEqual(body.users.length, 0);
+                done();
+            }
+        );
     });
 
     it('should load /admin/manage/users?filters=banned&filters=verified', (done) => {
-        request(`${nconf.get('url')}/api/admin/manage/users?filters=banned&filters=verified`, { jar: jar, json: true }, (err, res, body) => {
-            assert.ifError(err);
-            assert.strictEqual(res.statusCode, 200);
-            assert(body);
-            assert.strictEqual(body.users.length, 0);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/api/admin/manage/users?filters=banned&filters=verified`,
+            { jar: jar, json: true },
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.strictEqual(res.statusCode, 200);
+                assert(body);
+                assert.strictEqual(body.users.length, 0);
+                done();
+            }
+        );
     });
 
     it('should load /admin/manage/users?query=admin', (done) => {
-        request(`${nconf.get('url')}/api/admin/manage/users?query=admin`, { jar: jar, json: true }, (err, res, body) => {
-            assert.ifError(err);
-            assert.strictEqual(res.statusCode, 200);
-            assert(body);
-            assert.strictEqual(body.users[0].username, 'admin');
-            done();
-        });
+        request(
+            `${nconf.get('url')}/api/admin/manage/users?query=admin`,
+            { jar: jar, json: true },
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.strictEqual(res.statusCode, 200);
+                assert(body);
+                assert.strictEqual(body.users[0].username, 'admin');
+                done();
+            }
+        );
     });
 
     it('should return empty results if query is too short', (done) => {
@@ -346,17 +381,21 @@ describe('Admin Controllers', () => {
         socketAdmin.user.exportUsersCSV({ uid: adminUid }, {}, (err) => {
             assert.ifError(err);
             setTimeout(() => {
-                request(`${nconf.get('url')}/api/admin/users/csv`, {
-                    jar: jar,
-                    headers: {
-                        referer: `${nconf.get('url')}/admin/manage/users`,
+                request(
+                    `${nconf.get('url')}/api/admin/users/csv`,
+                    {
+                        jar: jar,
+                        headers: {
+                            referer: `${nconf.get('url')}/admin/manage/users`,
+                        },
                     },
-                }, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    assert(body);
-                    done();
-                });
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200);
+                        assert(body);
+                        done();
+                    }
+                );
             }, 2000);
         });
     });
@@ -371,31 +410,39 @@ describe('Admin Controllers', () => {
     });
 
     it('should return 403 if referer is not /api/admin/groups/administrators/csv', (done) => {
-        request(`${nconf.get('url')}/api/admin/groups/administrators/csv`, {
-            jar: jar,
-            headers: {
-                referer: '/topic/1/test',
+        request(
+            `${nconf.get('url')}/api/admin/groups/administrators/csv`,
+            {
+                jar: jar,
+                headers: {
+                    referer: '/topic/1/test',
+                },
             },
-        }, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 403);
-            assert.equal(body, '[[error:invalid-origin]]');
-            done();
-        });
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 403);
+                assert.equal(body, '[[error:invalid-origin]]');
+                done();
+            }
+        );
     });
 
     it('should load /api/admin/groups/administrators/csv', (done) => {
-        request(`${nconf.get('url')}/api/admin/groups/administrators/csv`, {
-            jar: jar,
-            headers: {
-                referer: `${nconf.get('url')}/admin/manage/groups`,
+        request(
+            `${nconf.get('url')}/api/admin/groups/administrators/csv`,
+            {
+                jar: jar,
+                headers: {
+                    referer: `${nconf.get('url')}/admin/manage/groups`,
+                },
             },
-        }, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should load /admin/advanced/hooks', (done) => {
@@ -530,8 +577,13 @@ describe('Admin Controllers', () => {
     });
 
     it('should load /admin/manage/catgories?cid=<cid>', async () => {
-        const { cid: rootCid } = await categories.create({ name: 'parent category' });
-        const { cid: childCid } = await categories.create({ name: 'child category', parentCid: rootCid });
+        const { cid: rootCid } = await categories.create({
+            name: 'parent category',
+        });
+        const { cid: childCid } = await categories.create({
+            name: 'child category',
+            parentCid: rootCid,
+        });
         const { res, body } = await helpers.request('get', `/api/admin/manage/categories?cid=${rootCid}`, {
             jar: jar,
             json: true,
@@ -544,12 +596,16 @@ describe('Admin Controllers', () => {
     });
 
     it('should load /admin/manage/categories/1/analytics', (done) => {
-        request(`${nconf.get('url')}/api/admin/manage/categories/1/analytics`, { jar: jar, json: true }, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/api/admin/manage/categories/1/analytics`,
+            { jar: jar, json: true },
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should load /admin/extend/rewards', (done) => {
@@ -703,20 +759,24 @@ describe('Admin Controllers', () => {
         });
 
         it('should return a 404 if flag does not exist', (done) => {
-            request(`${nconf.get('url')}/api/flags/123123123`, {
-                jar: moderatorJar,
-                json: true,
-                headers: {
-                    Accept: 'text/html, application/json',
+            request(
+                `${nconf.get('url')}/api/flags/123123123`,
+                {
+                    jar: moderatorJar,
+                    json: true,
+                    headers: {
+                        Accept: 'text/html, application/json',
+                    },
                 },
-            }, (err, res, body) => {
-                assert.ifError(err);
-                assert.strictEqual(res.statusCode, 404);
-                done();
-            });
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.strictEqual(res.statusCode, 404);
+                    done();
+                }
+            );
         });
 
-        it('should error when you attempt to flag a privileged user\'s post', async () => {
+        it("should error when you attempt to flag a privileged user's post", async () => {
             const { res, body } = await helpers.request('post', '/api/v3/flags', {
                 json: true,
                 jar: regularJar,
@@ -728,7 +788,10 @@ describe('Admin Controllers', () => {
             });
             assert.strictEqual(res.statusCode, 400);
             assert.strictEqual(body.status.code, 'bad-request');
-            assert.strictEqual(body.status.message, 'You are not allowed to flag the profiles or content of privileged users (moderators/global moderators/admins)');
+            assert.strictEqual(
+                body.status.message,
+                'You are not allowed to flag the profiles or content of privileged users (moderators/global moderators/admins)'
+            );
         });
 
         it('should error with not enough reputation to flag', async () => {
@@ -791,7 +854,10 @@ describe('Admin Controllers', () => {
             config.script = '</script>';
             callback(null, config);
         }
-        plugins.hooks.register('somePlugin', { hook: 'filter:config.get', method: onConfigGet });
+        plugins.hooks.register('somePlugin', {
+            hook: 'filter:config.get',
+            method: onConfigGet,
+        });
         request(`${nconf.get('url')}/admin`, { jar: jar }, (err, res, body) => {
             assert.ifError(err);
             assert.equal(res.statusCode, 200);
@@ -817,7 +883,10 @@ describe('Admin Controllers', () => {
         let uid;
         const privileges = require('../src/privileges');
         before(async () => {
-            uid = await user.create({ username: 'regularjoe', password: 'barbar' });
+            uid = await user.create({
+                username: 'regularjoe',
+                password: 'barbar',
+            });
             userJar = (await helpers.loginUser('regularjoe', 'barbar')).jar;
         });
 
@@ -841,8 +910,9 @@ describe('Admin Controllers', () => {
                     'uploadOgImage',
                     'uploadDefaultAvatar',
                 ];
-                const adminRoutes = Object.keys(privileges.admin.routeMap)
-                    .filter(route => !uploadRoutes.includes(route));
+                const adminRoutes = Object.keys(privileges.admin.routeMap).filter(
+                    route => !uploadRoutes.includes(route)
+                );
                 for (const route of adminRoutes) {
                     /* eslint-disable no-await-in-loop */
                     await privileges.admin.rescind([privileges.admin.routeMap[route]], uid);
@@ -933,7 +1003,11 @@ describe('Admin Controllers', () => {
         });
 
         it('should check if group has admin group privilege', async () => {
-            await groups.create({ name: 'some-special-group', private: 1, hidden: 1 });
+            await groups.create({
+                name: 'some-special-group',
+                private: 1,
+                hidden: 1,
+            });
             await privileges.admin.give(['groups:admin:users', 'groups:admin:groups'], 'some-special-group');
             const can = await privileges.admin.canGroup('admin:users', 'some-special-group');
             assert.strictEqual(can, true);

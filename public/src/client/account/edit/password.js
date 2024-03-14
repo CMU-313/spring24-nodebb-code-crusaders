@@ -1,8 +1,12 @@
 'use strict';
 
-define('forum/account/edit/password', [
-    'forum/account/header', 'translator', 'zxcvbn', 'api', 'alerts',
-], function (header, translator, zxcvbn, api, alerts) {
+define('forum/account/edit/password', ['forum/account/header', 'translator', 'zxcvbn', 'api', 'alerts'], function (
+    header,
+    translator,
+    zxcvbn,
+    api,
+    alerts
+) {
     const AccountEditPassword = {};
 
     AccountEditPassword.init = function () {
@@ -104,17 +108,13 @@ define('forum/account/edit/password', [
         translator.translate(msg, function (msg) {
             element.html(msg);
 
-            element.parent()
-                .removeClass('show-success')
-                .addClass('show-danger');
+            element.parent().removeClass('show-success').addClass('show-danger');
         });
     }
 
     function showSuccess(element) {
         element.html('');
-        element.parent()
-            .removeClass('show-danger')
-            .addClass('show-success');
+        element.parent().removeClass('show-danger').addClass('show-success');
     }
 
     return AccountEditPassword;

@@ -69,7 +69,10 @@ module.exports = function (utils, Benchpress, relative_path) {
 
     function stringify(obj) {
         // Turns the incoming object into a JSON string
-        return JSON.stringify(obj).replace(/&/gm, '&amp;').replace(/</gm, '&lt;').replace(/>/gm, '&gt;')
+        return JSON.stringify(obj)
+            .replace(/&/gm, '&amp;')
+            .replace(/</gm, '&lt;')
+            .replace(/>/gm, '&gt;')
             .replace(/"/g, '&quot;');
     }
 
@@ -112,15 +115,24 @@ module.exports = function (utils, Benchpress, relative_path) {
         }
         category.children.forEach(function (child) {
             if (child && !child.isSection) {
-                const link = child.link ? child.link : (relative_path + '/category/' + child.slug);
-                html += '<span class="category-children-item pull-left">' +
-                    '<div role="presentation" class="icon pull-left" style="' + generateCategoryBackground(child) + '">' +
-                    '<i class="fa fa-fw ' + child.icon + '"></i>' +
+                const link = child.link ? child.link : relative_path + '/category/' + child.slug;
+                html +=
+                    '<span class="category-children-item pull-left">' +
+                    '<div role="presentation" class="icon pull-left" style="' +
+                    generateCategoryBackground(child) +
+                    '">' +
+                    '<i class="fa fa-fw ' +
+                    child.icon +
+                    '"></i>' +
                     '</div>' +
-                    '<a href="' + link + '"><small>' + child.name + '</small></a></span>';
+                    '<a href="' +
+                    link +
+                    '"><small>' +
+                    child.name +
+                    '</small></a></span>';
             }
         });
-        html = html ? ('<span class="category-children">' + html + '</span>') : html;
+        html = html ? '<span class="category-children">' + html + '</span>' : html;
         return html;
     }
 
@@ -132,15 +144,31 @@ module.exports = function (utils, Benchpress, relative_path) {
     // Groups helpers
     function membershipBtn(groupObj) {
         if (groupObj.isMember && groupObj.name !== 'administrators') {
-            return '<button class="btn btn-danger" data-action="leave" data-group="' + groupObj.displayName + '"' + (groupObj.disableLeave ? ' disabled' : '') + '><i class="fa fa-times"></i> [[groups:membership.leave-group]]</button>';
+            return (
+                '<button class="btn btn-danger" data-action="leave" data-group="' +
+                groupObj.displayName +
+                '"' +
+                (groupObj.disableLeave ? ' disabled' : '') +
+                '><i class="fa fa-times"></i> [[groups:membership.leave-group]]</button>'
+            );
         }
 
         if (groupObj.isPending && groupObj.name !== 'administrators') {
             return '<button class="btn btn-warning disabled"><i class="fa fa-clock-o"></i> [[groups:membership.invitation-pending]]</button>';
         } else if (groupObj.isInvited) {
-            return '<button class="btn btn-link" data-action="rejectInvite" data-group="' + groupObj.displayName + '">[[groups:membership.reject]]</button><button class="btn btn-success" data-action="acceptInvite" data-group="' + groupObj.name + '"><i class="fa fa-plus"></i> [[groups:membership.accept-invitation]]</button>';
+            return (
+                '<button class="btn btn-link" data-action="rejectInvite" data-group="' +
+                groupObj.displayName +
+                '">[[groups:membership.reject]]</button><button class="btn btn-success" data-action="acceptInvite" data-group="' +
+                groupObj.name +
+                '"><i class="fa fa-plus"></i> [[groups:membership.accept-invitation]]</button>'
+            );
         } else if (!groupObj.disableJoinRequests && groupObj.name !== 'administrators') {
-            return '<button class="btn btn-success" data-action="join" data-group="' + groupObj.displayName + '"><i class="fa fa-plus"></i> [[groups:membership.join-group]]</button>';
+            return (
+                '<button class="btn btn-success" data-action="join" data-group="' +
+                groupObj.displayName +
+                '"><i class="fa fa-plus"></i> [[groups:membership.join-group]]</button>'
+            );
         }
         return '';
     }
@@ -155,17 +183,42 @@ module.exports = function (utils, Benchpress, relative_path) {
                 });
             }
         }
-        return states.map(function (priv) {
-            const guestDisabled = ['groups:moderate', 'groups:posts:upvote', 'groups:posts:downvote', 'groups:local:login', 'groups:group:create'];
-            const spidersEnabled = ['groups:find', 'groups:read', 'groups:topics:read', 'groups:view:users', 'groups:view:tags', 'groups:view:groups'];
-            const globalModDisabled = ['groups:moderate'];
-            const disabled =
-                (member === 'guests' && (guestDisabled.includes(priv.name) || priv.name.startsWith('groups:admin:'))) ||
-                (member === 'spiders' && !spidersEnabled.includes(priv.name)) ||
-                (member === 'Global Moderators' && globalModDisabled.includes(priv.name));
+        return states
+            .map(function (priv) {
+                const guestDisabled = [
+                    'groups:moderate',
+                    'groups:posts:upvote',
+                    'groups:posts:downvote',
+                    'groups:local:login',
+                    'groups:group:create',
+                ];
+                const spidersEnabled = [
+                    'groups:find',
+                    'groups:read',
+                    'groups:topics:read',
+                    'groups:view:users',
+                    'groups:view:tags',
+                    'groups:view:groups',
+                ];
+                const globalModDisabled = ['groups:moderate'];
+                const disabled =
+                    (member === 'guests' &&
+                        (guestDisabled.includes(priv.name) || priv.name.startsWith('groups:admin:'))) ||
+                    (member === 'spiders' && !spidersEnabled.includes(priv.name)) ||
+                    (member === 'Global Moderators' && globalModDisabled.includes(priv.name));
 
-            return '<td class="text-center" data-privilege="' + priv.name + '" data-value="' + priv.state + '"><input autocomplete="off" type="checkbox"' + (priv.state ? ' checked' : '') + (disabled ? ' disabled="disabled"' : '') + ' /></td>';
-        }).join('');
+                return (
+                    '<td class="text-center" data-privilege="' +
+                    priv.name +
+                    '" data-value="' +
+                    priv.state +
+                    '"><input autocomplete="off" type="checkbox"' +
+                    (priv.state ? ' checked' : '') +
+                    (disabled ? ' disabled="disabled"' : '') +
+                    ' /></td>'
+                );
+            })
+            .join('');
     }
 
     function localeToHTML(locale, fallback) {
@@ -175,9 +228,23 @@ module.exports = function (utils, Benchpress, relative_path) {
 
     function renderTopicImage(topicObj) {
         if (topicObj.thumb) {
-            return '<img src="' + topicObj.thumb + '" class="img-circle user-img" title="' + topicObj.user.username + '" />';
+            return (
+                '<img src="' +
+                topicObj.thumb +
+                '" class="img-circle user-img" title="' +
+                topicObj.user.username +
+                '" />'
+            );
         }
-        return '<img component="user/picture" data-uid="' + topicObj.user.uid + '" src="' + topicObj.user.picture + '" class="user-img" title="' + topicObj.user.username + '" />';
+        return (
+            '<img component="user/picture" data-uid="' +
+            topicObj.user.uid +
+            '" src="' +
+            topicObj.user.picture +
+            '" class="user-img" title="' +
+            topicObj.user.username +
+            '" />'
+        );
     }
 
     function renderTopicEvents(index, sort) {
@@ -226,14 +293,38 @@ module.exports = function (utils, Benchpress, relative_path) {
     function renderDigestAvatar(block) {
         if (block.teaser) {
             if (block.teaser.user.picture) {
-                return '<img style="vertical-align: middle; width: 32px; height: 32px; border-radius: 50%;" src="' + block.teaser.user.picture + '" title="' + block.teaser.user.username + '" />';
+                return (
+                    '<img style="vertical-align: middle; width: 32px; height: 32px; border-radius: 50%;" src="' +
+                    block.teaser.user.picture +
+                    '" title="' +
+                    block.teaser.user.username +
+                    '" />'
+                );
             }
-            return '<div style="vertical-align: middle; width: 32px; height: 32px; line-height: 32px; font-size: 16px; background-color: ' + block.teaser.user['icon:bgColor'] + '; color: white; text-align: center; display: inline-block; border-radius: 50%;">' + block.teaser.user['icon:text'] + '</div>';
+            return (
+                '<div style="vertical-align: middle; width: 32px; height: 32px; line-height: 32px; font-size: 16px; background-color: ' +
+                block.teaser.user['icon:bgColor'] +
+                '; color: white; text-align: center; display: inline-block; border-radius: 50%;">' +
+                block.teaser.user['icon:text'] +
+                '</div>'
+            );
         }
         if (block.user.picture) {
-            return '<img style="vertical-align: middle; width: 32px; height: 32px; border-radius: 50%;" src="' + block.user.picture + '" title="' + block.user.username + '" />';
+            return (
+                '<img style="vertical-align: middle; width: 32px; height: 32px; border-radius: 50%;" src="' +
+                block.user.picture +
+                '" title="' +
+                block.user.username +
+                '" />'
+            );
         }
-        return '<div style="vertical-align: middle; width: 32px; height: 32px; line-height: 32px; font-size: 16px; background-color: ' + block.user['icon:bgColor'] + '; color: white; text-align: center; display: inline-block; border-radius: 50%;">' + block.user['icon:text'] + '</div>';
+        return (
+            '<div style="vertical-align: middle; width: 32px; height: 32px; line-height: 32px; font-size: 16px; background-color: ' +
+            block.user['icon:bgColor'] +
+            '; color: white; text-align: center; display: inline-block; border-radius: 50%;">' +
+            block.user['icon:text'] +
+            '</div>'
+        );
     }
 
     function userAgentIcons(data) {
@@ -316,7 +407,12 @@ module.exports = function (utils, Benchpress, relative_path) {
         if (['xs', 'sm', 'sm2x', 'md', 'lg', 'xl'].includes(size)) {
             classNames += ' avatar-' + size;
         } else if (!isNaN(parseInt(size, 10))) {
-            styles.push('width: ' + size + 'px;', 'height: ' + size + 'px;', 'line-height: ' + size + 'px;', 'font-size: ' + (parseInt(size, 10) / 16) + 'rem;');
+            styles.push(
+                'width: ' + size + 'px;',
+                'height: ' + size + 'px;',
+                'line-height: ' + size + 'px;',
+                'font-size: ' + parseInt(size, 10) / 16 + 'rem;'
+            );
         } else {
             classNames += ' avatar-sm';
         }
@@ -330,11 +426,15 @@ module.exports = function (utils, Benchpress, relative_path) {
         }
 
         if (userObj.picture) {
-            return '<img ' + attributes.join(' ') + ' src="' + userObj.picture + '" style="' + styles.join(' ') + '" />';
+            return (
+                '<img ' + attributes.join(' ') + ' src="' + userObj.picture + '" style="' + styles.join(' ') + '" />'
+            );
         }
 
         styles.push('background-color: ' + userObj['icon:bgColor'] + ';');
-        return '<span ' + attributes.join(' ') + ' style="' + styles.join(' ') + '">' + userObj['icon:text'] + '</span>';
+        return (
+            '<span ' + attributes.join(' ') + ' style="' + styles.join(' ') + '">' + userObj['icon:text'] + '</span>'
+        );
     }
 
     function register() {

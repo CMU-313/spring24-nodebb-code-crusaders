@@ -42,7 +42,12 @@ Interstitials.email = async (data) => {
         callback: async (userData, formData) => {
             // Validate and send email confirmation
             if (userData.uid) {
-                const [isPasswordCorrect, canEdit, { email: current, 'email:confirmed': confirmed }, { allowed, error }] = await Promise.all([
+                const [
+                    isPasswordCorrect,
+                    canEdit,
+                    { email: current, 'email:confirmed': confirmed },
+                    { allowed, error },
+                ] = await Promise.all([
                     user.isPasswordCorrect(userData.uid, formData.password, data.req.ip),
                     privileges.users.canEdit(data.req.uid, userData.uid),
                     user.getUserFields(userData.uid, ['email', 'email:confirmed']),
@@ -69,7 +74,9 @@ Interstitials.email = async (data) => {
                         if (confirmed) {
                             throw new Error('[[error:email-nochange]]');
                         } else if (await user.email.canSendValidation(userData.uid, current)) {
-                            throw new Error(`[[error:confirm-email-already-sent, ${meta.config.emailConfirmInterval}]]`);
+                            throw new Error(
+                                `[[error:confirm-email-already-sent, ${meta.config.emailConfirmInterval}]]`
+                            );
                         }
                     }
 
@@ -82,12 +89,16 @@ Interstitials.email = async (data) => {
                             throw new Error('[[error:invalid-password]]');
                         }
 
-                        await user.email.sendValidationEmail(userData.uid, {
-                            email: formData.email,
-                            force: true,
-                        }).catch((err) => {
-                            winston.error(`[user.interstitials.email] Validation email failed to send\n[emailer.send] ${err.stack}`);
-                        });
+                        await user.email
+                            .sendValidationEmail(userData.uid, {
+                                email: formData.email,
+                                force: true,
+                            })
+                            .catch((err) => {
+                                winston.error(
+                                    `[user.interstitials.email] Validation email failed to send\n[emailer.send] ${err.stack}`
+                                );
+                            });
                         data.req.session.emailChanged = 1;
                     } else {
                         // User attempting to edit another user's email -- not allowed

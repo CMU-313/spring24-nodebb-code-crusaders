@@ -11,8 +11,8 @@ get:
         type: string
       example: admin
   responses:
-    "200":
-      description: "A JSON file containing the user profile"
+    '200':
+      description: 'A JSON file containing the user profile'
       content:
         text/json:
           schema:

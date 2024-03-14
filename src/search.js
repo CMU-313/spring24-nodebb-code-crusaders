@@ -41,10 +41,7 @@ search.search = async function (data) {
 async function searchInContent(data) {
     data.uid = data.uid || 0;
 
-    const [searchCids, searchUids] = await Promise.all([
-        getSearchCids(data),
-        getSearchUids(data),
-    ]);
+    const [searchCids, searchUids] = await Promise.all([getSearchCids(data), getSearchUids(data)]);
 
     async function doSearch(type, searchIn) {
         if (searchIn.includes(data.searchIn)) {
@@ -104,19 +101,28 @@ async function searchInContent(data) {
     };
 
     if (data.page) {
-        const start = Math.max(0, (data.page - 1)) * itemsPerPage;
+        const start = Math.max(0, data.page - 1) * itemsPerPage;
         metadata.pids = metadata.pids.slice(start, start + itemsPerPage);
     }
 
     returnData.posts = await posts.getPostSummaryByPids(metadata.pids, data.uid, {});
-    await plugins.hooks.fire('filter:search.contentGetResult', { result: returnData, data: data });
+    await plugins.hooks.fire('filter:search.contentGetResult', {
+        result: returnData,
+        data: data,
+    });
     delete metadata.pids;
     delete metadata.data;
     return Object.assign(returnData, metadata);
 }
 
 async function filterAndSort(pids, data) {
-    if (data.sortBy === 'relevance' && !data.replies && !data.timeRange && !data.hasTags && !plugins.hooks.hasListeners('filter:search.filterAndSort')) {
+    if (
+        data.sortBy === 'relevance' &&
+        !data.replies &&
+        !data.timeRange &&
+        !data.hasTags &&
+        !plugins.hooks.hasListeners('filter:search.filterAndSort')
+    ) {
         return pids;
     }
     let postsData = await getMatchedPosts(pids, data);
@@ -131,7 +137,11 @@ async function filterAndSort(pids, data) {
 
     sortPosts(postsData, data);
 
-    const result = await plugins.hooks.fire('filter:search.filterAndSort', { pids: pids, posts: postsData, data: data });
+    const result = await plugins.hooks.fire('filter:search.filterAndSort', {
+        pids: pids,
+        posts: postsData,
+        data: data,
+    });
     return result.posts.map(post => post && post.pid);
 }
 
@@ -143,10 +153,7 @@ async function getMatchedPosts(pids, data) {
     const uids = _.uniq(postsData.map(post => post.uid));
     const tids = _.uniq(postsData.map(post => post.tid));
 
-    const [users, topics] = await Promise.all([
-        getUsers(uids, data),
-        getTopics(tids, data),
-    ]);
+    const [users, topics] = await Promise.all([getUsers(uids, data), getTopics(tids, data)]);
 
     const tidToTopic = _.zipObject(tids, topics);
     const uidToUser = _.zipObject(uids, users);
@@ -201,7 +208,10 @@ async function getCategories(cids, data) {
         return null;
     }
 
-    return await db.getObjectsFields(cids.map(cid => `category:${cid}`), categoryFields);
+    return await db.getObjectsFields(
+        cids.map(cid => `category:${cid}`),
+        categoryFields
+    );
 }
 
 function filterByPostcount(posts, postCount, repliesFilter) {
@@ -284,10 +294,7 @@ async function getSearchCids(data) {
         return await categories.getCidsByPrivilege('categories:cid', data.uid, 'read');
     }
 
-    const [watchedCids, childrenCids] = await Promise.all([
-        getWatchedCids(data),
-        getChildrenCids(data),
-    ]);
+    const [watchedCids, childrenCids] = await Promise.all([getWatchedCids(data), getChildrenCids(data)]);
     return _.uniq(watchedCids.concat(childrenCids).concat(data.categories).filter(Boolean));
 }
 

@@ -95,7 +95,9 @@ helpers.getUserDataByUserSlug = async function (userslug, callerUID, query = {})
     userData.muted = parseInt(userData.mutedUntil, 10) > Date.now();
     userData.website = escape(userData.website);
     userData.websiteLink = !userData.website.startsWith('http') ? `http://${userData.website}` : userData.website;
-    userData.websiteName = userData.website.replace(validator.escape('http://'), '').replace(validator.escape('https://'), '');
+    userData.websiteName = userData.website
+        .replace(validator.escape('http://'), '')
+        .replace(validator.escape('https://'), '');
 
     userData.fullname = escape(userData.fullname);
     userData.location = escape(userData.location);
@@ -104,7 +106,9 @@ helpers.getUserDataByUserSlug = async function (userslug, callerUID, query = {})
     userData.moderationNote = validator.escape(String(userData.moderationNote || ''));
 
     if (userData['cover:url']) {
-        userData['cover:url'] = userData['cover:url'].startsWith('http') ? userData['cover:url'] : (nconf.get('relative_path') + userData['cover:url']);
+        userData['cover:url'] = userData['cover:url'].startsWith('http') ?
+            userData['cover:url'] :
+            nconf.get('relative_path') + userData['cover:url'];
     } else {
         userData['cover:url'] = require('../../coverPhoto').getDefaultProfileCover(userData.uid);
     }
@@ -139,7 +143,10 @@ async function getAllData(uid, callerUID) {
         ips: user.getIPs(uid, 4),
         profile_menu: getProfileMenu(uid, callerUID),
         groups: groups.getUserGroups([uid]),
-        sso: plugins.hooks.fire('filter:auth.list', { uid: uid, associations: [] }),
+        sso: plugins.hooks.fire('filter:auth.list', {
+            uid: uid,
+            associations: [],
+        }),
         canEdit: privileges.users.canEdit(callerUID, uid),
         canBanUser: privileges.users.canBanUser(callerUID, uid),
         canMuteUser: privileges.users.canMuteUser(callerUID, uid),
@@ -155,7 +162,9 @@ async function getCounts(userData, callerUID) {
     const promises = {
         posts: db.sortedSetsCardSum(cids.map(c => `cid:${c}:uid:${uid}:pids`)),
         best: Promise.all(cids.map(async c => db.sortedSetCount(`cid:${c}:uid:${uid}:pids:votes`, 1, '+inf'))),
-        controversial: Promise.all(cids.map(async c => db.sortedSetCount(`cid:${c}:uid:${uid}:pids:votes`, '-inf', -1))),
+        controversial: Promise.all(
+            cids.map(async c => db.sortedSetCount(`cid:${c}:uid:${uid}:pids:votes`, '-inf', -1))
+        ),
         topics: db.sortedSetsCardSum(cids.map(c => `cid:${c}:uid:${uid}:tids`)),
     };
     if (userData.isAdmin || userData.isSelf) {
@@ -180,33 +189,36 @@ async function getCounts(userData, callerUID) {
 }
 
 async function getProfileMenu(uid, callerUID) {
-    const links = [{
-        id: 'info',
-        route: 'info',
-        name: '[[user:account_info]]',
-        icon: 'fa-info',
-        visibility: {
-            self: false,
-            other: false,
-            moderator: false,
-            globalMod: false,
-            admin: true,
-            canViewInfo: true,
+    const links = [
+        {
+            id: 'info',
+            route: 'info',
+            name: '[[user:account_info]]',
+            icon: 'fa-info',
+            visibility: {
+                self: false,
+                other: false,
+                moderator: false,
+                globalMod: false,
+                admin: true,
+                canViewInfo: true,
+            },
         },
-    }, {
-        id: 'sessions',
-        route: 'sessions',
-        name: '[[pages:account/sessions]]',
-        icon: 'fa-group',
-        visibility: {
-            self: true,
-            other: false,
-            moderator: false,
-            globalMod: false,
-            admin: false,
-            canViewInfo: false,
+        {
+            id: 'sessions',
+            route: 'sessions',
+            name: '[[pages:account/sessions]]',
+            icon: 'fa-group',
+            visibility: {
+                self: true,
+                other: false,
+                moderator: false,
+                globalMod: false,
+                admin: false,
+                canViewInfo: false,
+            },
         },
-    }];
+    ];
 
     if (meta.config.gdpr_enabled) {
         links.push({

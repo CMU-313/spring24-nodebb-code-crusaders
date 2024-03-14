@@ -70,61 +70,79 @@ helpers.addLinkTags = function (params) {
 };
 
 helpers.buildFilters = function (url, filter, query) {
-    return [{
-        name: '[[unread:all-topics]]',
-        url: url + helpers.buildQueryString(query, 'filter', ''),
-        selected: filter === '',
-        filter: '',
-        icon: 'fa-book',
-    }, {
-        name: '[[unread:new-topics]]',
-        url: url + helpers.buildQueryString(query, 'filter', 'new'),
-        selected: filter === 'new',
-        filter: 'new',
-        icon: 'fa-clock-o',
-    }, {
-        name: '[[unread:watched-topics]]',
-        url: url + helpers.buildQueryString(query, 'filter', 'watched'),
-        selected: filter === 'watched',
-        filter: 'watched',
-        icon: 'fa-bell-o',
-    }, {
-        name: '[[unread:unreplied-topics]]',
-        url: url + helpers.buildQueryString(query, 'filter', 'unreplied'),
-        selected: filter === 'unreplied',
-        filter: 'unreplied',
-        icon: 'fa-reply',
-    }];
+    return [
+        {
+            name: '[[unread:all-topics]]',
+            url: url + helpers.buildQueryString(query, 'filter', ''),
+            selected: filter === '',
+            filter: '',
+            icon: 'fa-book',
+        },
+        {
+            name: '[[unread:new-topics]]',
+            url: url + helpers.buildQueryString(query, 'filter', 'new'),
+            selected: filter === 'new',
+            filter: 'new',
+            icon: 'fa-clock-o',
+        },
+        {
+            name: '[[unread:watched-topics]]',
+            url: url + helpers.buildQueryString(query, 'filter', 'watched'),
+            selected: filter === 'watched',
+            filter: 'watched',
+            icon: 'fa-bell-o',
+        },
+        {
+            name: '[[unread:unreplied-topics]]',
+            url: url + helpers.buildQueryString(query, 'filter', 'unreplied'),
+            selected: filter === 'unreplied',
+            filter: 'unreplied',
+            icon: 'fa-reply',
+        },
+    ];
 };
 
 helpers.buildTerms = function (url, term, query) {
-    return [{
-        name: '[[recent:alltime]]',
-        url: url + helpers.buildQueryString(query, 'term', ''),
-        selected: term === 'alltime',
-        term: 'alltime',
-    }, {
-        name: '[[recent:day]]',
-        url: url + helpers.buildQueryString(query, 'term', 'daily'),
-        selected: term === 'day',
-        term: 'day',
-    }, {
-        name: '[[recent:week]]',
-        url: url + helpers.buildQueryString(query, 'term', 'weekly'),
-        selected: term === 'week',
-        term: 'week',
-    }, {
-        name: '[[recent:month]]',
-        url: url + helpers.buildQueryString(query, 'term', 'monthly'),
-        selected: term === 'month',
-        term: 'month',
-    }];
+    return [
+        {
+            name: '[[recent:alltime]]',
+            url: url + helpers.buildQueryString(query, 'term', ''),
+            selected: term === 'alltime',
+            term: 'alltime',
+        },
+        {
+            name: '[[recent:day]]',
+            url: url + helpers.buildQueryString(query, 'term', 'daily'),
+            selected: term === 'day',
+            term: 'day',
+        },
+        {
+            name: '[[recent:week]]',
+            url: url + helpers.buildQueryString(query, 'term', 'weekly'),
+            selected: term === 'week',
+            term: 'week',
+        },
+        {
+            name: '[[recent:month]]',
+            url: url + helpers.buildQueryString(query, 'term', 'monthly'),
+            selected: term === 'month',
+            term: 'month',
+        },
+    ];
 };
 
 helpers.notAllowed = async function (req, res, error) {
-    ({ error } = await plugins.hooks.fire('filter:helpers.notAllowed', { req, res, error }));
+    ({ error } = await plugins.hooks.fire('filter:helpers.notAllowed', {
+        req,
+        res,
+        error,
+    }));
 
-    await plugins.hooks.fire('response:helpers.notAllowed', { req, res, error });
+    await plugins.hooks.fire('response:helpers.notAllowed', {
+        req,
+        res,
+        error,
+    });
     if (res.headersSent) {
         return;
     }
@@ -183,8 +201,7 @@ helpers.redirect = function (res, url, permanent) {
 };
 
 function prependRelativePath(url) {
-    return url.startsWith('http://') || url.startsWith('https://') ?
-        url : relative_path + url;
+    return url.startsWith('http://') || url.startsWith('https://') ? url : relative_path + url;
 }
 
 helpers.buildCategoryBreadcrumbs = async function (cid) {
@@ -259,7 +276,11 @@ helpers.getCategoriesByStates = async function (uid, selectedCid, states, privil
 async function getCategoryData(cids, uid, selectedCid, states, privilege) {
     const [visibleCategories, selectData] = await Promise.all([
         helpers.getVisibleCategories({
-            cids, uid, states, privilege, showLinks: false,
+            cids,
+            uid,
+            states,
+            privilege,
+            showLinks: false,
         }),
         helpers.getSelectedCategory(selectedCid),
     ]);
@@ -302,7 +323,10 @@ helpers.getVisibleCategories = async function (params) {
 
     categories.getTree(categoriesData, params.parentCid);
 
-    const cidToAllowed = _.zipObject(cids, allowed.map((allowed, i) => isAdmin || isModerator[i] || allowed));
+    const cidToAllowed = _.zipObject(
+        cids,
+        allowed.map((allowed, i) => isAdmin || isModerator[i] || allowed)
+    );
     const cidToCategory = _.zipObject(cids, categoriesData);
     const cidToWatchState = _.zipObject(cids, watchState);
 
@@ -311,12 +335,8 @@ helpers.getVisibleCategories = async function (params) {
             return false;
         }
         const hasVisibleChildren = checkVisibleChildren(c, cidToAllowed, cidToWatchState, states);
-        const isCategoryVisible = (
-            cidToAllowed[c.cid] &&
-            (showLinks || !c.link) &&
-            !c.disabled &&
-            states.includes(cidToWatchState[c.cid])
-        );
+        const isCategoryVisible =
+            cidToAllowed[c.cid] && (showLinks || !c.link) && !c.disabled && states.includes(cidToWatchState[c.cid]);
         const shouldBeRemoved = !hasVisibleChildren && !isCategoryVisible;
         const shouldBeDisaplayedAsDisabled = hasVisibleChildren && !isCategoryVisible;
 
@@ -325,8 +345,9 @@ helpers.getVisibleCategories = async function (params) {
         }
 
         if (shouldBeRemoved && c.parent && c.parent.cid && cidToCategory[c.parent.cid]) {
-            cidToCategory[c.parent.cid].children =
-                cidToCategory[c.parent.cid].children.filter(child => child.cid !== c.cid);
+            cidToCategory[c.parent.cid].children = cidToCategory[c.parent.cid].children.filter(
+                child => child.cid !== c.cid
+            );
         }
 
         return !shouldBeRemoved;
@@ -385,10 +406,11 @@ function checkVisibleChildren(c, cidToAllowed, cidToWatchState, states) {
     if (!c || !Array.isArray(c.children)) {
         return false;
     }
-    return c.children.some(c => !c.disabled && (
-        (cidToAllowed[c.cid] && states.includes(cidToWatchState[c.cid])) ||
-        checkVisibleChildren(c, cidToAllowed, cidToWatchState, states)
-    ));
+    return c.children.some(
+        c => !c.disabled &&
+            ((cidToAllowed[c.cid] && states.includes(cidToWatchState[c.cid])) ||
+                checkVisibleChildren(c, cidToAllowed, cidToWatchState, states))
+    );
 }
 
 helpers.getHomePageRoutes = async function (uid) {
@@ -526,7 +548,7 @@ helpers.generateError = async (statusCode, message, res) => {
     const payload = {
         status: {
             code: 'internal-server-error',
-            message: message || await translateMessage(`[[error:api.${statusCode}]]`),
+            message: message || (await translateMessage(`[[error:api.${statusCode}]]`)),
         },
         response: {},
     };

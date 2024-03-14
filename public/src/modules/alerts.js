@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('alerts', ['translator', 'components', 'hooks'], function (translator, components, hooks) {
     const module = {};
 
@@ -74,14 +73,12 @@ define('alerts', ['translator', 'components', 'hooks'], function (translator, co
             }
 
             if (typeof params.clickfn === 'function') {
-                alert
-                    .addClass('pointer')
-                    .on('click', function (e) {
-                        if (!$(e.target).is('.close')) {
-                            params.clickfn(alert, params);
-                        }
-                        fadeOut(alert);
-                    });
+                alert.addClass('pointer').on('click', function (e) {
+                    if (!$(e.target).is('.close')) {
+                        params.clickfn(alert, params);
+                    }
+                    fadeOut(alert);
+                });
             }
 
             hooks.fire('action:alert.new', { alert, params });
@@ -103,14 +100,12 @@ define('alerts', ['translator', 'components', 'hooks'], function (translator, co
         // Handle changes in the clickfn
         alert.off('click').removeClass('pointer');
         if (typeof params.clickfn === 'function') {
-            alert
-                .addClass('pointer')
-                .on('click', function (e) {
-                    if (!$(e.target).is('.close')) {
-                        params.clickfn();
-                    }
-                    fadeOut(alert);
-                });
+            alert.addClass('pointer').on('click', function (e) {
+                if (!$(e.target).is('.close')) {
+                    params.clickfn();
+                }
+                fadeOut(alert);
+            });
         }
     }
 
@@ -139,16 +134,18 @@ define('alerts', ['translator', 'components', 'hooks'], function (translator, co
 
         setTimeout(function () {
             alert.css('transition-property', '');
-            alert.css('transition', 'width ' + (timeout + 450) + 'ms linear, background-color ' + (timeout + 450) + 'ms ease-in');
+            alert.css(
+                'transition',
+                'width ' + (timeout + 450) + 'ms linear, background-color ' + (timeout + 450) + 'ms ease-in'
+            );
             alert.addClass('animate');
             hooks.fire('action:alert.animate', { alert, params });
         }, 50);
 
         // Handle mouseenter/mouseleave
-        alert
-            .on('mouseenter', function () {
-                $(this).css('transition-duration', 0);
-            });
+        alert.on('mouseenter', function () {
+            $(this).css('transition-duration', 0);
+        });
     }
 
     return module;

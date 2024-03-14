@@ -1,6 +1,5 @@
 'use strict';
 
-
 const async = require('async');
 const assert = require('assert');
 const db = require('../mocks/databasemock');
@@ -176,11 +175,14 @@ describe('Set methods', () => {
 
     describe('setsCount()', () => {
         before((done) => {
-            async.parallel([
-                async.apply(db.setAdd, 'set5', [1, 2, 3, 4, 5]),
-                async.apply(db.setAdd, 'set6', 1),
-                async.apply(db.setAdd, 'set7', 2),
-            ], done);
+            async.parallel(
+                [
+                    async.apply(db.setAdd, 'set5', [1, 2, 3, 4, 5]),
+                    async.apply(db.setAdd, 'set6', 1),
+                    async.apply(db.setAdd, 'set7', 2),
+                ],
+                done
+            );
         });
 
         it('should return the element count of sets', (done) => {
@@ -232,18 +234,22 @@ describe('Set methods', () => {
                 assert.ifError(err);
                 db.setAdd('multiSetTest2', ['three', 'four', 'five', 'six'], (err) => {
                     assert.ifError(err);
-                    db.setRemove(['multiSetTest1', 'multiSetTest2'], ['three', 'four', 'five', 'doesnt exist'], (err) => {
-                        assert.ifError(err);
-                        db.getSetsMembers(['multiSetTest1', 'multiSetTest2'], (err, members) => {
+                    db.setRemove(
+                        ['multiSetTest1', 'multiSetTest2'],
+                        ['three', 'four', 'five', 'doesnt exist'],
+                        (err) => {
                             assert.ifError(err);
-                            assert.equal(members[0].length, 2);
-                            assert.equal(members[1].length, 1);
-                            assert(members[0].includes('one'));
-                            assert(members[0].includes('two'));
-                            assert(members[1].includes('six'));
-                            done();
-                        });
-                    });
+                            db.getSetsMembers(['multiSetTest1', 'multiSetTest2'], (err, members) => {
+                                assert.ifError(err);
+                                assert.equal(members[0].length, 2);
+                                assert.equal(members[1].length, 1);
+                                assert(members[0].includes('one'));
+                                assert(members[0].includes('two'));
+                                assert(members[1].includes('six'));
+                                done();
+                            });
+                        }
+                    );
                 });
             });
         });

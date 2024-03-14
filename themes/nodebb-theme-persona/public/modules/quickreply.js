@@ -1,12 +1,14 @@
 'use strict';
 
 define('persona/quickreply', [
-    'components', 'composer', 'composer/autocomplete', 'api',
-    'alerts', 'uploadHelpers', 'mousetrap',
-], function (
-    components, composer, autocomplete, api,
-    alerts, uploadHelpers, mousetrap
-) {
+    'components',
+    'composer',
+    'composer/autocomplete',
+    'api',
+    'alerts',
+    'uploadHelpers',
+    'mousetrap',
+], function (components, composer, autocomplete, api, alerts, uploadHelpers, mousetrap) {
     var QuickReply = {};
 
     QuickReply.init = function () {
@@ -41,7 +43,8 @@ define('persona/quickreply', [
             callback: function (uploads) {
                 let text = element.val();
                 uploads.forEach((upload) => {
-                    text = text + (text ? '\n' : '') + (upload.isImage ? '!' : '') + `[${upload.filename}](${upload.url})`;
+                    text =
+                        text + (text ? '\n' : '') + (upload.isImage ? '!' : '') + `[${upload.filename}](${upload.url})`;
                 });
                 element.val(text);
             },

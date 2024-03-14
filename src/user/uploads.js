@@ -53,38 +53,50 @@ module.exports = function (User) {
             throw new Error('[[error:no-privileges]]');
         }
 
-        await batch.processArray(uploadNames, async (uploadNames) => {
-            const fullPaths = uploadNames.map(path => _getFullPath(path));
+        await batch.processArray(
+            uploadNames,
+            async (uploadNames) => {
+                const fullPaths = uploadNames.map(path => _getFullPath(path));
 
-            await Promise.all(fullPaths.map(async (fullPath, idx) => {
-                winston.verbose(`[user/deleteUpload] Deleting ${uploadNames[idx]}`);
-                await Promise.all([
-                    file.delete(fullPath),
-                    file.delete(file.appendToFileName(fullPath, '-resized')),
-                ]);
-                await Promise.all([
-                    db.sortedSetRemove(`uid:${uid}:uploads`, uploadNames[idx]),
-                    db.delete(`upload:${md5(uploadNames[idx])}`),
-                ]);
-            }));
+                await Promise.all(
+                    fullPaths.map(async (fullPath, idx) => {
+                        winston.verbose(`[user/deleteUpload] Deleting ${uploadNames[idx]}`);
+                        await Promise.all([
+                            file.delete(fullPath),
+                            file.delete(file.appendToFileName(fullPath, '-resized')),
+                        ]);
+                        await Promise.all([
+                            db.sortedSetRemove(`uid:${uid}:uploads`, uploadNames[idx]),
+                            db.delete(`upload:${md5(uploadNames[idx])}`),
+                        ]);
+                    })
+                );
 
-            // Dissociate the upload from pids, if any
-            const pids = await db.getSortedSetsMembers(uploadNames.map(relativePath => `upload:${md5(relativePath)}:pids`));
-            await Promise.all(pids.map(async (pids, idx) => Promise.all(
-                pids.map(async pid => posts.uploads.dissociate(pid, uploadNames[idx]))
-            )));
-        }, { batch: 50 });
+                // Dissociate the upload from pids, if any
+                const pids = await db.getSortedSetsMembers(
+                    uploadNames.map(relativePath => `upload:${md5(relativePath)}:pids`)
+                );
+                await Promise.all(
+                    pids.map(async (pids, idx) => Promise.all(pids.map(async pid => posts.uploads.dissociate(pid, uploadNames[idx]))))
+                );
+            },
+            { batch: 50 }
+        );
     };
 
     User.collateUploads = async function (uid, archive) {
-        await batch.processSortedSet(`uid:${uid}:uploads`, (files, next) => {
-            files.forEach((file) => {
-                archive.file(_getFullPath(file), {
-                    name: path.basename(file),
+        await batch.processSortedSet(
+            `uid:${uid}:uploads`,
+            (files, next) => {
+                files.forEach((file) => {
+                    archive.file(_getFullPath(file), {
+                        name: path.basename(file),
+                    });
                 });
-            });
 
-            setImmediate(next);
-        }, { batch: 100 });
+                setImmediate(next);
+            },
+            { batch: 100 }
+        );
     };
 };

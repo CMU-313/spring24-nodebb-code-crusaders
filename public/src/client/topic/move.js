@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('forum/topic/move', ['categorySelector', 'alerts', 'hooks'], function (categorySelector, alerts, hooks) {
     const Move = {};
     let modal;

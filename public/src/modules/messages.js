@@ -1,6 +1,12 @@
 'use strict';
 
-define('messages', ['bootbox', 'translator', 'storage', 'alerts', 'hooks'], function (bootbox, translator, storage, alerts, hooks) {
+define('messages', ['bootbox', 'translator', 'storage', 'alerts', 'hooks'], function (
+    bootbox,
+    translator,
+    storage,
+    alerts,
+    hooks
+) {
     const messages = {};
 
     let showWelcomeMessage;
@@ -48,7 +54,12 @@ define('messages', ['bootbox', 'translator', 'storage', 'alerts', 'hooks'], func
     };
 
     function showCookieWarning() {
-        if (!config.cookies.enabled || !navigator.cookieEnabled || app.inAdmin || storage.getItem('cookieconsent') === '1') {
+        if (
+            !config.cookies.enabled ||
+            !navigator.cookieEnabled ||
+            app.inAdmin ||
+            storage.getItem('cookieconsent') === '1'
+        ) {
             return;
         }
 
@@ -97,7 +108,9 @@ define('messages', ['bootbox', 'translator', 'storage', 'alerts', 'hooks'], func
         }
 
         if (params.has('lang') && params.get('lang') === config.defaultLang) {
-            console.info(`The "lang" parameter was passed in to set the language to "${params.get('lang')}", but that is already the forum default language.`);
+            console.info(
+                `The "lang" parameter was passed in to set the language to "${params.get('lang')}", but that is already the forum default language.`
+            );
             params.delete('lang');
         }
 

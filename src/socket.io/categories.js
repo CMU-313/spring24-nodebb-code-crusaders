@@ -18,10 +18,7 @@ SocketCategories.get = async function (socket) {
         const cids = await categories.getCidsByPrivilege('categories:cid', socket.uid, 'find');
         return await categories.getCategoriesData(cids);
     }
-    const [isAdmin, categoriesData] = await Promise.all([
-        user.isAdministrator(socket.uid),
-        getCategories(),
-    ]);
+    const [isAdmin, categoriesData] = await Promise.all([user.isAdministrator(socket.uid), getCategories()]);
     return categoriesData.filter(category => category && (!category.disabled || isAdmin));
 };
 
@@ -106,9 +103,13 @@ SocketCategories.setWatchState = async function (socket, data) {
     if (!data || !data.cid || !data.state) {
         throw new Error('[[error:invalid-data]]');
     }
-    return await ignoreOrWatch(async (uid, cids) => {
-        await user.setCategoryWatchState(uid, cids, categories.watchStates[data.state]);
-    }, socket, data);
+    return await ignoreOrWatch(
+        async (uid, cids) => {
+            await user.setCategoryWatchState(uid, cids, categories.watchStates[data.state]);
+        },
+        socket,
+        data
+    );
 };
 
 SocketCategories.watch = async function (socket, data) {

@@ -24,7 +24,10 @@ redisModule.questions = [
         description: 'Password of your Redis database',
         hidden: true,
         default: nconf.get('redis:password') || '',
-        before: function (value) { value = value || nconf.get('redis:password') || ''; return value; },
+        before: function (value) {
+            value = value || nconf.get('redis:password') || '';
+            return value;
+        },
     },
     {
         name: 'redis:database',
@@ -32,7 +35,6 @@ redisModule.questions = [
         default: nconf.get('redis:database') || 0,
     },
 ];
-
 
 redisModule.init = async function () {
     redisModule.client = await connection.connect(nconf.get('redis'));
@@ -56,7 +58,11 @@ redisModule.checkCompatibility = async function () {
 
 redisModule.checkCompatibilityVersion = function (version, callback) {
     if (semver.lt(version, '2.8.9')) {
-        callback(new Error('Your Redis version is not new enough to support NodeBB, please upgrade Redis to v2.8.9 or higher.'));
+        callback(
+            new Error(
+                'Your Redis version is not new enough to support NodeBB, please upgrade Redis to v2.8.9 or higher.'
+            )
+        );
     }
     callback();
 };

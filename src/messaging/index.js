@@ -1,6 +1,5 @@
 'use strict';
 
-
 const validator = require('validator');
 
 const db = require('../database');
@@ -100,11 +99,20 @@ Messaging.getRecentChats = async (callerUid, uid, start, stop) => {
     const results = await utils.promiseParallel({
         roomData: Messaging.getRoomsData(roomIds),
         unread: db.isSortedSetMembers(`uid:${uid}:chat:rooms:unread`, roomIds),
-        users: Promise.all(roomIds.map(async (roomId) => {
-            let uids = await db.getSortedSetRevRange(`chat:room:${roomId}:uids`, 0, 9);
-            uids = uids.filter(_uid => _uid && parseInt(_uid, 10) !== parseInt(uid, 10));
-            return await user.getUsersFields(uids, ['uid', 'username', 'userslug', 'picture', 'status', 'lastonline']);
-        })),
+        users: Promise.all(
+            roomIds.map(async (roomId) => {
+                let uids = await db.getSortedSetRevRange(`chat:room:${roomId}:uids`, 0, 9);
+                uids = uids.filter(_uid => _uid && parseInt(_uid, 10) !== parseInt(uid, 10));
+                return await user.getUsersFields(uids, [
+                    'uid',
+                    'username',
+                    'userslug',
+                    'picture',
+                    'status',
+                    'lastonline',
+                ]);
+            })
+        ),
         teasers: Promise.all(roomIds.map(async roomId => Messaging.getTeaser(uid, roomId))),
     });
 
@@ -137,8 +145,10 @@ Messaging.getRecentChats = async (callerUid, uid, start, stop) => {
     });
 };
 
-Messaging.generateUsernames = (users, excludeUid) => users.filter(user => user && parseInt(user.uid, 10) !== excludeUid)
-    .map(user => user.username).join(', ');
+Messaging.generateUsernames = (users, excludeUid) => users
+    .filter(user => user && parseInt(user.uid, 10) !== excludeUid)
+    .map(user => user.username)
+    .join(', ');
 
 Messaging.getTeaser = async (uid, roomId) => {
     const mid = await Messaging.getLatestUndeletedMessage(uid, roomId);
@@ -154,13 +164,22 @@ Messaging.getTeaser = async (uid, roomId) => {
         return null;
     }
 
-    teaser.user = await user.getUserFields(teaser.fromuid, ['uid', 'username', 'userslug', 'picture', 'status', 'lastonline']);
+    teaser.user = await user.getUserFields(teaser.fromuid, [
+        'uid',
+        'username',
+        'userslug',
+        'picture',
+        'status',
+        'lastonline',
+    ]);
     if (teaser.content) {
         teaser.content = utils.stripHTMLTags(utils.decodeHTMLEntities(teaser.content));
         teaser.content = validator.escape(String(teaser.content));
     }
 
-    const payload = await plugins.hooks.fire('filter:messaging.getTeaser', { teaser: teaser });
+    const payload = await plugins.hooks.fire('filter:messaging.getTeaser', {
+        teaser: teaser,
+    });
     return payload.teaser;
 };
 

@@ -24,7 +24,12 @@ module.exports = function (app, name, middleware, controllers) {
     setupPageRoute(app, `/${name}/:userslug/posts`, middlewares, controllers.accounts.posts.getPosts);
     setupPageRoute(app, `/${name}/:userslug/topics`, middlewares, controllers.accounts.posts.getTopics);
     setupPageRoute(app, `/${name}/:userslug/best`, middlewares, controllers.accounts.posts.getBestPosts);
-    setupPageRoute(app, `/${name}/:userslug/controversial`, middlewares, controllers.accounts.posts.getControversialPosts);
+    setupPageRoute(
+        app,
+        `/${name}/:userslug/controversial`,
+        middlewares,
+        controllers.accounts.posts.getControversialPosts
+    );
     setupPageRoute(app, `/${name}/:userslug/groups`, middlewares, controllers.accounts.groups.get);
 
     setupPageRoute(app, `/${name}/:userslug/categories`, accountMiddlewares, controllers.accounts.categories.get);
@@ -32,7 +37,12 @@ module.exports = function (app, name, middleware, controllers) {
     setupPageRoute(app, `/${name}/:userslug/watched`, accountMiddlewares, controllers.accounts.posts.getWatchedTopics);
     setupPageRoute(app, `/${name}/:userslug/ignored`, accountMiddlewares, controllers.accounts.posts.getIgnoredTopics);
     setupPageRoute(app, `/${name}/:userslug/upvoted`, accountMiddlewares, controllers.accounts.posts.getUpVotedPosts);
-    setupPageRoute(app, `/${name}/:userslug/downvoted`, accountMiddlewares, controllers.accounts.posts.getDownVotedPosts);
+    setupPageRoute(
+        app,
+        `/${name}/:userslug/downvoted`,
+        accountMiddlewares,
+        controllers.accounts.posts.getDownVotedPosts
+    );
     setupPageRoute(app, `/${name}/:userslug/edit`, accountMiddlewares, controllers.accounts.edit.get);
     setupPageRoute(app, `/${name}/:userslug/edit/username`, accountMiddlewares, controllers.accounts.edit.username);
     setupPageRoute(app, `/${name}/:userslug/edit/email`, accountMiddlewares, controllers.accounts.edit.email);

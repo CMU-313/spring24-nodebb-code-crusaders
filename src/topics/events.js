@@ -68,14 +68,16 @@ Events._types = {
 
 Events.init = async () => {
     // Allow plugins to define additional topic event types
-    const { types } = await plugins.hooks.fire('filter:topicEvents.init', { types: Events._types });
+    const { types } = await plugins.hooks.fire('filter:topicEvents.init', {
+        types: Events._types,
+    });
     Events._types = types;
 };
 
 Events.get = async (tid, uid, reverse = false) => {
     const topics = require('.');
 
-    if (!await topics.exists(tid)) {
+    if (!(await topics.exists(tid))) {
         throw new Error('[[error:no-topic]]');
     }
 
@@ -113,11 +115,13 @@ async function modifyEvent({ tid, uid, eventIds, timestamps, events }) {
     const isPrivileged = await user.isPrivileged(uid);
     if (isPrivileged) {
         const queuedPosts = await posts.getQueuedPosts({ tid }, { metadata: false });
-        events.push(...queuedPosts.map(item => ({
-            type: 'post-queue',
-            timestamp: item.data.timestamp || Date.now(),
-            uid: item.data.uid,
-        })));
+        events.push(
+            ...queuedPosts.map(item => ({
+                type: 'post-queue',
+                timestamp: item.data.timestamp || Date.now(),
+                uid: item.data.uid,
+            }))
+        );
         queuedPosts.forEach((item) => {
             timestamps.push(item.data.timestamp || Date.now());
         });
@@ -133,12 +137,9 @@ async function modifyEvent({ tid, uid, eventIds, timestamps, events }) {
         events = events.filter(event => event.type !== 'backlink');
     } else {
         // remove backlinks that we dont have read permission
-        const backlinkPids = events.filter(e => e.type === 'backlink')
-            .map(e => e.href.split('/').pop());
+        const backlinkPids = events.filter(e => e.type === 'backlink').map(e => e.href.split('/').pop());
         const pids = await privileges.posts.filter('topics:read', backlinkPids, uid);
-        events = events.filter(
-            e => e.type !== 'backlink' || pids.includes(e.href.split('/').pop())
-        );
+        events = events.filter(e => e.type !== 'backlink' || pids.includes(e.href.split('/').pop()));
     }
 
     // Remove events whose types no longer exist (e.g. plugin uninstalled)
@@ -173,7 +174,7 @@ Events.log = async (tid, payload) => {
 
     if (!Events._types.hasOwnProperty(type)) {
         throw new Error(`[[error:topic-event-unrecognized, ${type}]]`);
-    } else if (!await topics.exists(tid)) {
+    } else if (!(await topics.exists(tid))) {
         throw new Error('[[error:no-topic]]');
     }
 
@@ -190,7 +191,9 @@ Events.log = async (tid, payload) => {
         events: [payload],
     });
 
-    ({ events } = await plugins.hooks.fire('filter:topic.events.log', { events }));
+    ({ events } = await plugins.hooks.fire('filter:topic.events.log', {
+        events,
+    }));
     return events;
 };
 

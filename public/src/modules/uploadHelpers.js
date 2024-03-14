@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('uploadHelpers', ['alerts'], function (alerts) {
     const uploadHelpers = {};
 
@@ -136,7 +135,10 @@ define('uploadHelpers', ['alerts'], function (alerts) {
 
         for (let i = 0; i < files.length; ++i) {
             const isImage = files[i].type.match(/image./);
-            if ((isImage && !app.user.privileges['upload:post:image']) || (!isImage && !app.user.privileges['upload:post:file'])) {
+            if (
+                (isImage && !app.user.privileges['upload:post:image']) ||
+                (!isImage && !app.user.privileges['upload:post:file'])
+            ) {
                 return alerts.error('[[error:no-privileges]]');
             }
             if (files[i].size > parseInt(config.maximumFileSize, 10) * 1024) {
@@ -154,8 +156,9 @@ define('uploadHelpers', ['alerts'], function (alerts) {
                 clearForm: true,
                 formData: options.upload.formData,
                 error: function (xhr) {
-                    let errorMsg = (xhr.responseJSON &&
-                        (xhr.responseJSON.error || (xhr.responseJSON.status && xhr.responseJSON.status.message))) ||
+                    let errorMsg =
+                        (xhr.responseJSON &&
+                            (xhr.responseJSON.error || (xhr.responseJSON.status && xhr.responseJSON.status.message))) ||
                         '[[error:parse-error]]';
 
                     if (xhr && xhr.status === 413) {

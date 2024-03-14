@@ -8,9 +8,18 @@ const plugins = require('../plugins');
 const utils = require('../utils');
 
 const intFields = [
-    'cid', 'parentCid', 'disabled', 'isSection', 'order',
-    'topic_count', 'post_count', 'numRecentReplies',
-    'minTags', 'maxTags', 'postQueue', 'subCategoriesPerPage',
+    'cid',
+    'parentCid',
+    'disabled',
+    'isSection',
+    'order',
+    'topic_count',
+    'post_count',
+    'numRecentReplies',
+    'minTags',
+    'maxTags',
+    'postQueue',
+    'subCategoriesPerPage',
 ];
 
 module.exports = function (Categories) {
@@ -66,7 +75,8 @@ module.exports = function (Categories) {
 
 function defaultIntField(category, fields, fieldName, defaultField) {
     if (!fields.length || fields.includes(fieldName)) {
-        const useDefault = !category.hasOwnProperty(fieldName) ||
+        const useDefault =
+            !category.hasOwnProperty(fieldName) ||
             category[fieldName] === null ||
             category[fieldName] === '' ||
             !utils.isNumber(category[fieldName]);

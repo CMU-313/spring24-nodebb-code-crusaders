@@ -18,11 +18,10 @@ module.exports = function (SocketTopics) {
             categories.getTagWhitelist([data.cid]),
             user.isPrivileged(socket.uid),
         ]);
-        return isPrivileged ||
-            (
-                !systemTags.includes(data.tag) &&
-                (!tagWhitelist[0].length || tagWhitelist[0].includes(data.tag))
-            );
+        return (
+            isPrivileged ||
+            (!systemTags.includes(data.tag) && (!tagWhitelist[0].length || tagWhitelist[0].includes(data.tag)))
+        );
     };
 
     SocketTopics.canRemoveTag = async function (socket, data) {

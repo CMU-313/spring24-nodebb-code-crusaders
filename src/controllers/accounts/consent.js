@@ -24,7 +24,10 @@ consentController.get = async function (req, res, next) {
     };
 
     userData.title = '[[user:consent.title]]';
-    userData.breadcrumbs = helpers.buildBreadcrumbs([{ text: userData.username, url: `/user/${userData.userslug}` }, { text: '[[user:consent.title]]' }]);
+    userData.breadcrumbs = helpers.buildBreadcrumbs([
+        { text: userData.username, url: `/user/${userData.userslug}` },
+        { text: '[[user:consent.title]]' },
+    ]);
 
     res.render('account/consent', userData);
 };

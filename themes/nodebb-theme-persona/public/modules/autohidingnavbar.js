@@ -42,15 +42,20 @@
             return;
         }
 
-        autoHidingNavbar.element.addClass('navbar-hidden').animate({
-            top: (-1 * parseInt(autoHidingNavbar.element.css('height'), 10)) + autoHidingNavbar.settings.navbarOffset,
-        }, {
-            queue: false,
-            duration: autoHidingNavbar.settings.animationDuration,
-        });
+        autoHidingNavbar.element.addClass('navbar-hidden').animate(
+            {
+                top: -1 * parseInt(autoHidingNavbar.element.css('height'), 10) + autoHidingNavbar.settings.navbarOffset,
+            },
+            {
+                queue: false,
+                duration: autoHidingNavbar.settings.animationDuration,
+            }
+        );
 
         try {
-            $('.dropdown.open .dropdown-toggle, .dropdown.show .dropdown-toggle', autoHidingNavbar.element).dropdown('toggle');
+            $('.dropdown.open .dropdown-toggle, .dropdown.show .dropdown-toggle', autoHidingNavbar.element).dropdown(
+                'toggle'
+            );
         } catch (e) {}
 
         _visible = false;
@@ -63,12 +68,15 @@
             return;
         }
 
-        autoHidingNavbar.element.removeClass('navbar-hidden').animate({
-            top: 0,
-        }, {
-            queue: false,
-            duration: autoHidingNavbar.settings.animationDuration,
-        });
+        autoHidingNavbar.element.removeClass('navbar-hidden').animate(
+            {
+                top: 0,
+            },
+            {
+                queue: false,
+                duration: autoHidingNavbar.settings.animationDuration,
+            }
+        );
         _visible = true;
 
         autoHidingNavbar.element.trigger('show.autoHidingNavbar');
@@ -150,7 +158,10 @@
             this.setHideOffset(this.settings.hideOffset);
             this.setAnimationDuration(this.settings.animationDuration);
 
-            _hideOffset = this.settings.hideOffset === 'auto' ? parseInt(this.element.css('height'), 10) : this.settings.hideOffset;
+            _hideOffset =
+                this.settings.hideOffset === 'auto'
+                    ? parseInt(this.element.css('height'), 10)
+                    : this.settings.hideOffset;
             bindEvents(this);
 
             return this.element;
@@ -214,4 +225,4 @@
             return returns !== undefined ? returns : this;
         }
     };
-}(jQuery, window, document));
+})(jQuery, window, document);

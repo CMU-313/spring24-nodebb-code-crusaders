@@ -1,12 +1,12 @@
 'use strict';
 
-define('admin/manage/groups', [
-    'categorySelector',
-    'slugify',
-    'api',
-    'bootbox',
-    'alerts',
-], function (categorySelector, slugify, api, bootbox, alerts) {
+define('admin/manage/groups', ['categorySelector', 'slugify', 'api', 'bootbox', 'alerts'], function (
+    categorySelector,
+    slugify,
+    api,
+    bootbox,
+    alerts
+) {
     const Groups = {};
 
     Groups.init = function () {
@@ -38,19 +38,21 @@ define('admin/manage/groups', [
                 hidden: $('#create-group-hidden').is(':checked') ? 1 : 0,
             };
 
-            api.post('/groups', submitObj).then((response) => {
-                createModalError.addClass('hide');
-                createGroupName.val('');
-                createModal.on('hidden.bs.modal', function () {
-                    ajaxify.go('admin/manage/groups/' + response.name);
+            api.post('/groups', submitObj)
+                .then((response) => {
+                    createModalError.addClass('hide');
+                    createGroupName.val('');
+                    createModal.on('hidden.bs.modal', function () {
+                        ajaxify.go('admin/manage/groups/' + response.name);
+                    });
+                    createModal.modal('hide');
+                })
+                .catch((err) => {
+                    if (!utils.hasLanguageKey(err.status.message)) {
+                        err.status.message = '[[admin/manage/groups:alerts.create-failure]]';
+                    }
+                    createModalError.translateHtml(err.status.message).removeClass('hide');
                 });
-                createModal.modal('hide');
-            }).catch((err) => {
-                if (!utils.hasLanguageKey(err.status.message)) {
-                    err.status.message = '[[admin/manage/groups:alerts.create-failure]]';
-                }
-                createModalError.translateHtml(err.status.message).removeClass('hide');
-            });
         });
 
         $('.groups-list').on('click', '[data-action]', function () {
@@ -62,7 +64,9 @@ define('admin/manage/groups', [
             case 'delete':
                 bootbox.confirm('[[admin/manage/groups:alerts.confirm-delete]]', function (confirm) {
                     if (confirm) {
-                        api.del(`/groups/${slugify(groupName)}`, {}).then(ajaxify.refresh).catch(alerts.error);
+                        api.del(`/groups/${slugify(groupName)}`, {})
+                            .then(ajaxify.refresh)
+                            .catch(alerts.error);
                     }
                 });
                 break;
@@ -93,30 +97,38 @@ define('admin/manage/groups', [
             }
             $('.pagination').addClass('hide');
             const groupsEl = $('.groups-list');
-            socket.emit('groups.search', {
-                query: queryEl.val(),
-                options: {
-                    sort: 'date',
+            socket.emit(
+                'groups.search',
+                {
+                    query: queryEl.val(),
+                    options: {
+                        sort: 'date',
+                    },
                 },
-            }, function (err, groups) {
-                if (err) {
-                    return alerts.error(err);
-                }
+                function (err, groups) {
+                    if (err) {
+                        return alerts.error(err);
+                    }
 
-                app.parseAndTranslate('admin/manage/groups', 'groups', {
-                    groups: groups,
-                    categories: ajaxify.data.categories,
-                }, function (html) {
-                    groupsEl.find('[data-groupname]').remove();
-                    groupsEl.find('tbody').append(html);
-                    enableCategorySelectors();
-                });
-            });
+                    app.parseAndTranslate(
+                        'admin/manage/groups',
+                        'groups',
+                        {
+                            groups: groups,
+                            categories: ajaxify.data.categories,
+                        },
+                        function (html) {
+                            groupsEl.find('[data-groupname]').remove();
+                            groupsEl.find('tbody').append(html);
+                            enableCategorySelectors();
+                        }
+                    );
+                }
+            );
         }
 
         queryEl.on('keyup', utils.debounce(doSearch, 200));
     }
-
 
     return Groups;
 });

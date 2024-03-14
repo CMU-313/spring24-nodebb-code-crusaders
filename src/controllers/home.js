@@ -7,7 +7,10 @@ const meta = require('../meta');
 const user = require('../user');
 
 function adminHomePageRoute() {
-    return ((meta.config.homePageRoute === 'custom' ? meta.config.homePageCustom : meta.config.homePageRoute) || 'categories').replace(/^\//, '');
+    return (
+        (meta.config.homePageRoute === 'custom' ? meta.config.homePageCustom : meta.config.homePageRoute) ||
+        'categories'
+    ).replace(/^\//, '');
 }
 
 async function getUserHomeRoute(uid) {

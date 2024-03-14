@@ -37,7 +37,10 @@ module.exports = function (Posts) {
                 db.sortedSetAdd(`cid:${topicData.cid}:pids`, postData.timestamp, pid),
         ]);
         await categories.updateRecentTidForCid(postData.cid);
-        plugins.hooks.fire(`action:post.${type}`, { post: _.clone(postData), uid: uid });
+        plugins.hooks.fire(`action:post.${type}`, {
+            post: _.clone(postData),
+            uid: uid,
+        });
         if (type === 'delete') {
             await flags.resolveFlag('post', pid, uid);
         }
@@ -62,7 +65,13 @@ module.exports = function (Posts) {
         });
 
         // deprecated hook
-        await Promise.all(postData.map(p => plugins.hooks.fire('filter:post.purge', { post: p, pid: p.pid, uid: uid })));
+        await Promise.all(
+            postData.map(p => plugins.hooks.fire('filter:post.purge', {
+                post: p,
+                pid: p.pid,
+                uid: uid,
+            }))
+        );
 
         // new hook
         await plugins.hooks.fire('filter:posts.purge', {
@@ -147,7 +156,10 @@ module.exports = function (Posts) {
     async function deleteFromCategoryRecentPosts(postData) {
         const uniqCids = _.uniq(postData.map(p => p.cid));
         const sets = uniqCids.map(cid => `cid:${cid}:pids`);
-        await db.sortedSetRemove(sets, postData.map(p => p.pid));
+        await db.sortedSetRemove(
+            sets,
+            postData.map(p => p.pid)
+        );
         await Promise.all(uniqCids.map(categories.updateRecentTidForCid));
     }
 
@@ -180,10 +192,7 @@ module.exports = function (Posts) {
 
         await Promise.all([
             db.sortedSetRemoveBulk(bulkRemove),
-            db.deleteAll([
-                ...pids.map(pid => `pid:${pid}:upvote`),
-                ...pids.map(pid => `pid:${pid}:downvote`),
-            ]),
+            db.deleteAll([...pids.map(pid => `pid:${pid}:upvote`), ...pids.map(pid => `pid:${pid}:downvote`)]),
         ]);
     }
 
@@ -192,7 +201,8 @@ module.exports = function (Posts) {
         const allReplyPids = _.flatten(arrayOfReplyPids);
         const promises = [
             db.deleteObjectFields(
-                allReplyPids.map(pid => `post:${pid}`), ['toPid']
+                allReplyPids.map(pid => `post:${pid}`),
+                ['toPid']
             ),
             db.deleteAll(postData.map(p => `pid:${p.pid}:replies`)),
         ];

@@ -1,4 +1,3 @@
-
 'use strict';
 
 const _ = require('lodash');
@@ -22,7 +21,12 @@ helpers.isUsersAllowedTo = async function (privilege, uids, cid) {
         groups.isMembersOfGroupList(uids, `cid:${cid}:privileges:groups:${privilege}`),
     ]);
     const allowed = uids.map((uid, index) => hasUserPrivilege[index] || hasGroupPrivilege[index]);
-    const result = await plugins.hooks.fire('filter:privileges:isUsersAllowedTo', { allowed: allowed, privilege: privilege, uids: uids, cid: cid });
+    const result = await plugins.hooks.fire('filter:privileges:isUsersAllowedTo', {
+        allowed: allowed,
+        privilege: privilege,
+        uids: uids,
+        cid: cid,
+    });
     return result.allowed;
 };
 
@@ -34,7 +38,12 @@ helpers.isAllowedTo = async function (privilege, uidOrGroupName, cid) {
         allowed = await isAllowedToCids(privilege, uidOrGroupName, cid);
     }
     if (allowed) {
-        ({ allowed } = await plugins.hooks.fire('filter:privileges:isAllowedTo', { allowed: allowed, privilege: privilege, uid: uidOrGroupName, cid: cid }));
+        ({ allowed } = await plugins.hooks.fire('filter:privileges:isAllowedTo', {
+            allowed: allowed,
+            privilege: privilege,
+            uid: uidOrGroupName,
+            cid: cid,
+        }));
         return allowed;
     }
     throw new Error('[[error:invalid-data]]');
@@ -104,7 +113,9 @@ async function isSystemGroupAllowedToPrivileges(privileges, uid, cid) {
 }
 
 helpers.getUserPrivileges = async function (cid, userPrivileges) {
-    let memberSets = await groups.getMembersOfGroups(userPrivileges.map(privilege => `cid:${cid}:privileges:${privilege}`));
+    let memberSets = await groups.getMembersOfGroups(
+        userPrivileges.map(privilege => `cid:${cid}:privileges:${privilege}`)
+    );
     memberSets = memberSets.map(set => set.map(uid => parseInt(uid, 10)));
 
     const members = _.uniq(_.flatten(memberSets));
@@ -128,7 +139,9 @@ helpers.getGroupPrivileges = async function (cid, groupPrivileges) {
 
     const uniqueGroups = _.uniq(_.flatten(memberSets));
 
-    let groupNames = allGroupNames.filter(groupName => !groupName.includes(':privileges:') && uniqueGroups.includes(groupName));
+    let groupNames = allGroupNames.filter(
+        groupName => !groupName.includes(':privileges:') && uniqueGroups.includes(groupName)
+    );
 
     groupNames = groups.ephemeralGroups.concat(groupNames);
     moveToFront(groupNames, groups.BANNED_USERS);

@@ -21,22 +21,34 @@ const batch = require('./batch');
 const Flags = module.exports;
 
 Flags._states = new Map([
-    ['open', {
-        label: '[[flags:state-open]]',
-        class: 'danger',
-    }],
-    ['wip', {
-        label: '[[flags:state-wip]]',
-        class: 'warning',
-    }],
-    ['resolved', {
-        label: '[[flags:state-resolved]]',
-        class: 'success',
-    }],
-    ['rejected', {
-        label: '[[flags:state-rejected]]',
-        class: 'secondary',
-    }],
+    [
+        'open',
+        {
+            label: '[[flags:state-open]]',
+            class: 'danger',
+        },
+    ],
+    [
+        'wip',
+        {
+            label: '[[flags:state-wip]]',
+            class: 'warning',
+        },
+    ],
+    [
+        'resolved',
+        {
+            label: '[[flags:state-resolved]]',
+            class: 'success',
+        },
+    ],
+    [
+        'rejected',
+        {
+            label: '[[flags:state-rejected]]',
+            class: 'secondary',
+        },
+    ],
 ]);
 
 Flags.init = async function () {
@@ -73,8 +85,12 @@ Flags.init = async function () {
             cid: function (sets, orSets, key) {
                 prepareSets(sets, orSets, 'flags:byCid:', key);
             },
-            page: function () { /* noop */ },
-            perPage: function () { /* noop */ },
+            page: function () {
+                /* noop */
+            },
+            perPage: function () {
+                /* noop */
+            },
             quick: function (sets, orSets, key, uid) {
                 switch (key) {
                 case 'mine':
@@ -149,17 +165,31 @@ Flags.getFlagIdsWithFilters = async function ({ filters, uid, query }) {
             winston.warn(`[flags/list] No flag filter type found: ${type}`);
         }
     }
-    sets = (sets.length || orSets.length) ? sets : ['flags:datetime']; // No filter default
+    sets = sets.length || orSets.length ? sets : ['flags:datetime']; // No filter default
 
     let flagIds = [];
     if (sets.length === 1) {
         flagIds = await db.getSortedSetRevRange(sets[0], 0, -1);
     } else if (sets.length > 1) {
-        flagIds = await db.getSortedSetRevIntersect({ sets: sets, start: 0, stop: -1, aggregate: 'MAX' });
+        flagIds = await db.getSortedSetRevIntersect({
+            sets: sets,
+            start: 0,
+            stop: -1,
+            aggregate: 'MAX',
+        });
     }
 
     if (orSets.length) {
-        let _flagIds = await Promise.all(orSets.map(async orSet => await db.getSortedSetRevUnion({ sets: orSet, start: 0, stop: -1, aggregate: 'MAX' })));
+        let _flagIds = await Promise.all(
+            orSets.map(
+                async orSet => await db.getSortedSetRevUnion({
+                    sets: orSet,
+                    start: 0,
+                    stop: -1,
+                    aggregate: 'MAX',
+                })
+            )
+        );
 
         // Each individual orSet is ANDed together to construct the final list of flagIds
         _flagIds = _.intersection(..._flagIds);
@@ -199,21 +229,23 @@ Flags.list = async function (data) {
 
     const reportCounts = await db.sortedSetsCard(flagIds.map(flagId => `flag:${flagId}:reports`));
 
-    const flags = await Promise.all(flagIds.map(async (flagId, idx) => {
-        let flagObj = await db.getObject(`flag:${flagId}`);
-        flagObj = {
-            state: 'open',
-            assignee: null,
-            heat: reportCounts[idx],
-            ...flagObj,
-        };
-        flagObj.labelClass = Flags._states.get(flagObj.state).class;
+    const flags = await Promise.all(
+        flagIds.map(async (flagId, idx) => {
+            let flagObj = await db.getObject(`flag:${flagId}`);
+            flagObj = {
+                state: 'open',
+                assignee: null,
+                heat: reportCounts[idx],
+                ...flagObj,
+            };
+            flagObj.labelClass = Flags._states.get(flagObj.state).class;
 
-        return Object.assign(flagObj, {
-            target_readable: `${flagObj.type.charAt(0).toUpperCase() + flagObj.type.slice(1)} ${flagObj.targetId}`,
-            datetimeISO: utils.toISOString(flagObj.datetime),
-        });
-    }));
+            return Object.assign(flagObj, {
+                target_readable: `${flagObj.type.charAt(0).toUpperCase() + flagObj.type.slice(1)} ${flagObj.targetId}`,
+                datetimeISO: utils.toISOString(flagObj.datetime),
+            });
+        })
+    );
 
     const payload = await plugins.hooks.fire('filter:flags.list', {
         flags: flags,
@@ -245,7 +277,8 @@ Flags.sort = async function (flagIds, sort) {
         const keys = flagIds.map(id => `flag:${id}:reports`);
         const heat = await db.sortedSetsCard(keys);
         const mapped = heat.map((el, i) => ({
-            index: i, heat: el,
+            index: i,
+            heat: el,
         }));
         mapped.sort((a, b) => b.heat - a.heat);
         flagIds = mapped.map(obj => flagIds[obj.index]);
@@ -298,7 +331,11 @@ Flags.validate = async function (payload) {
 
     if (payload.type === 'post') {
         const editable = await privileges.posts.canEdit(payload.id, payload.uid);
-        if (!editable.flag && !meta.config['reputation:disabled'] && reporter.reputation < meta.config['min:rep:flag']) {
+        if (
+            !editable.flag &&
+            !meta.config['reputation:disabled'] &&
+            reporter.reputation < meta.config['min:rep:flag']
+        ) {
             throw new Error(`[[error:not-enough-reputation-to-flag, ${meta.config['min:rep:flag']}]]`);
         }
     } else if (payload.type === 'user') {
@@ -393,7 +430,7 @@ Flags.create = async function (type, id, uid, reason, timestamp, forceFlag = fal
         timestamp = Date.now();
         doHistoryAppend = true;
     }
-    const [flagExists, targetExists,, targetFlagged, targetUid, targetCid] = await Promise.all([
+    const [flagExists, targetExists, , targetFlagged, targetUid, targetCid] = await Promise.all([
         // Sanity checks
         Flags.exists(type, id, uid),
         Flags.targetExists(type, id),
@@ -495,12 +532,12 @@ Flags.purge = async function (flagIds) {
     });
     await Promise.all([
         db.sortedSetRemoveBulk([
-            ...flagData.map(flagObj => ([`flags:byType:${flagObj.type}`, flagObj.flagId])),
-            ...flagData.map(flagObj => ([`flags:byState:${flagObj.state}`, flagObj.flagId])),
+            ...flagData.map(flagObj => [`flags:byType:${flagObj.type}`, flagObj.flagId]),
+            ...flagData.map(flagObj => [`flags:byState:${flagObj.state}`, flagObj.flagId]),
             ...removeReporters,
-            ...postFlags.map(flagObj => ([`flags:byPid:${flagObj.targetId}`, flagObj.flagId])),
-            ...assignedFlags.map(flagObj => ([`flags:byAssignee:${flagObj.assignee}`, flagObj.flagId])),
-            ...userFlags.map(flagObj => ([`flags:byTargetUid:${flagObj.targetUid}`, flagObj.flagId])),
+            ...postFlags.map(flagObj => [`flags:byPid:${flagObj.targetId}`, flagObj.flagId]),
+            ...assignedFlags.map(flagObj => [`flags:byAssignee:${flagObj.assignee}`, flagObj.flagId]),
+            ...userFlags.map(flagObj => [`flags:byTargetUid:${flagObj.targetUid}`, flagObj.flagId]),
         ]),
         db.deleteObjectFields(postFlags.map(flagObj => `post:${flagObj.targetId}`, ['flagId'])),
         db.deleteObjectFields(userFlags.map(flagObj => `user:${flagObj.targetId}`, ['flagId'])),
@@ -510,7 +547,10 @@ Flags.purge = async function (flagIds) {
             ...flagIds.map(flagId => `flag:${flagId}:reports`),
             ...flagIds.map(flagId => `flag:${flagId}:history`),
         ]),
-        db.sortedSetRemove(cids.map(cid => `flags:byCid:${cid}`), flagIds),
+        db.sortedSetRemove(
+            cids.map(cid => `flags:byCid:${cid}`),
+            flagIds
+        ),
         db.sortedSetRemove('flags:datetime', flagIds),
         db.sortedSetRemove(
             'flags:byTarget',
@@ -521,21 +561,26 @@ Flags.purge = async function (flagIds) {
 
 Flags.getReports = async function (flagId) {
     const payload = await db.getSortedSetRevRangeWithScores(`flag:${flagId}:reports`, 0, -1);
-    const [reports, uids] = payload.reduce((memo, cur) => {
-        const value = cur.value.split(';');
-        memo[1].push(value.shift());
-        cur.value = validator.escape(String(value.join(';')));
-        memo[0].push(cur);
+    const [reports, uids] = payload.reduce(
+        (memo, cur) => {
+            const value = cur.value.split(';');
+            memo[1].push(value.shift());
+            cur.value = validator.escape(String(value.join(';')));
+            memo[0].push(cur);
 
-        return memo;
-    }, [[], []]);
+            return memo;
+        },
+        [[], []]
+    );
 
-    await Promise.all(reports.map(async (report, idx) => {
-        report.timestamp = report.score;
-        report.timestampISO = new Date(report.score).toISOString();
-        delete report.score;
-        report.reporter = await user.getUserFields(uids[idx], ['username', 'userslug', 'picture', 'reputation']);
-    }));
+    await Promise.all(
+        reports.map(async (report, idx) => {
+            report.timestamp = report.score;
+            report.timestampISO = new Date(report.score).toISOString();
+            delete report.score;
+            report.reporter = await user.getUserFields(uids[idx], ['username', 'userslug', 'picture', 'reputation']);
+        })
+    );
 
     return reports;
 };
@@ -548,7 +593,14 @@ Flags.addReport = async function (flagId, type, id, uid, reason, timestamp) {
         ['flags:hash', flagId, [type, id, uid].join(':')],
     ]);
 
-    plugins.hooks.fire('action:flags.addReport', { flagId, type, id, uid, reason, timestamp });
+    plugins.hooks.fire('action:flags.addReport', {
+        flagId,
+        type,
+        id,
+        uid,
+        reason,
+        timestamp,
+    });
 };
 
 Flags.exists = async function (type, id, uid) {
@@ -628,7 +680,7 @@ Flags.targetExists = async function (type, id) {
 };
 
 Flags.targetFlagged = async function (type, id) {
-    return await db.sortedSetScore('flags:byTarget', [type, id].join(':')) >= 1;
+    return (await db.sortedSetScore('flags:byTarget', [type, id].join(':'))) >= 1;
 };
 
 Flags.getTargetUid = async function (type, id) {
@@ -700,7 +752,7 @@ Flags.update = async function (flagId, uid, changeset) {
             if (changeset[prop] === '') {
                 tasks.push(db.sortedSetRemove(`flags:byAssignee:${changeset[prop]}`, flagId));
                 /* eslint-disable-next-line */
-            } else if (!await isAssignable(parseInt(changeset[prop], 10))) {
+            } else if (!(await isAssignable(parseInt(changeset[prop], 10)))) {
                 delete changeset[prop];
             } else {
                 tasks.push(db.sortedSetAdd(`flags:byAssignee:${changeset[prop]}`, now, flagId));
@@ -717,7 +769,11 @@ Flags.update = async function (flagId, uid, changeset) {
     tasks.push(Flags.appendHistory(flagId, uid, changeset));
     await Promise.all(tasks);
 
-    plugins.hooks.fire('action:flags.update', { flagId: flagId, changeset: changeset, uid: uid });
+    plugins.hooks.fire('action:flags.update', {
+        flagId: flagId,
+        changeset: changeset,
+        uid: uid,
+    });
 };
 
 Flags.resolveFlag = async function (type, id, uid) {
@@ -729,18 +785,24 @@ Flags.resolveFlag = async function (type, id, uid) {
 
 Flags.resolveUserPostFlags = async function (uid, callerUid) {
     if (meta.config['flags:autoResolveOnBan']) {
-        await batch.processSortedSet(`uid:${uid}:posts`, async (pids) => {
-            let postData = await posts.getPostsFields(pids, ['pid', 'flagId']);
-            postData = postData.filter(p => p && p.flagId);
-            for (const postObj of postData) {
-                if (parseInt(postObj.flagId, 10)) {
-                    // eslint-disable-next-line no-await-in-loop
-                    await Flags.update(postObj.flagId, callerUid, { state: 'resolved' });
+        await batch.processSortedSet(
+            `uid:${uid}:posts`,
+            async (pids) => {
+                let postData = await posts.getPostsFields(pids, ['pid', 'flagId']);
+                postData = postData.filter(p => p && p.flagId);
+                for (const postObj of postData) {
+                    if (parseInt(postObj.flagId, 10)) {
+                        // eslint-disable-next-line no-await-in-loop
+                        await Flags.update(postObj.flagId, callerUid, {
+                            state: 'resolved',
+                        });
+                    }
                 }
+            },
+            {
+                batch: 500,
             }
-        }, {
-            batch: 500,
-        });
+        );
     }
 };
 
@@ -774,7 +836,9 @@ Flags.getHistory = async function (flagId) {
     history = await mergeUsernameEmailChanges(history, targetUid, uids);
 
     const userData = await user.getUsersFields(uids, ['username', 'userslug', 'picture']);
-    history.forEach((event, idx) => { event.user = userData[idx]; });
+    history.forEach((event, idx) => {
+        event.user = userData[idx];
+    });
 
     // Resort by date
     history = history.sort((a, b) => b.datetime - a.datetime);
@@ -842,7 +906,8 @@ Flags.notify = async function (flagObj, uid, notifySelf = false) {
         });
         uids = uids.concat(modUids[0]);
     } else if (flagObj.type === 'user') {
-        const targetDisplayname = flagObj.target && flagObj.target.user ? flagObj.target.user.displayname : '[[global:guest]]';
+        const targetDisplayname =
+            flagObj.target && flagObj.target.user ? flagObj.target.user.displayname : '[[global:guest]]';
         notifObj = await notifications.create({
             type: 'new-user-flag',
             bodyShort: `[[notifications:user_flagged_user, ${displayname}, ${targetDisplayname}]]`,
@@ -890,67 +955,75 @@ async function mergeBanMuteHistory(history, uids, params) {
     let recentObjs = await db.getSortedSetRevRange(params.set, 0, 19);
     recentObjs = await db.getObjects(recentObjs);
 
-    return history.concat(recentObjs.reduce((memo, cur) => {
-        uids.push(cur.fromUid);
-        memo.push({
-            uid: cur.fromUid,
-            meta: [
-                {
-                    key: params.label,
-                    value: validator.escape(String(cur.reason || params.reasonDefault)),
-                    labelClass: 'danger',
-                },
-                {
-                    key: params.expiryKey,
-                    value: new Date(parseInt(cur.expire, 10)).toISOString(),
-                    labelClass: 'default',
-                },
-            ],
-            datetime: parseInt(cur.timestamp, 10),
-            datetimeISO: utils.toISOString(parseInt(cur.timestamp, 10)),
-        });
+    return history.concat(
+        recentObjs.reduce((memo, cur) => {
+            uids.push(cur.fromUid);
+            memo.push({
+                uid: cur.fromUid,
+                meta: [
+                    {
+                        key: params.label,
+                        value: validator.escape(String(cur.reason || params.reasonDefault)),
+                        labelClass: 'danger',
+                    },
+                    {
+                        key: params.expiryKey,
+                        value: new Date(parseInt(cur.expire, 10)).toISOString(),
+                        labelClass: 'default',
+                    },
+                ],
+                datetime: parseInt(cur.timestamp, 10),
+                datetimeISO: utils.toISOString(parseInt(cur.timestamp, 10)),
+            });
 
-        return memo;
-    }, []));
+            return memo;
+        }, [])
+    );
 }
 
 async function mergeUsernameEmailChanges(history, targetUid, uids) {
     const usernameChanges = await user.getHistory(`user:${targetUid}:usernames`);
     const emailChanges = await user.getHistory(`user:${targetUid}:emails`);
 
-    return history.concat(usernameChanges.reduce((memo, changeObj) => {
-        uids.push(targetUid);
-        memo.push({
-            uid: targetUid,
-            meta: [
-                {
-                    key: '[[user:change_username]]',
-                    value: changeObj.value,
-                    labelClass: 'primary',
-                },
-            ],
-            datetime: changeObj.timestamp,
-            datetimeISO: changeObj.timestampISO,
-        });
+    return history
+        .concat(
+            usernameChanges.reduce((memo, changeObj) => {
+                uids.push(targetUid);
+                memo.push({
+                    uid: targetUid,
+                    meta: [
+                        {
+                            key: '[[user:change_username]]',
+                            value: changeObj.value,
+                            labelClass: 'primary',
+                        },
+                    ],
+                    datetime: changeObj.timestamp,
+                    datetimeISO: changeObj.timestampISO,
+                });
 
-        return memo;
-    }, [])).concat(emailChanges.reduce((memo, changeObj) => {
-        uids.push(targetUid);
-        memo.push({
-            uid: targetUid,
-            meta: [
-                {
-                    key: '[[user:change_email]]',
-                    value: changeObj.value,
-                    labelClass: 'primary',
-                },
-            ],
-            datetime: changeObj.timestamp,
-            datetimeISO: changeObj.timestampISO,
-        });
+                return memo;
+            }, [])
+        )
+        .concat(
+            emailChanges.reduce((memo, changeObj) => {
+                uids.push(targetUid);
+                memo.push({
+                    uid: targetUid,
+                    meta: [
+                        {
+                            key: '[[user:change_email]]',
+                            value: changeObj.value,
+                            labelClass: 'primary',
+                        },
+                    ],
+                    datetime: changeObj.timestamp,
+                    datetimeISO: changeObj.timestampISO,
+                });
 
-        return memo;
-    }, []));
+                return memo;
+            }, [])
+        );
 }
 
 require('./promisify')(Flags);

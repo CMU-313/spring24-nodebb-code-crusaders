@@ -20,11 +20,13 @@ modsController.flags.list = async function (req, res) {
     const results = await Promise.all([
         user.isAdminOrGlobalMod(req.uid),
         user.getModeratedCids(req.uid),
-        plugins.hooks.fire('filter:flags.validateFilters', { filters: validFilters }),
+        plugins.hooks.fire('filter:flags.validateFilters', {
+            filters: validFilters,
+        }),
         plugins.hooks.fire('filter:flags.validateSort', { sorts: validSorts }),
     ]);
-    const [isAdminOrGlobalMod, moderatedCids,, { sorts }] = results;
-    let [,, { filters }] = results;
+    const [isAdminOrGlobalMod, moderatedCids, , { sorts }] = results;
+    let [, , { filters }] = results;
 
     if (!(isAdminOrGlobalMod || !!moderatedCids.length)) {
         return helpers.notAllowed(req, res);
@@ -115,11 +117,11 @@ modsController.flags.detail = async function (req, res, next) {
     });
     results.privileges = { ...results.privileges[0], ...results.privileges[1] };
 
-    if (!results.flagData || (!(results.isAdminOrGlobalMod || !!results.moderatedCids.length))) {
+    if (!results.flagData || !(results.isAdminOrGlobalMod || !!results.moderatedCids.length)) {
         return next(); // 404
     }
 
-    results.flagData.history = results.isAdminOrGlobalMod ? (await flags.getHistory(req.params.flagId)) : null;
+    results.flagData.history = results.isAdminOrGlobalMod ? await flags.getHistory(req.params.flagId) : null;
 
     if (results.flagData.type === 'user') {
         results.flagData.type_path = 'uid';
@@ -127,28 +129,30 @@ modsController.flags.detail = async function (req, res, next) {
         results.flagData.type_path = 'post';
     }
 
-    res.render('flags/detail', Object.assign(results.flagData, {
-        assignees: results.assignees,
-        type_bool: ['post', 'user', 'empty'].reduce((memo, cur) => {
-            if (cur !== 'empty') {
-                memo[cur] = results.flagData.type === cur && (
-                    !results.flagData.target ||
-                    !!Object.keys(results.flagData.target).length
-                );
-            } else {
-                memo[cur] = !Object.keys(results.flagData.target).length;
-            }
+    res.render(
+        'flags/detail',
+        Object.assign(results.flagData, {
+            assignees: results.assignees,
+            type_bool: ['post', 'user', 'empty'].reduce((memo, cur) => {
+                if (cur !== 'empty') {
+                    memo[cur] =
+                        results.flagData.type === cur &&
+                        (!results.flagData.target || !!Object.keys(results.flagData.target).length);
+                } else {
+                    memo[cur] = !Object.keys(results.flagData.target).length;
+                }
 
-            return memo;
-        }, {}),
-        states: Object.fromEntries(flags._states),
-        title: `[[pages:flag-details, ${req.params.flagId}]]`,
-        privileges: results.privileges,
-        breadcrumbs: helpers.buildBreadcrumbs([
-            { text: '[[pages:flags]]', url: '/flags' },
-            { text: `[[pages:flag-details, ${req.params.flagId}]]` },
-        ]),
-    }));
+                return memo;
+            }, {}),
+            states: Object.fromEntries(flags._states),
+            title: `[[pages:flag-details, ${req.params.flagId}]]`,
+            privileges: results.privileges,
+            breadcrumbs: helpers.buildBreadcrumbs([
+                { text: '[[pages:flags]]', url: '/flags' },
+                { text: `[[pages:flag-details, ${req.params.flagId}]]` },
+            ]),
+        })
+    );
 };
 
 modsController.postQueue = async function (req, res, next) {
@@ -168,9 +172,11 @@ modsController.postQueue = async function (req, res, next) {
         helpers.getSelectedCategory(cid),
     ]);
 
-    postData = postData.filter(p => p &&
-        (!categoriesData.selectedCids.length || categoriesData.selectedCids.includes(p.category.cid)) &&
-        (isAdmin || isGlobalMod || moderatedCids.includes(Number(p.category.cid)) || req.uid === p.user.uid));
+    postData = postData.filter(
+        p => p &&
+            (!categoriesData.selectedCids.length || categoriesData.selectedCids.includes(p.category.cid)) &&
+            (isAdmin || isGlobalMod || moderatedCids.includes(Number(p.category.cid)) || req.uid === p.user.uid)
+    );
 
     ({ posts: postData } = await plugins.hooks.fire('filter:post-queue.get', {
         posts: postData,

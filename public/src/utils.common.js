@@ -1,6 +1,5 @@
 'use strict';
 
-
 // add default escape function for escaping HTML entities
 const escapeCharMap = Object.freeze({
     '&': '&amp;',
@@ -299,7 +298,10 @@ const utils = {
     // https://github.com/jprichardson/string.js/blob/master/lib/string.js
     stripHTMLTags: function (str, tags) {
         const pattern = (tags || ['']).join('|');
-        return String(str).replace(new RegExp('<(\\/)?(' + (pattern || '[^\\s>]+') + ')(\\s+[^<>]*?)?\\s*(\\/)?>', 'gi'), '');
+        return String(str).replace(
+            new RegExp('<(\\/)?(' + (pattern || '[^\\s>]+') + ')(\\s+[^<>]*?)?\\s*(\\/)?>', 'gi'),
+            ''
+        );
     },
 
     cleanUpTag: function (tag, maxLength) {
@@ -324,11 +326,17 @@ const utils = {
     },
 
     isEmailValid: function (email) {
-        return typeof email === 'string' && email.length && email.indexOf('@') !== -1 && email.indexOf(',') === -1 && email.indexOf(';') === -1;
+        return (
+            typeof email === 'string' &&
+            email.length &&
+            email.indexOf('@') !== -1 &&
+            email.indexOf(',') === -1 &&
+            email.indexOf(';') === -1
+        );
     },
 
     isUserNameValid: function (name) {
-        return (name && name !== '' && (/^['" \-+.*[\]0-9\u00BF-\u1FFF\u2C00-\uD7FF\w]+$/.test(name)));
+        return name && name !== '' && /^['" \-+.*[\]0-9\u00BF-\u1FFF\u2C00-\uD7FF\w]+$/.test(name);
     },
 
     isPasswordValid: function (password) {
@@ -415,7 +423,9 @@ const utils = {
     promiseParallel: function (obj) {
         const keys = Object.keys(obj);
         return Promise.all(
-            keys.map(function (k) { return obj[k]; })
+            keys.map(function (k) {
+                return obj[k];
+            })
         ).then(function (results) {
             const data = {};
             keys.forEach(function (k, i) {
@@ -472,25 +482,244 @@ const utils = {
         }
     },
 
-    tags: ['a', 'abbr', 'acronym', 'address', 'applet', 'area', 'article', 'aside', 'audio', 'b', 'base', 'basefont',
-        'bdi', 'bdo', 'big', 'blockquote', 'body', 'br', 'button', 'canvas', 'caption', 'center', 'cite', 'code', 'col', 'colgroup',
-        'command', 'datalist', 'dd', 'del', 'details', 'dfn', 'dialog', 'dir', 'div', 'dl', 'dt', 'em', 'embed',
-        'fieldset', 'figcaption', 'figure', 'font', 'footer', 'form', 'frame', 'frameset', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        'head', 'header', 'hr', 'html', 'i', 'iframe', 'img', 'input', 'ins', 'kbd', 'keygen', 'label', 'legend', 'li', 'link',
-        'map', 'mark', 'menu', 'meta', 'meter', 'nav', 'noframes', 'noscript', 'object', 'ol', 'optgroup', 'option',
-        'output', 'p', 'param', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'script', 'section', 'select',
-        'small', 'source', 'span', 'strike', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'textarea', 'tfoot',
-        'th', 'thead', 'time', 'title', 'tr', 'track', 'tt', 'u', 'ul', 'const', 'video', 'wbr'],
+    tags: [
+        'a',
+        'abbr',
+        'acronym',
+        'address',
+        'applet',
+        'area',
+        'article',
+        'aside',
+        'audio',
+        'b',
+        'base',
+        'basefont',
+        'bdi',
+        'bdo',
+        'big',
+        'blockquote',
+        'body',
+        'br',
+        'button',
+        'canvas',
+        'caption',
+        'center',
+        'cite',
+        'code',
+        'col',
+        'colgroup',
+        'command',
+        'datalist',
+        'dd',
+        'del',
+        'details',
+        'dfn',
+        'dialog',
+        'dir',
+        'div',
+        'dl',
+        'dt',
+        'em',
+        'embed',
+        'fieldset',
+        'figcaption',
+        'figure',
+        'font',
+        'footer',
+        'form',
+        'frame',
+        'frameset',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'head',
+        'header',
+        'hr',
+        'html',
+        'i',
+        'iframe',
+        'img',
+        'input',
+        'ins',
+        'kbd',
+        'keygen',
+        'label',
+        'legend',
+        'li',
+        'link',
+        'map',
+        'mark',
+        'menu',
+        'meta',
+        'meter',
+        'nav',
+        'noframes',
+        'noscript',
+        'object',
+        'ol',
+        'optgroup',
+        'option',
+        'output',
+        'p',
+        'param',
+        'pre',
+        'progress',
+        'q',
+        'rp',
+        'rt',
+        'ruby',
+        's',
+        'samp',
+        'script',
+        'section',
+        'select',
+        'small',
+        'source',
+        'span',
+        'strike',
+        'strong',
+        'style',
+        'sub',
+        'summary',
+        'sup',
+        'table',
+        'tbody',
+        'td',
+        'textarea',
+        'tfoot',
+        'th',
+        'thead',
+        'time',
+        'title',
+        'tr',
+        'track',
+        'tt',
+        'u',
+        'ul',
+        'const',
+        'video',
+        'wbr',
+    ],
 
-    stripTags: ['abbr', 'acronym', 'address', 'applet', 'area', 'article', 'aside', 'audio', 'base', 'basefont',
-        'bdi', 'bdo', 'big', 'blink', 'body', 'button', 'canvas', 'caption', 'center', 'cite', 'code', 'col', 'colgroup',
-        'command', 'datalist', 'dd', 'del', 'details', 'dfn', 'dialog', 'dir', 'div', 'dl', 'dt', 'em', 'embed',
-        'fieldset', 'figcaption', 'figure', 'font', 'footer', 'form', 'frame', 'frameset', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        'head', 'header', 'hr', 'html', 'iframe', 'input', 'ins', 'kbd', 'keygen', 'label', 'legend', 'li', 'link',
-        'map', 'mark', 'marquee', 'menu', 'meta', 'meter', 'nav', 'noframes', 'noscript', 'object', 'ol', 'optgroup', 'option',
-        'output', 'param', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'script', 'section', 'select',
-        'source', 'span', 'strike', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'textarea', 'tfoot',
-        'th', 'thead', 'time', 'title', 'tr', 'track', 'tt', 'u', 'ul', 'const', 'video', 'wbr'],
+    stripTags: [
+        'abbr',
+        'acronym',
+        'address',
+        'applet',
+        'area',
+        'article',
+        'aside',
+        'audio',
+        'base',
+        'basefont',
+        'bdi',
+        'bdo',
+        'big',
+        'blink',
+        'body',
+        'button',
+        'canvas',
+        'caption',
+        'center',
+        'cite',
+        'code',
+        'col',
+        'colgroup',
+        'command',
+        'datalist',
+        'dd',
+        'del',
+        'details',
+        'dfn',
+        'dialog',
+        'dir',
+        'div',
+        'dl',
+        'dt',
+        'em',
+        'embed',
+        'fieldset',
+        'figcaption',
+        'figure',
+        'font',
+        'footer',
+        'form',
+        'frame',
+        'frameset',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'head',
+        'header',
+        'hr',
+        'html',
+        'iframe',
+        'input',
+        'ins',
+        'kbd',
+        'keygen',
+        'label',
+        'legend',
+        'li',
+        'link',
+        'map',
+        'mark',
+        'marquee',
+        'menu',
+        'meta',
+        'meter',
+        'nav',
+        'noframes',
+        'noscript',
+        'object',
+        'ol',
+        'optgroup',
+        'option',
+        'output',
+        'param',
+        'pre',
+        'progress',
+        'q',
+        'rp',
+        'rt',
+        'ruby',
+        's',
+        'samp',
+        'script',
+        'section',
+        'select',
+        'source',
+        'span',
+        'strike',
+        'style',
+        'sub',
+        'summary',
+        'sup',
+        'table',
+        'tbody',
+        'td',
+        'textarea',
+        'tfoot',
+        'th',
+        'thead',
+        'time',
+        'title',
+        'tr',
+        'track',
+        'tt',
+        'u',
+        'ul',
+        'const',
+        'video',
+        'wbr',
+    ],
 
     escapeRegexChars: function (text) {
         return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
@@ -510,7 +739,12 @@ const utils = {
     isAndroidBrowser: function () {
         // http://stackoverflow.com/questions/9286355/how-to-detect-only-the-native-android-browser
         const nua = navigator.userAgent;
-        return ((nua.indexOf('Mozilla/5.0') > -1 && nua.indexOf('Android ') > -1 && nua.indexOf('AppleWebKit') > -1) && !(nua.indexOf('Chrome') > -1));
+        return (
+            nua.indexOf('Mozilla/5.0') > -1 &&
+            nua.indexOf('Android ') > -1 &&
+            nua.indexOf('AppleWebKit') > -1 &&
+            !(nua.indexOf('Chrome') > -1)
+        );
     },
 
     isTouchDevice: function () {
@@ -561,7 +795,7 @@ const utils = {
         let tmpDate;
 
         for (let x = (amount || 30) - 1; x >= 0; x -= 1) {
-            tmpDate = new Date(currentDay - (1000 * 60 * 60 * 24 * x));
+            tmpDate = new Date(currentDay - 1000 * 60 * 60 * 24 * x);
             labels.push(months[tmpDate.getMonth()] + ' ' + tmpDate.getDate());
         }
 
@@ -580,7 +814,7 @@ const utils = {
         return (
             rect.top >= 0 &&
             rect.left >= 0 &&
-            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /* or $(window).height() */
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) /* or $(window).height() */ &&
             rect.right <= (window.innerWidth || document.documentElement.clientWidth) /* or $(window).width() */
         );
     },
@@ -598,7 +832,8 @@ const utils = {
         }
         let params = url.searchParams;
 
-        if (options.full) { // return URLSearchParams object
+        if (options.full) {
+            // return URLSearchParams object
             return params;
         }
 
@@ -691,14 +926,14 @@ const utils = {
     },
 
     isInternalURI: function (targetLocation, referenceLocation, relative_path) {
-        return targetLocation.host === '' || // Relative paths are always internal links
-            (
-                targetLocation.host === referenceLocation.host &&
+        return (
+            targetLocation.host === '' || // Relative paths are always internal links
+            (targetLocation.host === referenceLocation.host &&
                 // Otherwise need to check if protocol and host match
                 targetLocation.protocol === referenceLocation.protocol &&
                 // Subfolder installs need this additional check
-                (relative_path.length > 0 ? targetLocation.pathname.indexOf(relative_path) === 0 : true)
-            );
+                (relative_path.length > 0 ? targetLocation.pathname.indexOf(relative_path) === 0 : true))
+        );
     },
 
     rtrim: function (str) {

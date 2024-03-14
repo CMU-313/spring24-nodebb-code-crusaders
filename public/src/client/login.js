@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('forum/login', ['hooks', 'translator', 'jquery-form'], function (hooks, translator) {
     const Login = {
         _capsState: false,
@@ -51,7 +50,11 @@ define('forum/login', ['hooks', 'translator', 'jquery-form'], function (hooks, t
                             window.location.href = config.relative_path + '/login?error=csrf-invalid';
                         } else if (errInfo && errInfo.hasOwnProperty('banned_until')) {
                             message = errInfo.banned_until ?
-                                translator.compile('error:user-banned-reason-until', (new Date(errInfo.banned_until).toLocaleString()), errInfo.reason) :
+                                translator.compile(
+                                    'error:user-banned-reason-until',
+                                    new Date(errInfo.banned_until).toLocaleString(),
+                                    errInfo.reason
+                                ) :
                                 '[[error:user-banned-reason, ' + errInfo.reason + ']]';
                         }
                         errorEl.find('p').translateText(message);

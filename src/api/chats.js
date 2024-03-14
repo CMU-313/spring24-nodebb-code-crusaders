@@ -65,7 +65,10 @@ chatsAPI.post = async (caller, data) => {
 chatsAPI.rename = async (caller, data) => {
     await messaging.renameRoom(caller.uid, data.roomId, data.name);
     const uids = await messaging.getUidsInRoom(data.roomId, 0, -1);
-    const eventData = { roomId: data.roomId, newName: validator.escape(String(data.name)) };
+    const eventData = {
+        roomId: data.roomId,
+        newName: validator.escape(String(data.name)),
+    };
 
     socketHelpers.emitToUids('event:chats.roomRename', eventData, uids);
     return messaging.loadRoom(caller.uid, {
@@ -79,7 +82,7 @@ chatsAPI.users = async (caller, data) => {
         messaging.getUsersInRoom(data.roomId, 0, -1),
     ]);
     users.forEach((user) => {
-        user.canKick = (parseInt(user.uid, 10) !== parseInt(caller.uid, 10)) && isOwner;
+        user.canKick = parseInt(user.uid, 10) !== parseInt(caller.uid, 10) && isOwner;
     });
     return { users };
 };

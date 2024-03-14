@@ -5,13 +5,16 @@ define('admin/manage/uploads', ['api', 'bootbox', 'alerts', 'uploader'], functio
 
     Uploads.init = function () {
         $('#upload').on('click', function () {
-            uploader.show({
-                title: '[[admin/manage/uploads:upload-file]]',
-                route: config.relative_path + '/api/admin/upload/file',
-                params: { folder: ajaxify.data.currentFolder },
-            }, function () {
-                ajaxify.refresh();
-            });
+            uploader.show(
+                {
+                    title: '[[admin/manage/uploads:upload-file]]',
+                    route: config.relative_path + '/api/admin/upload/file',
+                    params: { folder: ajaxify.data.currentFolder },
+                },
+                function () {
+                    ajaxify.refresh();
+                }
+            );
         });
 
         $('.delete').on('click', function () {
@@ -23,9 +26,11 @@ define('admin/manage/uploads', ['api', 'bootbox', 'alerts', 'uploader'], functio
 
                 api.del('/files', {
                     path: file.attr('data-path'),
-                }).then(() => {
-                    file.remove();
-                }).catch(alerts.error);
+                })
+                    .then(() => {
+                        file.remove();
+                    })
+                    .catch(alerts.error);
             });
         });
 
@@ -38,9 +43,11 @@ define('admin/manage/uploads', ['api', 'bootbox', 'alerts', 'uploader'], functio
                 api.put('/files/folder', {
                     path: ajaxify.data.currentFolder,
                     folderName: newFolderName,
-                }).then(() => {
-                    ajaxify.refresh();
-                }).catch(alerts.error);
+                })
+                    .then(() => {
+                        ajaxify.refresh();
+                    })
+                    .catch(alerts.error);
             });
         });
     };

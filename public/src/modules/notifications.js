@@ -1,14 +1,13 @@
 'use strict';
 
-
-define('notifications', [
-    'translator',
-    'components',
-    'navigator',
-    'tinycon',
-    'hooks',
-    'alerts',
-], function (translator, components, navigator, Tinycon, hooks, alerts) {
+define('notifications', ['translator', 'components', 'navigator', 'tinycon', 'hooks', 'alerts'], function (
+    translator,
+    components,
+    navigator,
+    Tinycon,
+    hooks,
+    alerts
+) {
     const Notifications = {};
 
     let unreadNotifs = {};
@@ -142,7 +141,8 @@ define('notifications', [
             Tinycon.setBubble(count > 99 ? '99+' : count);
         }
 
-        if (navigator.setAppBadge) { // feature detection
+        if (navigator.setAppBadge) {
+            // feature detection
             navigator.setAppBadge(count);
         }
     };

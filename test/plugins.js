@@ -36,8 +36,14 @@ describe('Plugins', () => {
             callback(null, data);
         }
 
-        plugins.hooks.register('test-plugin', { hook: 'filter:test.hook', method: filterMethod1 });
-        plugins.hooks.register('test-plugin', { hook: 'filter:test.hook', method: filterMethod2 });
+        plugins.hooks.register('test-plugin', {
+            hook: 'filter:test.hook',
+            method: filterMethod1,
+        });
+        plugins.hooks.register('test-plugin', {
+            hook: 'filter:test.hook',
+            method: filterMethod2,
+        });
 
         plugins.hooks.fire('filter:test.hook', { foo: 1 }, (err, data) => {
             assert.ifError(err);
@@ -62,9 +68,18 @@ describe('Plugins', () => {
             return data;
         }
 
-        plugins.hooks.register('test-plugin', { hook: 'filter:test.hook2', method: method1 });
-        plugins.hooks.register('test-plugin', { hook: 'filter:test.hook2', method: method2 });
-        plugins.hooks.register('test-plugin', { hook: 'filter:test.hook2', method: method3 });
+        plugins.hooks.register('test-plugin', {
+            hook: 'filter:test.hook2',
+            method: method1,
+        });
+        plugins.hooks.register('test-plugin', {
+            hook: 'filter:test.hook2',
+            method: method2,
+        });
+        plugins.hooks.register('test-plugin', {
+            hook: 'filter:test.hook2',
+            method: method3,
+        });
 
         const data = await plugins.hooks.fire('filter:test.hook2', { foo: 1 });
         assert.strictEqual(data.foo, 8);
@@ -82,8 +97,14 @@ describe('Plugins', () => {
             return data;
         }
 
-        plugins.hooks.register('test-plugin', { hook: 'filter:test.hook3', method: method1 });
-        plugins.hooks.register('test-plugin', { hook: 'filter:test.hook3', method: method2 });
+        plugins.hooks.register('test-plugin', {
+            hook: 'filter:test.hook3',
+            method: method1,
+        });
+        plugins.hooks.register('test-plugin', {
+            hook: 'filter:test.hook3',
+            method: method2,
+        });
 
         const data = await plugins.hooks.fire('filter:test.hook3', { foo: 1 });
         assert.strictEqual(data.foo, 4);
@@ -96,7 +117,10 @@ describe('Plugins', () => {
                 reject(new Error('nope'));
             });
         }
-        plugins.hooks.register('test-plugin', { hook: 'filter:test.hook4', method: method });
+        plugins.hooks.register('test-plugin', {
+            hook: 'filter:test.hook4',
+            method: method,
+        });
         plugins.hooks.fire('filter:test.hook4', { foo: 1 }, (err) => {
             assert(err);
             done();
@@ -109,7 +133,10 @@ describe('Plugins', () => {
             done();
         }
 
-        plugins.hooks.register('test-plugin', { hook: 'action:test.hook', method: actionMethod });
+        plugins.hooks.register('test-plugin', {
+            hook: 'action:test.hook',
+            method: actionMethod,
+        });
         plugins.hooks.fire('action:test.hook', { bar: 'test' });
     });
 
@@ -119,7 +146,10 @@ describe('Plugins', () => {
             callback();
         }
 
-        plugins.hooks.register('test-plugin', { hook: 'static:test.hook', method: actionMethod });
+        plugins.hooks.register('test-plugin', {
+            hook: 'static:test.hook',
+            method: actionMethod,
+        });
         plugins.hooks.fire('static:test.hook', { bar: 'test' }, (err) => {
             assert.ifError(err);
             done();
@@ -133,7 +163,10 @@ describe('Plugins', () => {
                 resolve();
             });
         }
-        plugins.hooks.register('test-plugin', { hook: 'static:test.hook', method: method });
+        plugins.hooks.register('test-plugin', {
+            hook: 'static:test.hook',
+            method: method,
+        });
         plugins.hooks.fire('static:test.hook', { bar: 'test' }, (err) => {
             assert.ifError(err);
             done();
@@ -147,7 +180,10 @@ describe('Plugins', () => {
                 reject(new Error('just because'));
             });
         }
-        plugins.hooks.register('test-plugin', { hook: 'static:test.hook', method: method });
+        plugins.hooks.register('test-plugin', {
+            hook: 'static:test.hook',
+            method: method,
+        });
         plugins.hooks.fire('static:test.hook', { bar: 'test' }, (err) => {
             assert.strictEqual(err.message, 'just because');
             plugins.hooks.unregister('test-plugin', 'static:test.hook', method);
@@ -162,7 +198,10 @@ describe('Plugins', () => {
                 setTimeout(resolve, 6000);
             });
         }
-        plugins.hooks.register('test-plugin', { hook: 'static:test.hook', method: method });
+        plugins.hooks.register('test-plugin', {
+            hook: 'static:test.hook',
+            method: method,
+        });
         plugins.hooks.fire('static:test.hook', { bar: 'test' }, (err) => {
             assert.ifError(err);
             plugins.hooks.unregister('test-plugin', 'static:test.hook', method);
@@ -266,11 +305,14 @@ describe('Plugins', () => {
             plugins.upgrade(pluginName, 'latest', (err, isActive) => {
                 assert.ifError(err);
                 assert(isActive);
-                plugins.loadPluginInfo(path.join(nconf.get('base_dir'), 'node_modules', pluginName), (err, pluginInfo) => {
-                    assert.ifError(err);
-                    assert.equal(pluginInfo.version, latest);
-                    done();
-                });
+                plugins.loadPluginInfo(
+                    path.join(nconf.get('base_dir'), 'node_modules', pluginName),
+                    (err, pluginInfo) => {
+                        assert.ifError(err);
+                        assert.equal(pluginInfo.version, latest);
+                        done();
+                    }
+                );
             });
         });
 
@@ -321,10 +363,7 @@ describe('Plugins', () => {
     });
 
     describe('plugin state set in configuration', () => {
-        const activePlugins = [
-            'nodebb-plugin-markdown',
-            'nodebb-plugin-mentions',
-        ];
+        const activePlugins = ['nodebb-plugin-markdown', 'nodebb-plugin-mentions'];
         const inactivePlugin = 'nodebb-plugin-emoji';
         beforeEach((done) => {
             nconf.set('plugins:active', activePlugins);
@@ -399,5 +438,3 @@ describe('Plugins', () => {
         });
     });
 });
-
-

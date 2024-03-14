@@ -79,7 +79,10 @@ OFFSET $2::INTEGER`,
         }
 
         if (withScores) {
-            res.rows = res.rows.map(r => ({ value: r.value, score: parseFloat(r.score) }));
+            res.rows = res.rows.map(r => ({
+                value: r.value,
+                score: parseFloat(r.score),
+            }));
         } else {
             res.rows = res.rows.map(r => r.value);
         }
@@ -142,7 +145,10 @@ OFFSET $2::INTEGER`,
         });
 
         if (withScores) {
-            res.rows = res.rows.map(r => ({ value: r.value, score: parseFloat(r.score) }));
+            res.rows = res.rows.map(r => ({
+                value: r.value,
+                score: parseFloat(r.score),
+            }));
         } else {
             res.rows = res.rows.map(r => r.value);
         }
@@ -636,20 +642,28 @@ SELECT z."value",
         if (!params.withScores) {
             return res.rows.map(r => r.value);
         }
-        return res.rows.map(r => ({ value: r.value, score: parseFloat(r.score) }));
+        return res.rows.map(r => ({
+            value: r.value,
+            score: parseFloat(r.score),
+        }));
     };
 
     module.processSortedSet = async function (setKey, process, options) {
         const client = await module.pool.connect();
         const batchSize = (options || {}).batch || 100;
-        const cursor = client.query(new Cursor(`
+        const cursor = client.query(
+            new Cursor(
+                `
 SELECT z."value", z."score"
   FROM "legacy_object_live" o
  INNER JOIN "legacy_zset" z
          ON o."_key" = z."_key"
         AND o."type" = z."type"
  WHERE o."_key" = $1::TEXT
- ORDER BY z."score" ASC, z."value" ASC`, [setKey]));
+ ORDER BY z."score" ASC, z."value" ASC`,
+                [setKey]
+            )
+        );
 
         if (process && process.constructor && process.constructor.name !== 'AsyncFunction') {
             process = util.promisify(process);
@@ -664,7 +678,10 @@ SELECT z."value", z."score"
             }
 
             if (options.withScores) {
-                rows = rows.map(r => ({ value: r.value, score: parseFloat(r.score) }));
+                rows = rows.map(r => ({
+                    value: r.value,
+                    score: parseFloat(r.score),
+                }));
             } else {
                 rows = rows.map(r => r.value);
             }

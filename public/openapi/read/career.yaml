@@ -4,5 +4,5 @@ get:
   summary: Get career information
   description: Returns career-related information for the career page
   responses:
-    "200":
-      description: ""
+    '200':
+      description: ''

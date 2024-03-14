@@ -42,10 +42,13 @@ describe('API', async () => {
                 {
                     in: 'path',
                     name: 'token',
-                    example: (() => jwt.sign({
-                        template: 'digest',
-                        uid: 1,
-                    }, nconf.get('secret')))(),
+                    example: (() => jwt.sign(
+                        {
+                            template: 'digest',
+                            uid: 1,
+                        },
+                        nconf.get('secret')
+                    ))(),
                 },
             ],
         },
@@ -109,8 +112,16 @@ describe('API', async () => {
         }
 
         // Create sample users
-        const adminUid = await user.create({ username: 'admin', password: '123456', email: 'test@example.org' });
-        const unprivUid = await user.create({ username: 'unpriv', password: '123456', email: 'unpriv@example.org' });
+        const adminUid = await user.create({
+            username: 'admin',
+            password: '123456',
+            email: 'test@example.org',
+        });
+        const unprivUid = await user.create({
+            username: 'unpriv',
+            password: '123456',
+            email: 'unpriv@example.org',
+        });
         await user.setUserField(adminUid, 'email', 'test@example.org');
         await user.setUserField(unprivUid, 'email', 'unpriv@example.org');
         await user.email.confirmByUid(adminUid);
@@ -128,12 +139,14 @@ describe('API', async () => {
         });
 
         await meta.settings.set('core.api', {
-            tokens: [{
-                token: mocks.delete['/users/{uid}/tokens/{token}'][1].example,
-                uid: 1,
-                description: 'for testing of token deletion route',
-                timestamp: Date.now(),
-            }],
+            tokens: [
+                {
+                    token: mocks.delete['/users/{uid}/tokens/{token}'][1].example,
+                    uid: 1,
+                    description: 'for testing of token deletion route',
+                    timestamp: Date.now(),
+                },
+            ],
         });
         meta.config.allowTopicsThumbnail = 1;
         meta.config.termsOfUse = 'I, for one, welcome our new test-driven overlords';
@@ -170,7 +183,9 @@ describe('API', async () => {
             req: {},
         });
         mocks.delete['/posts/{pid}/diffs/{timestamp}'][0].example = unprivTopic.postData.pid;
-        mocks.delete['/posts/{pid}/diffs/{timestamp}'][1].example = (await posts.diffs.list(unprivTopic.postData.pid))[0];
+        mocks.delete['/posts/{pid}/diffs/{timestamp}'][1].example = (
+            await posts.diffs.list(unprivTopic.postData.pid)
+        )[0];
 
         // Create a sample flag
         const { flagId } = await flags.create('post', 1, unprivUid, 'sample reasons', Date.now()); // deleted in DELETE /api/v3/flags/1
@@ -258,7 +273,11 @@ describe('API', async () => {
                         path: (prefix || '') + dispatch.route.path,
                     };
                 } else if (dispatch.name === 'router') {
-                    const prefix = dispatch.regexp.toString().replace('/^', '').replace('\\/?(?=\\/|$)/i', '').replace(/\\\//g, '/');
+                    const prefix = dispatch.regexp
+                        .toString()
+                        .replace('/^', '')
+                        .replace('\\/?(?=\\/|$)/i', '')
+                        .replace(/\\\//g, '/');
                     return buildPaths(dispatch.handle.stack, prefix);
                 }
 
@@ -269,16 +288,21 @@ describe('API', async () => {
             return _.flatten(paths);
         };
 
-        let paths = buildPaths(webserver.app._router.stack).filter(Boolean).map((pathObj) => {
-            pathObj.path = pathObj.path.replace(/\/:([^\\/]+)/g, '/{$1}');
-            return pathObj;
-        });
+        let paths = buildPaths(webserver.app._router.stack)
+            .filter(Boolean)
+            .map((pathObj) => {
+                pathObj.path = pathObj.path.replace(/\/:([^\\/]+)/g, '/{$1}');
+                return pathObj;
+            });
         const exclusionPrefixes = [
-            '/api/admin/plugins', '/api/compose', '/debug',
+            '/api/admin/plugins',
+            '/api/compose',
+            '/debug',
             '/api/user/{userslug}/theme', // from persona
         ];
-        paths = paths.filter(path => path.method !== '_all' && !exclusionPrefixes.some(prefix => path.path.startsWith(prefix)));
-
+        paths = paths.filter(
+            path => path.method !== '_all' && !exclusionPrefixes.some(prefix => path.path.startsWith(prefix))
+        );
 
         // For each express path, query for existence in read and write api schemas
         paths.forEach((pathObj) => {
@@ -296,8 +320,14 @@ describe('API', async () => {
                     }
 
                     const normalizedPath = pathObj.path.replace(/\/:([^\\/]+)/g, '/{$1}').replace(/\?/g, '');
-                    assert(schema.paths.hasOwnProperty(normalizedPath), `${pathObj.path} is not defined in schema docs`);
-                    assert(schema.paths[normalizedPath].hasOwnProperty(pathObj.method), `${pathObj.path} was found in schema docs, but ${pathObj.method.toUpperCase()} method is not defined`);
+                    assert(
+                        schema.paths.hasOwnProperty(normalizedPath),
+                        `${pathObj.path} is not defined in schema docs`
+                    );
+                    assert(
+                        schema.paths[normalizedPath].hasOwnProperty(pathObj.method),
+                        `${pathObj.path} was found in schema docs, but ${pathObj.method.toUpperCase()} method is not defined`
+                    );
                 });
             });
         });
@@ -332,8 +362,13 @@ describe('API', async () => {
                     }
 
                     const pathParams = (path.match(/{[\w\-_*]+}?/g) || []).map(match => match.slice(1, -1));
-                    const schemaParams = context[method].parameters.map(param => (param.in === 'path' ? param.name : null)).filter(Boolean);
-                    assert(pathParams.every(param => schemaParams.includes(param)), `${method.toUpperCase()} ${path} has path parameters specified but not defined`);
+                    const schemaParams = context[method].parameters
+                        .map(param => (param.in === 'path' ? param.name : null))
+                        .filter(Boolean);
+                    assert(
+                        pathParams.every(param => schemaParams.includes(param)),
+                        `${method.toUpperCase()} ${path} has path parameters specified but not defined`
+                    );
                 });
 
                 it(`${_method.toUpperCase()} ${path}: should have examples when parameters are present`, () => {
@@ -345,7 +380,10 @@ describe('API', async () => {
                         parameters = mocks[method][path] || parameters;
 
                         parameters.forEach((param) => {
-                            assert(param.example !== null && param.example !== undefined, `${method.toUpperCase()} ${path} has parameters without examples`);
+                            assert(
+                                param.example !== null && param.example !== undefined,
+                                `${method.toUpperCase()} ${path} has parameters without examples`
+                            );
 
                             switch (param.in) {
                             case 'path':
@@ -373,11 +411,17 @@ describe('API', async () => {
                         if (context[method].requestBody.content.hasOwnProperty('application/json')) {
                             assert(context[method].requestBody.content['application/json'], failMessage);
                             assert(context[method].requestBody.content['application/json'].schema, failMessage);
-                            assert(context[method].requestBody.content['application/json'].schema.properties, failMessage);
+                            assert(
+                                context[method].requestBody.content['application/json'].schema.properties,
+                                failMessage
+                            );
                         } else if (context[method].requestBody.content.hasOwnProperty('multipart/form-data')) {
                             assert(context[method].requestBody.content['multipart/form-data'], failMessage);
                             assert(context[method].requestBody.content['multipart/form-data'].schema, failMessage);
-                            assert(context[method].requestBody.content['multipart/form-data'].schema.properties, failMessage);
+                            assert(
+                                context[method].requestBody.content['multipart/form-data'].schema.properties,
+                                failMessage
+                            );
                         }
                     }
                 });
@@ -391,9 +435,15 @@ describe('API', async () => {
 
                     let body = {};
                     let type = 'json';
-                    if (context[method].hasOwnProperty('requestBody') && context[method].requestBody.content['application/json']) {
+                    if (
+                        context[method].hasOwnProperty('requestBody') &&
+                        context[method].requestBody.content['application/json']
+                    ) {
                         body = buildBody(context[method].requestBody.content['application/json'].schema.properties);
-                    } else if (context[method].hasOwnProperty('requestBody') && context[method].requestBody.content['multipart/form-data']) {
+                    } else if (
+                        context[method].hasOwnProperty('requestBody') &&
+                        context[method].requestBody.content['multipart/form-data']
+                    ) {
                         type = 'form';
                     }
 
@@ -412,12 +462,19 @@ describe('API', async () => {
                             });
                         } else if (type === 'form') {
                             response = await new Promise((resolve, reject) => {
-                                helpers.uploadFile(url, pathLib.join(__dirname, './files/test.png'), {}, jar, csrfToken, (err, res) => {
-                                    if (err) {
-                                        return reject(err);
+                                helpers.uploadFile(
+                                    url,
+                                    pathLib.join(__dirname, './files/test.png'),
+                                    {},
+                                    jar,
+                                    csrfToken,
+                                    (err, res) => {
+                                        if (err) {
+                                            return reject(err);
+                                        }
+                                        resolve(res);
                                     }
-                                    resolve(res);
-                                });
+                                );
                             });
                         }
                     } catch (e) {
@@ -427,7 +484,11 @@ describe('API', async () => {
 
                 it(`${_method.toUpperCase()} ${path}: response status code should match one of the schema defined responses`, () => {
                     // HACK: allow HTTP 418 I am a teapot, for now   👇
-                    assert(context[method].responses.hasOwnProperty('418') || Object.keys(context[method].responses).includes(String(response.statusCode)), `${method.toUpperCase()} ${path} sent back unexpected HTTP status code: ${response.statusCode} ${JSON.stringify(response.body)}`);
+                    assert(
+                        context[method].responses.hasOwnProperty('418') ||
+                            Object.keys(context[method].responses).includes(String(response.statusCode)),
+                        `${method.toUpperCase()} ${path} sent back unexpected HTTP status code: ${response.statusCode} ${JSON.stringify(response.body)}`
+                    );
                 });
 
                 // Recursively iterate through schema properties, comparing type
@@ -437,7 +498,9 @@ describe('API', async () => {
                         // Compare headers instead
                         const expectedHeaders = Object.keys(http302.headers).reduce((memo, name) => {
                             const value = http302.headers[name].schema.example;
-                            memo[name] = value.startsWith(nconf.get('relative_path')) ? value : nconf.get('relative_path') + value;
+                            memo[name] = value.startsWith(nconf.get('relative_path')) ?
+                                value :
+                                nconf.get('relative_path') + value;
                             return memo;
                         }, {});
 
@@ -515,7 +578,9 @@ describe('API', async () => {
                     try {
                         required = required.concat(obj.required ? obj.required : Object.keys(obj.properties));
                     } catch (e) {
-                        assert.fail(`Syntax error re: allOf, perhaps you allOf'd an array? (path: ${method} ${path}, context: ${context})`);
+                        assert.fail(
+                            `Syntax error re: allOf, perhaps you allOf'd an array? (path: ${method} ${path}, context: ${context})`
+                        );
                     }
                 }
 
@@ -536,7 +601,10 @@ describe('API', async () => {
         // Compare the schema to the response
         required.forEach((prop) => {
             if (schema.hasOwnProperty(prop)) {
-                assert(response.hasOwnProperty(prop), `"${prop}" is a required property (path: ${method} ${path}, context: ${context})`);
+                assert(
+                    response.hasOwnProperty(prop),
+                    `"${prop}" is a required property (path: ${method} ${path}, context: ${context})`
+                );
 
                 // Don't proceed with type-check if the value could possibly be unset (nullable: true, in spec)
                 if (response[prop] === null && schema[prop].nullable === true) {
@@ -544,34 +612,67 @@ describe('API', async () => {
                 }
 
                 // Therefore, if the value is actually null, that's a problem (nullable is probably missing)
-                assert(response[prop] !== null, `"${prop}" was null, but schema does not specify it to be a nullable property (path: ${method} ${path}, context: ${context})`);
+                assert(
+                    response[prop] !== null,
+                    `"${prop}" was null, but schema does not specify it to be a nullable property (path: ${method} ${path}, context: ${context})`
+                );
 
                 switch (schema[prop].type) {
                 case 'string':
-                    assert.strictEqual(typeof response[prop], 'string', `"${prop}" was expected to be a string, but was ${typeof response[prop]} instead (path: ${method} ${path}, context: ${context})`);
+                    assert.strictEqual(
+                        typeof response[prop],
+                        'string',
+                        `"${prop}" was expected to be a string, but was ${typeof response[prop]} instead (path: ${method} ${path}, context: ${context})`
+                    );
                     break;
                 case 'boolean':
-                    assert.strictEqual(typeof response[prop], 'boolean', `"${prop}" was expected to be a boolean, but was ${typeof response[prop]} instead, with value ${response[prop]} (path: ${method} ${path}, context: ${context})`);
+                    assert.strictEqual(
+                        typeof response[prop],
+                        'boolean',
+                        `"${prop}" was expected to be a boolean, but was ${typeof response[prop]} instead, with value ${response[prop]} (path: ${method} ${path}, context: ${context})`
+                    );
                     break;
                 case 'object':
-                    assert.strictEqual(typeof response[prop], 'object', `"${prop}" was expected to be an object, but was ${typeof response[prop]} instead (path: ${method} ${path}, context: ${context})`);
+                    assert.strictEqual(
+                        typeof response[prop],
+                        'object',
+                        `"${prop}" was expected to be an object, but was ${typeof response[prop]} instead (path: ${method} ${path}, context: ${context})`
+                    );
                     compare(schema[prop], response[prop], method, path, context ? [context, prop].join('.') : prop);
                     break;
                 case 'array':
-                    assert.strictEqual(Array.isArray(response[prop]), true, `"${prop}" was expected to be an array, but was ${typeof response[prop]} instead (path: ${method} ${path}, context: ${context})`);
+                    assert.strictEqual(
+                        Array.isArray(response[prop]),
+                        true,
+                        `"${prop}" was expected to be an array, but was ${typeof response[prop]} instead (path: ${method} ${path}, context: ${context})`
+                    );
 
                     if (schema[prop].items) {
                         // Ensure the array items have a schema defined
-                        assert(schema[prop].items.type || schema[prop].items.allOf, `"${prop}" is defined to be an array, but its items have no schema defined (path: ${method} ${path}, context: ${context})`);
+                        assert(
+                            schema[prop].items.type || schema[prop].items.allOf,
+                            `"${prop}" is defined to be an array, but its items have no schema defined (path: ${method} ${path}, context: ${context})`
+                        );
 
                         // Compare types
                         if (schema[prop].items.type === 'object' || Array.isArray(schema[prop].items.allOf)) {
                             response[prop].forEach((res) => {
-                                compare(schema[prop].items, res, method, path, context ? [context, prop].join('.') : prop);
+                                compare(
+                                    schema[prop].items,
+                                    res,
+                                    method,
+                                    path,
+                                    context ? [context, prop].join('.') : prop
+                                );
                             });
-                        } else if (response[prop].length) { // for now
+                        } else if (response[prop].length) {
+                            // for now
                             response[prop].forEach((item) => {
-                                assert.strictEqual(typeof item, schema[prop].items.type, `"${prop}" should have ${schema[prop].items.type} items, but found ${typeof items} instead (path: ${method} ${path}, context: ${context})`);
+                                assert.strictEqual(
+                                    typeof item,
+                                    schema[prop].items.type,
+                                    `"${prop}" should have ${schema[prop].items.type} items, but found ${typeof items} instead (path: ${method} ${path}, context: ${context})`
+                                );
                             });
                         }
                     }
@@ -582,11 +683,15 @@ describe('API', async () => {
 
         // Compare the response to the schema
         Object.keys(response).forEach((prop) => {
-            if (additionalProperties) { // All bets are off
+            if (additionalProperties) {
+                // All bets are off
                 return;
             }
 
-            assert(schema[prop], `"${prop}" was found in response, but is not defined in schema (path: ${method} ${path}, context: ${context})`);
+            assert(
+                schema[prop],
+                `"${prop}" was found in response, but is not defined in schema (path: ${method} ${path}, context: ${context})`
+            );
         });
     }
 });

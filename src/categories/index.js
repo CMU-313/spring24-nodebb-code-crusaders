@@ -1,4 +1,3 @@
-
 'use strict';
 
 const _ = require('lodash');
@@ -25,9 +24,7 @@ require('./watch')(Categories);
 require('./search')(Categories);
 
 Categories.exists = async function (cids) {
-    return await db.exists(
-        Array.isArray(cids) ? cids.map(cid => `category:${cid}`) : `category:${cids}`
-    );
+    return await db.exists(Array.isArray(cids) ? cids.map(cid => `category:${cid}`) : `category:${cids}`);
 };
 
 Categories.getCategoryById = async function (data) {
@@ -107,22 +104,23 @@ Categories.getModeratorUids = async function (cids) {
 
     const memberSets = await groups.getMembersOfGroups(groupNames);
     // Every other set is actually a list of user groups, not uids, so convert those to members
-    const sets = memberSets.reduce((memo, set, idx) => {
-        if (idx % 2) {
-            memo.groupNames.push(set);
-        } else {
-            memo.uids.push(set);
-        }
+    const sets = memberSets.reduce(
+        (memo, set, idx) => {
+            if (idx % 2) {
+                memo.groupNames.push(set);
+            } else {
+                memo.uids.push(set);
+            }
 
-        return memo;
-    }, { groupNames: [], uids: [] });
+            return memo;
+        },
+        { groupNames: [], uids: [] }
+    );
 
     const uniqGroups = _.uniq(_.flatten(sets.groupNames));
     const groupUids = await groups.getMembersOfGroups(uniqGroups);
     const map = _.zipObject(uniqGroups, groupUids);
-    const moderatorUids = cids.map(
-        (cid, index) => _.uniq(sets.uids[index].concat(_.flatten(sets.groupNames[index].map(g => map[g]))))
-    );
+    const moderatorUids = cids.map((cid, index) => _.uniq(sets.uids[index].concat(_.flatten(sets.groupNames[index].map(g => map[g])))));
     return moderatorUids;
 };
 
@@ -144,7 +142,7 @@ Categories.getCategories = async function (cids, uid) {
     categories.forEach((category, i) => {
         if (category) {
             category.tagWhitelist = tagWhitelist[i];
-            category['unread-class'] = (category.topic_count === 0 || (hasRead[i] && uid !== 0)) ? '' : 'unread';
+            category['unread-class'] = category.topic_count === 0 || (hasRead[i] && uid !== 0) ? '' : 'unread';
         }
     });
     return categories;
@@ -218,7 +216,10 @@ Categories.getParents = async function (cids) {
 
 Categories.getChildren = async function (cids, uid) {
     const categoryData = await Categories.getCategoriesFields(cids, ['parentCid']);
-    const categories = categoryData.map((category, index) => ({ cid: cids[index], parentCid: category.parentCid }));
+    const categories = categoryData.map((category, index) => ({
+        cid: cids[index],
+        parentCid: category.parentCid,
+    }));
     await Promise.all(categories.map(c => getChildrenTree(c, uid)));
     return categories.map(c => c && c.children);
 };
@@ -236,7 +237,7 @@ async function getChildrenTree(category, uid) {
     childrenCids = childrenData.map(child => child.cid);
     const hasRead = await Categories.hasReadCategories(childrenCids, uid);
     childrenData.forEach((child, i) => {
-        child['unread-class'] = (child.topic_count === 0 || (hasRead[i] && uid !== 0)) ? '' : 'unread';
+        child['unread-class'] = child.topic_count === 0 || (hasRead[i] && uid !== 0) ? '' : 'unread';
     });
     Categories.getTree([category].concat(childrenData), category.parentCid);
 }
@@ -392,8 +393,15 @@ Categories.buildForSelectCategories = function (categories, fields, parentCid) {
     rootCategories.forEach(category => recursive(category, categoriesData, '', 0));
 
     const pickFields = [
-        'cid', 'name', 'level', 'icon', 'parentCid',
-        'color', 'bgColor', 'backgroundImage', 'imageClass',
+        'cid',
+        'name',
+        'level',
+        'icon',
+        'parentCid',
+        'color',
+        'bgColor',
+        'backgroundImage',
+        'imageClass',
     ];
     fields = fields || [];
     if (fields.includes('text') && fields.includes('value')) {

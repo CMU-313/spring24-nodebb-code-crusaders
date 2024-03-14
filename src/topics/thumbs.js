@@ -1,4 +1,3 @@
-
 'use strict';
 
 const _ = require('lodash');
@@ -27,7 +26,7 @@ Thumbs.load = async function (topicData) {
     const tidsWithThumbs = topicsWithThumbs.map(t => t.tid);
     const thumbs = await Thumbs.get(tidsWithThumbs);
     const tidToThumbs = _.zipObject(tidsWithThumbs, thumbs);
-    return topicData.map(t => (t && t.tid ? (tidToThumbs[t.tid] || []) : []));
+    return topicData.map(t => (t && t.tid ? tidToThumbs[t.tid] || [] : []));
 };
 
 Thumbs.get = async function (tids) {
@@ -99,11 +98,15 @@ Thumbs.migrate = async function (uuid, id) {
     // Converts the draft thumb zset to the topic zset (combines thumbs if applicable)
     const set = `draft:${uuid}:thumbs`;
     const thumbs = await db.getSortedSetRangeWithScores(set, 0, -1);
-    await Promise.all(thumbs.map(async thumb => await Thumbs.associate({
-        id,
-        path: thumb.value,
-        score: thumb.score,
-    })));
+    await Promise.all(
+        thumbs.map(
+            async thumb => await Thumbs.associate({
+                id,
+                path: thumb.value,
+                score: thumb.score,
+            })
+        )
+    );
     await db.delete(set);
     cache.del(set);
 };
@@ -138,7 +141,8 @@ Thumbs.delete = async function (id, relativePaths) {
 
     await db.sortedSetRemove(set, toRemove);
 
-    if (isDraft && toDelete.length) { // drafts only; post upload dissociation handles disk deletion for topics
+    if (isDraft && toDelete.length) {
+        // drafts only; post upload dissociation handles disk deletion for topics
         await Promise.all(toDelete.map(async absolutePath => file.delete(absolutePath)));
     }
 

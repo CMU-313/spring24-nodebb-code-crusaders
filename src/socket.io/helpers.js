@@ -19,11 +19,15 @@ const SocketHelpers = module.exports;
 SocketHelpers.notifyNew = async function (uid, type, result) {
     let uids = await user.getUidsFromSet('users:online', 0, -1);
     uids = uids.filter(toUid => parseInt(toUid, 10) !== uid);
-    await batch.processArray(uids, async (uids) => {
-        await notifyUids(uid, uids, type, result);
-    }, {
-        interval: 1000,
-    });
+    await batch.processArray(
+        uids,
+        async (uids) => {
+            await notifyUids(uid, uids, type, result);
+        },
+        {
+            interval: 1000,
+        }
+    );
 };
 
 async function notifyUids(uid, uids, type, result) {
@@ -68,9 +72,11 @@ async function getWatchStates(uids, tid, cid) {
 }
 
 function filterTidCidIgnorers(uids, watchStates) {
-    return uids.filter((uid, index) => watchStates.topicFollowed[index] ||
-        (!watchStates.topicIgnored[index] &&
-            watchStates.categoryWatchStates[index] !== categories.watchStates.ignoring));
+    return uids.filter(
+        (uid, index) => watchStates.topicFollowed[index] ||
+            (!watchStates.topicIgnored[index] &&
+                watchStates.categoryWatchStates[index] !== categories.watchStates.ignoring)
+    );
 }
 
 SocketHelpers.sendNotificationToPostOwner = async function (pid, fromuid, command, notification) {
@@ -112,7 +118,6 @@ SocketHelpers.sendNotificationToPostOwner = async function (pid, fromuid, comman
 
     notifications.push(notifObj, [postData.uid]);
 };
-
 
 SocketHelpers.sendNotificationToTopicOwner = async function (tid, fromuid, command, notification) {
     if (!tid || !fromuid || !notification) {

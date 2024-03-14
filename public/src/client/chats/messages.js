@@ -1,9 +1,14 @@
 'use strict';
 
-
 define('forum/chats/messages', [
-    'components', 'translator', 'benchpress', 'hooks',
-    'bootbox', 'alerts', 'messages', 'api',
+    'components',
+    'translator',
+    'benchpress',
+    'hooks',
+    'bootbox',
+    'alerts',
+    'messages',
+    'api',
 ], function (components, translator, Benchpress, hooks, bootbox, alerts, messagesModule, api) {
     const messages = {};
 
@@ -52,7 +57,9 @@ define('forum/chats/messages', [
     messages.updateRemainingLength = function (parent) {
         const element = parent.find('[component="chat/input"]');
         parent.find('[component="chat/message/length"]').text(element.val().length);
-        parent.find('[component="chat/message/remaining"]').text(config.maximumChatMessageLength - element.val().length);
+        parent
+            .find('[component="chat/message/remaining"]')
+            .text(config.maximumChatMessageLength - element.val().length);
         hooks.fire('action:chat.updateRemainingLength', {
             parent: parent,
         });
@@ -62,8 +69,9 @@ define('forum/chats/messages', [
         const lastSpeaker = parseInt(chatContentEl.find('.chat-message').last().attr('data-uid'), 10);
         const lasttimestamp = parseInt(chatContentEl.find('.chat-message').last().attr('data-timestamp'), 10);
         if (!Array.isArray(data)) {
-            data.newSet = lastSpeaker !== parseInt(data.fromuid, 10) ||
-                parseInt(data.timestamp, 10) > parseInt(lasttimestamp, 10) + (1000 * 60 * 3);
+            data.newSet =
+                lastSpeaker !== parseInt(data.fromuid, 10) ||
+                parseInt(data.timestamp, 10) > parseInt(lasttimestamp, 10) + 1000 * 60 * 3;
         }
 
         messages.parseMessage(data, function (html) {
@@ -86,7 +94,6 @@ define('forum/chats/messages', [
         });
     }
 
-
     messages.parseMessage = function (data, callback) {
         function done(html) {
             translator.translate(html, callback);
@@ -105,9 +112,8 @@ define('forum/chats/messages', [
 
     messages.isAtBottom = function (containerEl, threshold) {
         if (containerEl.length) {
-            const distanceToBottom = containerEl[0].scrollHeight - (
-                containerEl.outerHeight() + containerEl.scrollTop()
-            );
+            const distanceToBottom =
+                containerEl[0].scrollHeight - (containerEl.outerHeight() + containerEl.scrollTop());
             return distanceToBottom < (threshold || 100);
         }
     };
@@ -115,17 +121,13 @@ define('forum/chats/messages', [
     messages.scrollToBottom = function (containerEl) {
         if (containerEl && containerEl.length) {
             containerEl.scrollTop(containerEl[0].scrollHeight - containerEl.height());
-            containerEl.parent()
-                .find('[component="chat/messages/scroll-up-alert"]')
-                .addClass('hidden');
+            containerEl.parent().find('[component="chat/messages/scroll-up-alert"]').addClass('hidden');
         }
     };
 
     messages.toggleScrollUpAlert = function (containerEl) {
         const isAtBottom = messages.isAtBottom(containerEl, 300);
-        containerEl.parent()
-            .find('[component="chat/messages/scroll-up-alert"]')
-            .toggleClass('hidden', isAtBottom);
+        containerEl.parent().find('[component="chat/messages/scroll-up-alert"]').toggleClass('hidden', isAtBottom);
     };
 
     messages.prepEdit = function (inputEl, messageId, roomId) {
@@ -175,15 +177,19 @@ define('forum/chats/messages', [
     }
 
     function onChatMessageDeleted(messageId) {
-        components.get('chat/message', messageId)
+        components
+            .get('chat/message', messageId)
             .toggleClass('deleted', true)
-            .find('[component="chat/message/body"]').translateHtml('[[modules:chat.message-deleted]]');
+            .find('[component="chat/message/body"]')
+            .translateHtml('[[modules:chat.message-deleted]]');
     }
 
     function onChatMessageRestored(message) {
-        components.get('chat/message', message.messageId)
+        components
+            .get('chat/message', message.messageId)
             .toggleClass('deleted', false)
-            .find('[component="chat/message/body"]').html(message.content);
+            .find('[component="chat/message/body"]')
+            .html(message.content);
     }
 
     messages.delete = function (messageId, roomId) {
@@ -193,17 +199,21 @@ define('forum/chats/messages', [
                     return;
                 }
 
-                api.delete(`/chats/${roomId}/messages/${messageId}`, {}).then(() => {
-                    components.get('chat/message', messageId).toggleClass('deleted', true);
-                }).catch(alerts.error);
+                api.delete(`/chats/${roomId}/messages/${messageId}`, {})
+                    .then(() => {
+                        components.get('chat/message', messageId).toggleClass('deleted', true);
+                    })
+                    .catch(alerts.error);
             });
         });
     };
 
     messages.restore = function (messageId, roomId) {
-        api.post(`/chats/${roomId}/messages/${messageId}`, {}).then(() => {
-            components.get('chat/message', messageId).toggleClass('deleted', false);
-        }).catch(alerts.error);
+        api.post(`/chats/${roomId}/messages/${messageId}`, {})
+            .then(() => {
+                components.get('chat/message', messageId).toggleClass('deleted', false);
+            })
+            .catch(alerts.error);
     };
 
     return messages;

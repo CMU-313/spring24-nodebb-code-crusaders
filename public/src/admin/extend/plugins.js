@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('admin/extend/plugins', [
     'translator',
     'benchpress',
@@ -36,31 +35,40 @@ define('admin/extend/plugins', [
                     if (err) {
                         return alerts.error(err);
                     }
-                    translator.translate('<i class="fa fa-power-off"></i> [[admin/extend/plugins:plugin-item.' + (status.active ? 'deactivate' : 'activate') + ']]', function (buttonText) {
-                        btn.html(buttonText);
-                        btn.toggleClass('btn-warning', status.active).toggleClass('btn-success', !status.active);
+                    translator.translate(
+                        '<i class="fa fa-power-off"></i> [[admin/extend/plugins:plugin-item.' +
+                            (status.active ? 'deactivate' : 'activate') +
+                            ']]',
+                        function (buttonText) {
+                            btn.html(buttonText);
+                            btn.toggleClass('btn-warning', status.active).toggleClass('btn-success', !status.active);
 
-                        // clone it to active plugins tab
-                        if (status.active && !$('#active [id="' + pluginID + '"]').length) {
-                            $('#active ul').prepend(pluginEl.clone(true));
+                            // clone it to active plugins tab
+                            if (status.active && !$('#active [id="' + pluginID + '"]').length) {
+                                $('#active ul').prepend(pluginEl.clone(true));
+                            }
+
+                            // Toggle active state in template data
+                            pluginData.active = !pluginData.active;
+
+                            alerts.alert({
+                                alert_id: 'plugin_toggled',
+                                title:
+                                    '[[admin/extend/plugins:alert.' + (status.active ? 'enabled' : 'disabled') + ']]',
+                                message:
+                                    '[[admin/extend/plugins:alert.' +
+                                    (status.active ? 'activate-success' : 'deactivate-success') +
+                                    ']]',
+                                type: status.active ? 'warning' : 'success',
+                                timeout: 5000,
+                                clickfn: function () {
+                                    require(['admin/modules/instance'], function (instance) {
+                                        instance.rebuildAndRestart();
+                                    });
+                                },
+                            });
                         }
-
-                        // Toggle active state in template data
-                        pluginData.active = !pluginData.active;
-
-                        alerts.alert({
-                            alert_id: 'plugin_toggled',
-                            title: '[[admin/extend/plugins:alert.' + (status.active ? 'enabled' : 'disabled') + ']]',
-                            message: '[[admin/extend/plugins:alert.' + (status.active ? 'activate-success' : 'deactivate-success') + ']]',
-                            type: status.active ? 'warning' : 'success',
-                            timeout: 5000,
-                            clickfn: function () {
-                                require(['admin/modules/instance'], function (instance) {
-                                    instance.rebuildAndRestart();
-                                });
-                            },
-                        });
-                    });
+                    );
                 });
             }
 
@@ -105,13 +113,16 @@ define('admin/extend/plugins', [
 
             Plugins.suggest(pluginID, function (err, payload) {
                 if (err) {
-                    bootbox.confirm(translator.compile('admin/extend/plugins:alert.suggest-error', err.status, err.responseText), function (confirm) {
-                        if (confirm) {
-                            Plugins.toggleInstall(pluginID, 'latest');
-                        } else {
-                            btn.removeAttr('disabled');
+                    bootbox.confirm(
+                        translator.compile('admin/extend/plugins:alert.suggest-error', err.status, err.responseText),
+                        function (confirm) {
+                            if (confirm) {
+                                Plugins.toggleInstall(pluginID, 'latest');
+                            } else {
+                                btn.removeAttr('disabled');
+                            }
                         }
-                    });
+                    );
                     return;
                 }
 
@@ -150,7 +161,13 @@ define('admin/extend/plugins', [
                             upgrade(pluginID, btn, payload.version);
                         });
                     } else {
-                        bootbox.alert(translator.compile('admin/extend/plugins:alert.incompatible', app.config.version, payload.version));
+                        bootbox.alert(
+                            translator.compile(
+                                'admin/extend/plugins:alert.incompatible',
+                                app.config.version,
+                                payload.version
+                            )
+                        );
                     }
                 });
             });
@@ -174,13 +191,17 @@ define('admin/extend/plugins', [
         });
 
         $('#plugin-submit-usage').on('click', function () {
-            socket.emit('admin.config.setMultiple', {
-                submitPluginUsage: $(this).prop('checked') ? '1' : '0',
-            }, function (err) {
-                if (err) {
-                    return alerts.error(err);
+            socket.emit(
+                'admin.config.setMultiple',
+                {
+                    submitPluginUsage: $(this).prop('checked') ? '1' : '0',
+                },
+                function (err) {
+                    if (err) {
+                        return alerts.error(err);
+                    }
                 }
-            });
+            );
         });
 
         $('#plugin-order').on('click', function () {
@@ -191,7 +212,10 @@ define('admin/extend/plugins', [
                 }
                 let html = '';
                 activePlugins.forEach(function (plugin) {
-                    html += '<li class="">' + plugin + '<span class="pull-right"><i class="fa fa-chevron-up"></i><i class="fa fa-chevron-down"></i></span></li>';
+                    html +=
+                        '<li class="">' +
+                        plugin +
+                        '<span class="pull-right"><i class="fa fa-chevron-up"></i><i class="fa fa-chevron-down"></i></span></li>';
                 });
                 if (!activePlugins.length) {
                     translator.translate('[[admin/extend/plugins:none-active]]', function (text) {
@@ -248,68 +272,83 @@ define('admin/extend/plugins', [
     };
 
     function confirmInstall(pluginID, callback) {
-        bootbox.confirm(translator.compile('admin/extend/plugins:alert.possibly-incompatible', pluginID), function (confirm) {
-            callback(confirm);
-        });
+        bootbox.confirm(
+            translator.compile('admin/extend/plugins:alert.possibly-incompatible', pluginID),
+            function (confirm) {
+                callback(confirm);
+            }
+        );
     }
 
     function upgrade(pluginID, btn, version) {
         btn.attr('disabled', true).find('i').attr('class', 'fa fa-refresh fa-spin');
-        socket.emit('admin.plugins.upgrade', {
-            id: pluginID,
-            version: version,
-        }, function (err, isActive) {
-            if (err) {
-                return alerts.error(err);
+        socket.emit(
+            'admin.plugins.upgrade',
+            {
+                id: pluginID,
+                version: version,
+            },
+            function (err, isActive) {
+                if (err) {
+                    return alerts.error(err);
+                }
+                const parent = btn.parents('li');
+                parent.find('.fa-exclamation-triangle').remove();
+                parent.find('.currentVersion').text(version);
+                btn.remove();
+                if (isActive) {
+                    alerts.alert({
+                        alert_id: 'plugin_upgraded',
+                        title: '[[admin/extend/plugins:alert.upgraded]]',
+                        message: '[[admin/extend/plugins:alert.upgrade-success]]',
+                        type: 'warning',
+                        timeout: 5000,
+                        clickfn: function () {
+                            require(['admin/modules/instance'], function (instance) {
+                                instance.rebuildAndRestart();
+                            });
+                        },
+                    });
+                }
             }
-            const parent = btn.parents('li');
-            parent.find('.fa-exclamation-triangle').remove();
-            parent.find('.currentVersion').text(version);
-            btn.remove();
-            if (isActive) {
-                alerts.alert({
-                    alert_id: 'plugin_upgraded',
-                    title: '[[admin/extend/plugins:alert.upgraded]]',
-                    message: '[[admin/extend/plugins:alert.upgrade-success]]',
-                    type: 'warning',
-                    timeout: 5000,
-                    clickfn: function () {
-                        require(['admin/modules/instance'], function (instance) {
-                            instance.rebuildAndRestart();
-                        });
-                    },
-                });
-            }
-        });
+        );
     }
 
     Plugins.toggleInstall = function (pluginID, version, callback) {
         const btn = $('li[data-plugin-id="' + pluginID + '"] button[data-action="toggleInstall"]');
         btn.find('i').attr('class', 'fa fa-refresh fa-spin');
 
-        socket.emit('admin.plugins.toggleInstall', {
-            id: pluginID,
-            version: version,
-        }, function (err, pluginData) {
-            if (err) {
-                btn.removeAttr('disabled');
-                return alerts.error(err);
+        socket.emit(
+            'admin.plugins.toggleInstall',
+            {
+                id: pluginID,
+                version: version,
+            },
+            function (err, pluginData) {
+                if (err) {
+                    btn.removeAttr('disabled');
+                    return alerts.error(err);
+                }
+
+                ajaxify.refresh();
+
+                alerts.alert({
+                    alert_id: 'plugin_toggled',
+                    title:
+                        '[[admin/extend/plugins:alert.' + (pluginData.installed ? 'installed' : 'uninstalled') + ']]',
+                    message:
+                        '[[admin/extend/plugins:alert.' +
+                        (pluginData.installed ? 'install-success' : 'uninstall-success') +
+                        ']]',
+                    type: 'info',
+                    timeout: 5000,
+                });
+
+                if (typeof callback === 'function') {
+                    callback.apply(this, arguments);
+                }
             }
-
-            ajaxify.refresh();
-
-            alerts.alert({
-                alert_id: 'plugin_toggled',
-                title: '[[admin/extend/plugins:alert.' + (pluginData.installed ? 'installed' : 'uninstalled') + ']]',
-                message: '[[admin/extend/plugins:alert.' + (pluginData.installed ? 'install-success' : 'uninstall-success') + ']]',
-                type: 'info',
-                timeout: 5000,
-            });
-
-            if (typeof callback === 'function') {
-                callback.apply(this, arguments);
-            }
-        });
+        );
     };
 
     Plugins.suggest = function (pluginId, callback) {
@@ -321,9 +360,11 @@ define('admin/extend/plugins', [
                 version: nbbVersion[0],
             },
             dataType: 'json',
-        }).done(function (payload) {
-            callback(undefined, payload);
-        }).fail(callback);
+        })
+            .done(function (payload) {
+                callback(undefined, payload);
+            })
+            .fail(callback);
     };
 
     function populateUpgradeablePlugins() {

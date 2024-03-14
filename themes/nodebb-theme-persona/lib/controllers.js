@@ -16,7 +16,10 @@ Controllers.renderThemeSettings = async (req, res, next) => {
     }
 
     userData.title = '[[persona:settings.title]]';
-    userData.breadcrumbs = helpers.buildBreadcrumbs([{ text: userData.username, url: `/user/${userData.userslug}` }, { text: '[[persona:settings.title]]' }]);
+    userData.breadcrumbs = helpers.buildBreadcrumbs([
+        { text: userData.username, url: `/user/${userData.userslug}` },
+        { text: '[[persona:settings.title]]' },
+    ]);
 
     res.render('account/theme', userData);
 };

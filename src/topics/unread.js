@@ -1,4 +1,3 @@
-
 'use strict';
 
 const async = require('async');
@@ -17,7 +16,11 @@ const plugins = require('../plugins');
 module.exports = function (Topics) {
     Topics.getTotalUnread = async function (uid, filter) {
         filter = filter || '';
-        const counts = await Topics.getUnreadTids({ cid: 0, uid: uid, count: true });
+        const counts = await Topics.getUnreadTids({
+            cid: 0,
+            uid: uid,
+            count: true,
+        });
         return counts && counts[filter];
     };
 
@@ -47,8 +50,11 @@ module.exports = function (Topics) {
     };
 
     Topics.unreadCutoff = async function (uid) {
-        const cutoff = Date.now() - (meta.config.unreadCutoff * 86400000);
-        const data = await plugins.hooks.fire('filter:topics.unreadCutoff', { uid: uid, cutoff: cutoff });
+        const cutoff = Date.now() - meta.config.unreadCutoff * 86400000;
+        const data = await plugins.hooks.fire('filter:topics.unreadCutoff', {
+            uid: uid,
+            cutoff: cutoff,
+        });
         return parseInt(data.cutoff, 10);
     };
 
@@ -107,7 +113,8 @@ module.exports = function (Topics) {
             isTopicsFollowed[t.value] = true;
         });
         const unreadFollowed = await db.isSortedSetMembers(
-            `uid:${params.uid}:followed_tids`, tids_unread.map(t => t.value)
+            `uid:${params.uid}:followed_tids`,
+            tids_unread.map(t => t.value)
         );
 
         tids_unread.forEach((t, i) => {
@@ -115,8 +122,9 @@ module.exports = function (Topics) {
         });
 
         const unreadTopics = _.unionWith(categoryTids, followedTids, (a, b) => a.value === b.value)
-            .filter(t => !ignoredTids.includes(t.value) &&
-                    (!userReadTimes[t.value] || t.score > userReadTimes[t.value]))
+            .filter(
+                t => !ignoredTids.includes(t.value) && (!userReadTimes[t.value] || t.score > userReadTimes[t.value])
+            )
             .concat(tids_unread.filter(t => !ignoredTids.includes(t.value)))
             .sort((a, b) => b.score - a.score);
 
@@ -136,8 +144,9 @@ module.exports = function (Topics) {
         });
 
         tids = await privileges.topics.filterTids('topics:read', tids, params.uid);
-        const topicData = (await Topics.getTopicsFields(tids, ['tid', 'cid', 'uid', 'postcount', 'deleted', 'scheduled']))
-            .filter(t => t.scheduled || !t.deleted);
+        const topicData = (
+            await Topics.getTopicsFields(tids, ['tid', 'cid', 'uid', 'postcount', 'deleted', 'scheduled'])
+        ).filter(t => t.scheduled || !t.deleted);
         const topicCids = _.uniq(topicData.map(topic => topic.cid)).filter(Boolean);
 
         const categoryWatchState = await categories.getWatchState(topicCids, params.uid);
@@ -146,8 +155,12 @@ module.exports = function (Topics) {
         const filterCids = params.cid && params.cid.map(cid => parseInt(cid, 10));
 
         topicData.forEach((topic) => {
-            if (topic && topic.cid && (!filterCids || filterCids.includes(topic.cid)) &&
-                !blockedUids.includes(topic.uid)) {
+            if (
+                topic &&
+                topic.cid &&
+                (!filterCids || filterCids.includes(topic.cid)) &&
+                !blockedUids.includes(topic.uid)
+            ) {
                 if (isTopicsFollowed[topic.tid] || userCidState[topic.cid] === categories.watchStates.watching) {
                     tidsByFilter[''].push(topic.tid);
                 }
@@ -180,13 +193,16 @@ module.exports = function (Topics) {
 
     async function getCategoryTids(params) {
         if (plugins.hooks.hasListeners('filter:topics.unread.getCategoryTids')) {
-            const result = await plugins.hooks.fire('filter:topics.unread.getCategoryTids', { params: params, tids: [] });
+            const result = await plugins.hooks.fire('filter:topics.unread.getCategoryTids', {
+                params: params,
+                tids: [],
+            });
             return result.tids;
         }
         if (params.filter === 'watched') {
             return [];
         }
-        const cids = params.cid || await user.getWatchedCategories(params.uid);
+        const cids = params.cid || (await user.getWatchedCategories(params.uid));
         const keys = cids.map(cid => `cid:${cid}:tids:lastposttime`);
         return await db.getSortedSetRevRangeByScoreWithScores(keys, 0, -1, '+inf', params.cutoff);
     }
@@ -199,7 +215,10 @@ module.exports = function (Topics) {
             tids = topicData.filter(t => filterCids.includes(t.cid)).map(t => t.tid);
         }
         const scores = await db.sortedSetScores('topics:recent', tids);
-        const data = tids.map((tid, index) => ({ value: String(tid), score: scores[index] }));
+        const data = tids.map((tid, index) => ({
+            value: String(tid),
+            score: scores[index],
+        }));
         return data.filter(item => item.score > params.cutoff);
     }
 
@@ -213,11 +232,14 @@ module.exports = function (Topics) {
 
         const userScores = _.zipObject(params.tids, results);
 
-        return await async.filter(params.tids, async tid => await doesTidHaveUnblockedUnreadPosts(tid, {
-            blockedUids: params.blockedUids,
-            topicTimestamp: topicScores[tid],
-            userLastReadTimestamp: userScores[tid],
-        }));
+        return await async.filter(
+            params.tids,
+            async tid => await doesTidHaveUnblockedUnreadPosts(tid, {
+                blockedUids: params.blockedUids,
+                topicTimestamp: topicScores[tid],
+                userLastReadTimestamp: userScores[tid],
+            })
+        );
     }
 
     async function doesTidHaveUnblockedUnreadPosts(tid, params) {
@@ -234,7 +256,13 @@ module.exports = function (Topics) {
         }
         while (!done) {
             /* eslint-disable no-await-in-loop */
-            const pidsSinceLastVisit = await db.getSortedSetRangeByScore(`tid:${tid}:posts`, start, count, userLastReadTimestamp, '+inf');
+            const pidsSinceLastVisit = await db.getSortedSetRangeByScore(
+                `tid:${tid}:posts`,
+                start,
+                count,
+                userLastReadTimestamp,
+                '+inf'
+            );
             if (!pidsSinceLastVisit.length) {
                 return hasUnblockedUnread;
             }
@@ -280,8 +308,9 @@ module.exports = function (Topics) {
             db.sortedSetScores(`uid:${uid}:tids_read`, tids),
         ]);
 
-        const topics = topicScores.filter((t, i) => t.lastposttime &&
-            (!userScores[i] || userScores[i] < t.lastposttime));
+        const topics = topicScores.filter(
+            (t, i) => t.lastposttime && (!userScores[i] || userScores[i] < t.lastposttime)
+        );
         tids = topics.map(t => t.tid);
 
         if (!tids.length) {
@@ -299,7 +328,10 @@ module.exports = function (Topics) {
         const cids = _.uniq(topicData.map(t => t && t.cid).filter(Boolean));
         await categories.markAsRead(cids, uid);
 
-        plugins.hooks.fire('action:topics.markAsRead', { uid: uid, tids: tids });
+        plugins.hooks.fire('action:topics.markAsRead', {
+            uid: uid,
+            tids: tids,
+        });
         return true;
     };
 
@@ -338,9 +370,9 @@ module.exports = function (Topics) {
 
         const cutoff = await Topics.unreadCutoff(uid);
         const result = tids.map((tid, index) => {
-            const read = !tids_unread[index] &&
-                (topicScores[index] < cutoff ||
-                !!(userScores[index] && userScores[index] >= topicScores[index]));
+            const read =
+                !tids_unread[index] &&
+                (topicScores[index] < cutoff || !!(userScores[index] && userScores[index] >= topicScores[index]));
             return { tid: tid, read: read, index: index };
         });
 

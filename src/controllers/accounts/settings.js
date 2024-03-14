@@ -22,10 +22,7 @@ settingsController.get = async function (req, res, next) {
     if (!userData) {
         return next();
     }
-    const [settings, languagesData] = await Promise.all([
-        user.getSettings(userData.uid),
-        languages.list(),
-    ]);
+    const [settings, languagesData] = await Promise.all([user.getSettings(userData.uid), languages.list()]);
 
     userData.settings = settings;
     userData.languages = languagesData;
@@ -50,11 +47,31 @@ settingsController.get = async function (req, res, next) {
     userData.disableEmailSubscriptions = meta.config.disableEmailSubscriptions;
 
     userData.dailyDigestFreqOptions = [
-        { value: 'off', name: '[[user:digest_off]]', selected: userData.settings.dailyDigestFreq === 'off' },
-        { value: 'day', name: '[[user:digest_daily]]', selected: userData.settings.dailyDigestFreq === 'day' },
-        { value: 'week', name: '[[user:digest_weekly]]', selected: userData.settings.dailyDigestFreq === 'week' },
-        { value: 'biweek', name: '[[user:digest_biweekly]]', selected: userData.settings.dailyDigestFreq === 'biweek' },
-        { value: 'month', name: '[[user:digest_monthly]]', selected: userData.settings.dailyDigestFreq === 'month' },
+        {
+            value: 'off',
+            name: '[[user:digest_off]]',
+            selected: userData.settings.dailyDigestFreq === 'off',
+        },
+        {
+            value: 'day',
+            name: '[[user:digest_daily]]',
+            selected: userData.settings.dailyDigestFreq === 'day',
+        },
+        {
+            value: 'week',
+            name: '[[user:digest_weekly]]',
+            selected: userData.settings.dailyDigestFreq === 'week',
+        },
+        {
+            value: 'biweek',
+            name: '[[user:digest_biweekly]]',
+            selected: userData.settings.dailyDigestFreq === 'biweek',
+        },
+        {
+            value: 'month',
+            name: '[[user:digest_monthly]]',
+            selected: userData.settings.dailyDigestFreq === 'month',
+        },
     ];
 
     userData.bootswatchSkinOptions = [
@@ -91,20 +108,16 @@ settingsController.get = async function (req, res, next) {
         });
     }
 
-    const notifFreqOptions = [
-        'all',
-        'first',
-        'everyTen',
-        'threshold',
-        'logarithmic',
-        'disabled',
-    ];
+    const notifFreqOptions = ['all', 'first', 'everyTen', 'threshold', 'logarithmic', 'disabled'];
 
-    userData.upvoteNotifFreq = notifFreqOptions.map(
-        name => ({ name: name, selected: name === userData.settings.upvoteNotifFreq })
-    );
+    userData.upvoteNotifFreq = notifFreqOptions.map(name => ({
+        name: name,
+        selected: name === userData.settings.upvoteNotifFreq,
+    }));
 
-    userData.categoryWatchState = { [userData.settings.categoryWatchState]: true };
+    userData.categoryWatchState = {
+        [userData.settings.categoryWatchState]: true,
+    };
 
     userData.disableCustomUserSkins = meta.config.disableCustomUserSkins || 0;
 
@@ -119,7 +132,10 @@ settingsController.get = async function (req, res, next) {
     userData.maxPostsPerPage = meta.config.maxPostsPerPage;
 
     userData.title = '[[pages:account/settings]]';
-    userData.breadcrumbs = helpers.buildBreadcrumbs([{ text: userData.username, url: `/user/${userData.userslug}` }, { text: '[[user:settings]]' }]);
+    userData.breadcrumbs = helpers.buildBreadcrumbs([
+        { text: userData.username, url: `/user/${userData.userslug}` },
+        { text: '[[user:settings]]' },
+    ]);
 
     res.render('account/settings', userData);
 };
@@ -136,7 +152,11 @@ const doUnsubscribe = async (payload) => {
         ]);
     } else if (payload.template === 'notification') {
         const current = await db.getObjectField(`user:${payload.uid}:settings`, `notificationType_${payload.type}`);
-        await user.setSetting(payload.uid, `notificationType_${payload.type}`, (current === 'notificationemail' ? 'notification' : 'none'));
+        await user.setSetting(
+            payload.uid,
+            `notificationType_${payload.type}`,
+            current === 'notificationemail' ? 'notification' : 'none'
+        );
     }
     return true;
 };

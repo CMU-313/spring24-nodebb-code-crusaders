@@ -1,6 +1,5 @@
 'use strict';
 
-
 const winston = require('winston');
 const db = require('../../database');
 
@@ -42,11 +41,7 @@ async function dismissFlag(pid) {
         db.deleteAll(nids.map(nid => `notifications:${nid}`)),
         db.sortedSetRemove('notifications', nids),
         db.delete(`pid:${pid}:flag:uids`),
-        db.sortedSetsRemove([
-            'posts:flagged',
-            'posts:flags:count',
-            `uid:${postData.uid}:flag:pids`,
-        ], pid),
+        db.sortedSetsRemove(['posts:flagged', 'posts:flags:count', `uid:${postData.uid}:flag:pids`], pid),
         db.deleteObjectField(`post:${pid}`, 'flags'),
         db.delete(`pid:${pid}:flag:uid:reason`),
         db.deleteObjectFields(`post:${pid}`, ['flag:state', 'flag:assignee', 'flag:notes', 'flag:history']),

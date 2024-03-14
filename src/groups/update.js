@@ -11,7 +11,6 @@ const batch = require('../batch');
 const meta = require('../meta');
 const cache = require('../cache');
 
-
 module.exports = function (Groups) {
     Groups.update = async function (groupName, values) {
         const exists = await db.exists(`group:${groupName}`);
@@ -77,7 +76,10 @@ module.exports = function (Groups) {
 
         if (values.hasOwnProperty('memberPostCids')) {
             const validCids = await categories.getCidsByPrivilege('categories:cid', groupName, 'topics:read');
-            const cidsArray = values.memberPostCids.split(',').map(cid => parseInt(cid.trim(), 10)).filter(Boolean);
+            const cidsArray = values.memberPostCids
+                .split(',')
+                .map(cid => parseInt(cid.trim(), 10))
+                .filter(Boolean);
             payload.memberPostCids = cidsArray.filter(cid => validCids.includes(cid)).join(',') || '';
         }
 
@@ -134,7 +136,9 @@ module.exports = function (Groups) {
             return;
         }
 
-        winston.verbose(`[groups.update] Group is now public, automatically adding ${pendingUids.length} new members, who were pending prior.`);
+        winston.verbose(
+            `[groups.update] Group is now public, automatically adding ${pendingUids.length} new members, who were pending prior.`
+        );
 
         for (const uid of pendingUids) {
             /* eslint-disable no-await-in-loop */
@@ -153,10 +157,7 @@ module.exports = function (Groups) {
             return;
         }
         Groups.validateGroupName(newName);
-        const [group, exists] = await Promise.all([
-            Groups.getGroupData(currentName),
-            Groups.existsBySlug(newSlug),
-        ]);
+        const [group, exists] = await Promise.all([Groups.getGroupData(currentName), Groups.existsBySlug(newSlug)]);
 
         if (exists) {
             throw new Error('[[error:group-already-exists]]');
@@ -189,7 +190,10 @@ module.exports = function (Groups) {
         await updateNavigationItems(oldName, newName);
         await updateWidgets(oldName, newName);
         await updateConfig(oldName, newName);
-        await db.setObject(`group:${oldName}`, { name: newName, slug: slugify(newName) });
+        await db.setObject(`group:${oldName}`, {
+            name: newName,
+            slug: slugify(newName),
+        });
         await db.deleteObjectField('groupslug:groupname', group.slug);
         await db.setObjectField('groupslug:groupname', slugify(newName), newName);
 
@@ -205,8 +209,16 @@ module.exports = function (Groups) {
         await db.rename(`group:${oldName}:invited`, `group:${newName}:invited`);
         await db.rename(`group:${oldName}:member:pids`, `group:${newName}:member:pids`);
 
-        await renameGroupsMember(['groups:createtime', 'groups:visible:createtime', 'groups:visible:memberCount'], oldName, newName);
-        await renameGroupsMember(['groups:visible:name'], `${oldName.toLowerCase()}:${oldName}`, `${newName.toLowerCase()}:${newName}`);
+        await renameGroupsMember(
+            ['groups:createtime', 'groups:visible:createtime', 'groups:visible:memberCount'],
+            oldName,
+            newName
+        );
+        await renameGroupsMember(
+            ['groups:visible:name'],
+            `${oldName.toLowerCase()}:${oldName}`,
+            `${newName.toLowerCase()}:${newName}`
+        );
 
         plugins.hooks.fire('action:group.rename', {
             old: oldName,
@@ -216,17 +228,22 @@ module.exports = function (Groups) {
     };
 
     async function updateMemberGroupTitles(oldName, newName) {
-        await batch.processSortedSet(`group:${oldName}:members`, async (uids) => {
-            let usersData = await user.getUsersData(uids);
-            usersData = usersData.filter(userData => userData && userData.groupTitleArray.includes(oldName));
+        await batch.processSortedSet(
+            `group:${oldName}:members`,
+            async (uids) => {
+                let usersData = await user.getUsersData(uids);
+                usersData = usersData.filter(userData => userData && userData.groupTitleArray.includes(oldName));
 
-            usersData.forEach((userData) => {
-                userData.newTitleArray = userData.groupTitleArray
-                    .map(oldTitle => (oldTitle === oldName ? newName : oldTitle));
-            });
+                usersData.forEach((userData) => {
+                    userData.newTitleArray = userData.groupTitleArray.map(oldTitle => (oldTitle === oldName ? newName : oldTitle));
+                });
 
-            await Promise.all(usersData.map(u => user.setUserField(u.uid, 'groupTitle', JSON.stringify(u.newTitleArray))));
-        }, {});
+                await Promise.all(
+                    usersData.map(u => user.setUserField(u.uid, 'groupTitle', JSON.stringify(u.newTitleArray)))
+                );
+            },
+            {}
+        );
     }
 
     async function renameGroupsMember(keys, oldName, newName) {
@@ -261,8 +278,12 @@ module.exports = function (Groups) {
         data.areas.forEach((area) => {
             area.widgets = area.data;
             area.widgets.forEach((widget) => {
-                if (widget && widget.data && Array.isArray(widget.data.groups) &&
-                    widget.data.groups.includes(oldName)) {
+                if (
+                    widget &&
+                    widget.data &&
+                    Array.isArray(widget.data.groups) &&
+                    widget.data.groups.includes(oldName)
+                ) {
                     widget.data.groups.splice(widget.data.groups.indexOf(oldName), 1, newName);
                 }
             });
@@ -277,13 +298,17 @@ module.exports = function (Groups) {
     async function updateConfig(oldName, newName) {
         if (meta.config.groupsExemptFromPostQueue.includes(oldName)) {
             meta.config.groupsExemptFromPostQueue.splice(
-                meta.config.groupsExemptFromPostQueue.indexOf(oldName), 1, newName
+                meta.config.groupsExemptFromPostQueue.indexOf(oldName),
+                1,
+                newName
             );
             await meta.configs.set('groupsExemptFromPostQueue', meta.config.groupsExemptFromPostQueue);
         }
         if (meta.config.groupsExemptFromMaintenanceMode.includes(oldName)) {
             meta.config.groupsExemptFromMaintenanceMode.splice(
-                meta.config.groupsExemptFromMaintenanceMode.indexOf(oldName), 1, newName
+                meta.config.groupsExemptFromMaintenanceMode.indexOf(oldName),
+                1,
+                newName
             );
             await meta.configs.set('groupsExemptFromMaintenanceMode', meta.config.groupsExemptFromMaintenanceMode);
         }

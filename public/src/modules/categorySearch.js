@@ -20,7 +20,8 @@ define('categorySearch', ['alerts'], function (alerts) {
             return;
         }
 
-        const toggleVisibility = searchEl.parent('[component="category/dropdown"]').length > 0 ||
+        const toggleVisibility =
+            searchEl.parent('[component="category/dropdown"]').length > 0 ||
             searchEl.parent('[component="category-selector"]').length > 0;
 
         el.on('show.bs.dropdown', function () {
@@ -67,33 +68,42 @@ define('categorySearch', ['alerts'], function (alerts) {
         });
 
         function loadList(search, callback) {
-            socket.emit('categories.categorySearch', {
-                search: search,
-                query: utils.params(),
-                parentCid: options.parentCid || 0,
-                selectedCids: options.selectedCids,
-                privilege: options.privilege,
-                states: options.states,
-                showLinks: options.showLinks,
-            }, function (err, categories) {
-                if (err) {
-                    return alerts.error(err);
+            socket.emit(
+                'categories.categorySearch',
+                {
+                    search: search,
+                    query: utils.params(),
+                    parentCid: options.parentCid || 0,
+                    selectedCids: options.selectedCids,
+                    privilege: options.privilege,
+                    states: options.states,
+                    showLinks: options.showLinks,
+                },
+                function (err, categories) {
+                    if (err) {
+                        return alerts.error(err);
+                    }
+                    callback(localCategories.concat(categories));
                 }
-                callback(localCategories.concat(categories));
-            });
+            );
         }
 
         function renderList(categories) {
-            app.parseAndTranslate(options.template, {
-                categoryItems: categories.slice(0, 200),
-                selectedCategory: ajaxify.data.selectedCategory,
-                allCategoriesUrl: ajaxify.data.allCategoriesUrl,
-            }, function (html) {
-                el.find('[component="category/list"]')
-                    .replaceWith(html.find('[component="category/list"]'));
-                el.find('[component="category/list"] [component="category/no-matches"]')
-                    .toggleClass('hidden', !!categories.length);
-            });
+            app.parseAndTranslate(
+                options.template,
+                {
+                    categoryItems: categories.slice(0, 200),
+                    selectedCategory: ajaxify.data.selectedCategory,
+                    allCategoriesUrl: ajaxify.data.allCategoriesUrl,
+                },
+                function (html) {
+                    el.find('[component="category/list"]').replaceWith(html.find('[component="category/list"]'));
+                    el.find('[component="category/list"] [component="category/no-matches"]').toggleClass(
+                        'hidden',
+                        !!categories.length
+                    );
+                }
+            );
         }
     };
 

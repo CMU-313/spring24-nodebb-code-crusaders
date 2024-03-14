@@ -57,7 +57,9 @@ module.exports = function (Plugins) {
 
     Plugins.toggleActive = async function (id) {
         if (nconf.get('plugins:active')) {
-            winston.error('Cannot activate plugins while plugin state is set in the configuration (config.json, environmental variables or terminal arguments), please modify the configuration instead');
+            winston.error(
+                'Cannot activate plugins while plugin state is set in the configuration (config.json, environmental variables or terminal arguments), please modify the configuration instead'
+            );
             throw new Error('[[error:plugins-set-in-configuration]]');
         }
         const isActive = await Plugins.isActive(id);
@@ -97,45 +99,56 @@ module.exports = function (Plugins) {
     };
 
     Plugins.toggleInstall = async function (id, version) {
-        pubsub.publish('plugins:toggleInstall', { hostname: os.hostname(), id: id, version: version });
+        pubsub.publish('plugins:toggleInstall', {
+            hostname: os.hostname(),
+            id: id,
+            version: version,
+        });
         return await toggleInstall(id, version);
     };
 
     const runPackageManagerCommandAsync = util.promisify(runPackageManagerCommand);
 
     async function toggleInstall(id, version) {
-        const [installed, active] = await Promise.all([
-            Plugins.isInstalled(id),
-            Plugins.isActive(id),
-        ]);
+        const [installed, active] = await Promise.all([Plugins.isInstalled(id), Plugins.isActive(id)]);
         const type = installed ? 'uninstall' : 'install';
         if (active) {
             await Plugins.toggleActive(id);
         }
         await runPackageManagerCommandAsync(type, id, version || 'latest');
         const pluginData = await Plugins.get(id);
-        Plugins.hooks.fire(`action:plugin.${type}`, { id: id, version: version });
+        Plugins.hooks.fire(`action:plugin.${type}`, {
+            id: id,
+            version: version,
+        });
         return pluginData;
     }
 
     function runPackageManagerCommand(command, pkgName, version, callback) {
-        cproc.execFile(packageManagerExecutable, [
-            packageManagerCommands[packageManager][command],
-            pkgName + (command === 'install' ? `@${version}` : ''),
-            '--save',
-        ], (err, stdout) => {
-            if (err) {
-                return callback(err);
-            }
+        cproc.execFile(
+            packageManagerExecutable,
+            [
+                packageManagerCommands[packageManager][command],
+                pkgName + (command === 'install' ? `@${version}` : ''),
+                '--save',
+            ],
+            (err, stdout) => {
+                if (err) {
+                    return callback(err);
+                }
 
-            winston.verbose(`[plugins/${command}] ${stdout}`);
-            callback();
-        });
+                winston.verbose(`[plugins/${command}] ${stdout}`);
+                callback();
+            }
+        );
     }
 
-
     Plugins.upgrade = async function (id, version) {
-        pubsub.publish('plugins:upgrade', { hostname: os.hostname(), id: id, version: version });
+        pubsub.publish('plugins:upgrade', {
+            hostname: os.hostname(),
+            id: id,
+            version: version,
+        });
         return await upgrade(id, version);
     };
 

@@ -15,9 +15,12 @@ $('document').ready(function () {
 
     if ($('#database-error').length) {
         $('[name="database"]').parents('.input-row').addClass('error');
-        $('html, body').animate({
-            scrollTop: ($('#database-error').offset().top + 100) + 'px',
-        }, 400);
+        $('html, body').animate(
+            {
+                scrollTop: $('#database-error').offset().top + 100 + 'px',
+            },
+            400
+        );
     }
 
     $('#launch').on('click', launchForum);

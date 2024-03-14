@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('forum/account/header', [
     'coverPhoto',
     'pictureCropper',
@@ -50,7 +49,6 @@ define('forum/account/header', [
             });
         });
 
-
         components.get('account/ban').on('click', function () {
             banAccount(ajaxify.data.theirid);
         });
@@ -87,40 +85,53 @@ define('forum/account/header', [
     }
 
     function selectActivePill() {
-        $('.account-sub-links li').removeClass('active').each(function () {
-            const href = $(this).find('a').attr('href');
+        $('.account-sub-links li')
+            .removeClass('active')
+            .each(function () {
+                const href = $(this).find('a').attr('href');
 
-            if (decodeURIComponent(href) === decodeURIComponent(window.location.pathname)) {
-                $(this).addClass('active');
-                return false;
-            }
-        });
+                if (decodeURIComponent(href) === decodeURIComponent(window.location.pathname)) {
+                    $(this).addClass('active');
+                    return false;
+                }
+            });
     }
 
     function setupCoverPhoto() {
         coverPhoto.init(
             components.get('account/cover'),
             function (imageData, position, callback) {
-                socket.emit('user.updateCover', {
-                    uid: ajaxify.data.uid,
-                    imageData: imageData,
-                    position: position,
-                }, callback);
+                socket.emit(
+                    'user.updateCover',
+                    {
+                        uid: ajaxify.data.uid,
+                        imageData: imageData,
+                        position: position,
+                    },
+                    callback
+                );
             },
             function () {
-                pictureCropper.show({
-                    title: '[[user:upload_cover_picture]]',
-                    socketMethod: 'user.updateCover',
-                    aspectRatio: NaN,
-                    allowSkippingCrop: true,
-                    restrictImageDimension: false,
-                    paramName: 'uid',
-                    paramValue: ajaxify.data.theirid,
-                    accept: '.png,.jpg,.bmp',
-                }, function (imageUrlOnServer) {
-                    imageUrlOnServer = (!imageUrlOnServer.startsWith('http') ? config.relative_path : '') + imageUrlOnServer + '?' + Date.now();
-                    components.get('account/cover').css('background-image', 'url(' + imageUrlOnServer + ')');
-                });
+                pictureCropper.show(
+                    {
+                        title: '[[user:upload_cover_picture]]',
+                        socketMethod: 'user.updateCover',
+                        aspectRatio: NaN,
+                        allowSkippingCrop: true,
+                        restrictImageDimension: false,
+                        paramName: 'uid',
+                        paramValue: ajaxify.data.theirid,
+                        accept: '.png,.jpg,.bmp',
+                    },
+                    function (imageUrlOnServer) {
+                        imageUrlOnServer =
+                            (!imageUrlOnServer.startsWith('http') ? config.relative_path : '') +
+                            imageUrlOnServer +
+                            '?' +
+                            Date.now();
+                        components.get('account/cover').css('background-image', 'url(' + imageUrlOnServer + ')');
+                    }
+                );
             },
             removeCover
         );
@@ -156,25 +167,31 @@ define('forum/account/header', [
                     submit: {
                         label: '[[user:ban_account]]',
                         callback: function () {
-                            const formData = $('.ban-modal form').serializeArray().reduce(function (data, cur) {
-                                data[cur.name] = cur.value;
-                                return data;
-                            }, {});
+                            const formData = $('.ban-modal form')
+                                .serializeArray()
+                                .reduce(function (data, cur) {
+                                    data[cur.name] = cur.value;
+                                    return data;
+                                }, {});
 
-                            const until = formData.length > 0 ? (
-                                Date.now() + (formData.length * 1000 * 60 * 60 * (parseInt(formData.unit, 10) ? 24 : 1))
-                            ) : 0;
+                            const until =
+                                formData.length > 0
+                                    ? Date.now() +
+                                      formData.length * 1000 * 60 * 60 * (parseInt(formData.unit, 10) ? 24 : 1)
+                                    : 0;
 
                             api.put('/users/' + theirid + '/ban', {
                                 until: until,
                                 reason: formData.reason || '',
-                            }).then(() => {
-                                if (typeof onSuccess === 'function') {
-                                    return onSuccess();
-                                }
+                            })
+                                .then(() => {
+                                    if (typeof onSuccess === 'function') {
+                                        return onSuccess();
+                                    }
 
-                                ajaxify.refresh();
-                            }).catch(alerts.error);
+                                    ajaxify.refresh();
+                                })
+                                .catch(alerts.error);
                         },
                     },
                 },
@@ -183,9 +200,11 @@ define('forum/account/header', [
     }
 
     function unbanAccount(theirid) {
-        api.del('/users/' + theirid + '/ban').then(() => {
-            ajaxify.refresh();
-        }).catch(alerts.error);
+        api.del('/users/' + theirid + '/ban')
+            .then(() => {
+                ajaxify.refresh();
+            })
+            .catch(alerts.error);
     }
 
     function muteAccount(theirid, onSuccess) {
@@ -204,24 +223,30 @@ define('forum/account/header', [
                     submit: {
                         label: '[[user:mute_account]]',
                         callback: function () {
-                            const formData = $('.mute-modal form').serializeArray().reduce(function (data, cur) {
-                                data[cur.name] = cur.value;
-                                return data;
-                            }, {});
+                            const formData = $('.mute-modal form')
+                                .serializeArray()
+                                .reduce(function (data, cur) {
+                                    data[cur.name] = cur.value;
+                                    return data;
+                                }, {});
 
-                            const until = formData.length > 0 ? (
-                                Date.now() + (formData.length * 1000 * 60 * 60 * (parseInt(formData.unit, 10) ? 24 : 1))
-                            ) : 0;
+                            const until =
+                                formData.length > 0
+                                    ? Date.now() +
+                                      formData.length * 1000 * 60 * 60 * (parseInt(formData.unit, 10) ? 24 : 1)
+                                    : 0;
 
                             api.put('/users/' + theirid + '/mute', {
                                 until: until,
                                 reason: formData.reason || '',
-                            }).then(() => {
-                                if (typeof onSuccess === 'function') {
-                                    return onSuccess();
-                                }
-                                ajaxify.refresh();
-                            }).catch(alerts.error);
+                            })
+                                .then(() => {
+                                    if (typeof onSuccess === 'function') {
+                                        return onSuccess();
+                                    }
+                                    ajaxify.refresh();
+                                })
+                                .catch(alerts.error);
                         },
                     },
                 },
@@ -230,9 +255,11 @@ define('forum/account/header', [
     }
 
     function unmuteAccount(theirid) {
-        api.del('/users/' + theirid + '/mute').then(() => {
-            ajaxify.refresh();
-        }).catch(alerts.error);
+        api.del('/users/' + theirid + '/mute')
+            .then(() => {
+                ajaxify.refresh();
+            })
+            .catch(alerts.error);
     }
 
     function flagAccount() {
@@ -246,18 +273,22 @@ define('forum/account/header', [
 
     function toggleBlockAccount() {
         const targetEl = this;
-        socket.emit('user.toggleBlock', {
-            blockeeUid: ajaxify.data.uid,
-            blockerUid: app.user.uid,
-        }, function (err, blocked) {
-            if (err) {
-                return alerts.error(err);
-            }
+        socket.emit(
+            'user.toggleBlock',
+            {
+                blockeeUid: ajaxify.data.uid,
+                blockerUid: app.user.uid,
+            },
+            function (err, blocked) {
+                if (err) {
+                    return alerts.error(err);
+                }
 
-            translator.translate('[[user:' + (blocked ? 'unblock' : 'block') + '_user]]', function (label) {
-                $(targetEl).text(label);
-            });
-        });
+                translator.translate('[[user:' + (blocked ? 'unblock' : 'block') + '_user]]', function (label) {
+                    $(targetEl).text(label);
+                });
+            }
+        );
 
         // Keep dropdown open
         return false;
@@ -270,15 +301,19 @@ define('forum/account/header', [
                     return;
                 }
 
-                socket.emit('user.removeCover', {
-                    uid: ajaxify.data.uid,
-                }, function (err) {
-                    if (!err) {
-                        ajaxify.refresh();
-                    } else {
-                        alerts.error(err);
+                socket.emit(
+                    'user.removeCover',
+                    {
+                        uid: ajaxify.data.uid,
+                    },
+                    function (err) {
+                        if (!err) {
+                            ajaxify.refresh();
+                        } else {
+                            alerts.error(err);
+                        }
                     }
-                });
+                );
             });
         });
     }

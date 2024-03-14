@@ -17,10 +17,9 @@ questions.main = [
     {
         name: 'url',
         description: 'URL used to access this NodeBB',
-        default:
-            nconf.get('url') || 'http://127.0.0.1:4567',
+        default: nconf.get('url') || 'http://127.0.0.1:4567',
         pattern: /^http(?:s)?:\/\//,
-        message: 'Base URL must begin with \'http://\' or \'https://\'',
+        message: "Base URL must begin with 'http://' or 'https://'",
     },
     {
         name: 'secret',
@@ -70,7 +69,8 @@ function checkSetupFlagEnv() {
         winston.info('[install/checkSetupFlagEnv] checking env vars for setup info...');
         setupVal = setupVal || {};
 
-        Object.entries(process.env).forEach(([evName, evValue]) => { // get setup values from env
+        Object.entries(process.env).forEach(([evName, evValue]) => {
+            // get setup values from env
             if (evName.startsWith('NODEBB_DB_')) {
                 setupVal[`${process.env.NODEBB_DB}:${envConfMap[evName]}`] = evValue;
             } else if (evName.startsWith('NODEBB_')) {
@@ -90,11 +90,18 @@ function checkSetupFlagEnv() {
             setupVal = { ...setupVal, ...setupJSON };
         }
     } catch (err) {
-        winston.error('[install/checkSetupFlagEnv] invalid json in nconf.get(\'setup\'), ignoring setup values from json');
+        winston.error(
+            "[install/checkSetupFlagEnv] invalid json in nconf.get('setup'), ignoring setup values from json"
+        );
     }
 
     if (setupVal && typeof setupVal === 'object') {
-        if (setupVal['admin:username'] && setupVal['admin:password'] && setupVal['admin:password:confirm'] && setupVal['admin:email']) {
+        if (
+            setupVal['admin:username'] &&
+            setupVal['admin:password'] &&
+            setupVal['admin:password:confirm'] &&
+            setupVal['admin:email']
+        ) {
             install.values = setupVal;
         } else {
             winston.error('[install/checkSetupFlagEnv] required values are missing for automated setup:');
@@ -272,7 +279,9 @@ async function createDefaultUserGroups() {
     }
 
     const [verifiedExists, unverifiedExists, bannedExists] = await groups.exists([
-        'verified-users', 'unverified-users', 'banned-users',
+        'verified-users',
+        'unverified-users',
+        'banned-users',
     ]);
     if (!verifiedExists) {
         await createGroup('verified-users');
@@ -304,30 +313,36 @@ async function createAdmin() {
 
     winston.warn('No administrators have been detected, running initial user setup\n');
 
-    let questions = [{
-        name: 'username',
-        description: 'Administrator username',
-        required: true,
-        type: 'string',
-    }, {
-        name: 'email',
-        description: 'Administrator email address',
-        pattern: /.+@.+/,
-        required: true,
-    }];
-    const passwordQuestions = [{
-        name: 'password',
-        description: 'Password',
-        required: true,
-        hidden: true,
-        type: 'string',
-    }, {
-        name: 'password:confirm',
-        description: 'Confirm Password',
-        required: true,
-        hidden: true,
-        type: 'string',
-    }];
+    let questions = [
+        {
+            name: 'username',
+            description: 'Administrator username',
+            required: true,
+            type: 'string',
+        },
+        {
+            name: 'email',
+            description: 'Administrator email address',
+            pattern: /.+@.+/,
+            required: true,
+        },
+    ];
+    const passwordQuestions = [
+        {
+            name: 'password',
+            description: 'Password',
+            required: true,
+            hidden: true,
+            type: 'string',
+        },
+        {
+            name: 'password:confirm',
+            description: 'Confirm Password',
+            required: true,
+            hidden: true,
+            type: 'string',
+        },
+    ];
 
     async function success(results) {
         if (!results) {
@@ -423,14 +438,22 @@ async function createGlobalModeratorsGroup() {
 async function giveGlobalPrivileges() {
     const privileges = require('./privileges');
     const defaultPrivileges = [
-        'groups:chat', 'groups:upload:post:image', 'groups:signature', 'groups:search:content',
-        'groups:search:users', 'groups:search:tags', 'groups:view:users', 'groups:view:tags', 'groups:view:groups',
+        'groups:chat',
+        'groups:upload:post:image',
+        'groups:signature',
+        'groups:search:content',
+        'groups:search:users',
+        'groups:search:tags',
+        'groups:view:users',
+        'groups:view:tags',
+        'groups:view:groups',
         'groups:local:login',
     ];
     await privileges.global.give(defaultPrivileges, 'registered-users');
-    await privileges.global.give(defaultPrivileges.concat([
-        'groups:ban', 'groups:upload:post:file', 'groups:view:users:info',
-    ]), 'Global Moderators');
+    await privileges.global.give(
+        defaultPrivileges.concat(['groups:ban', 'groups:upload:post:file', 'groups:view:users:info']),
+        'Global Moderators'
+    );
     await privileges.global.give(['groups:view:users', 'groups:view:tags', 'groups:view:groups'], 'guests');
     await privileges.global.give(['groups:view:users', 'groups:view:tags', 'groups:view:groups'], 'spiders');
 }

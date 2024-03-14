@@ -10,19 +10,25 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (transla
             return;
         }
 
-        searchOptions = searchOptions || { in: config.searchDefaultInQuick || 'titles' };
+        searchOptions = searchOptions || {
+            in: config.searchDefaultInQuick || 'titles',
+        };
         const searchButton = $('#search-button');
         const searchFields = $('#search-fields');
         const searchInput = $('#search-fields input');
         const quickSearchContainer = $('#quick-search-container');
 
-        $('#search-form .advanced-search-link').off('mousedown').on('mousedown', function () {
-            ajaxify.go('/search');
-        });
+        $('#search-form .advanced-search-link')
+            .off('mousedown')
+            .on('mousedown', function () {
+                ajaxify.go('/search');
+            });
 
-        $('#search-form').off('submit').on('submit', function () {
-            searchInput.blur();
-        });
+        $('#search-form')
+            .off('submit')
+            .on('submit', function () {
+                searchInput.blur();
+            });
         searchInput.off('blur').on('blur', function dismissSearch() {
             setTimeout(function () {
                 if (!searchInput.is(':focus')) {
@@ -58,21 +64,23 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (transla
             return false;
         });
 
-        $('#search-form').off('submit').on('submit', function () {
-            const input = $(this).find('input');
-            const data = Search.getSearchPreferences();
-            data.term = input.val();
-            data.in = searchOptions.in;
-            hooks.fire('action:search.submit', {
-                searchOptions: data,
-                searchElements: searchElements,
-            });
-            Search.query(data, function () {
-                input.val('');
-            });
+        $('#search-form')
+            .off('submit')
+            .on('submit', function () {
+                const input = $(this).find('input');
+                const data = Search.getSearchPreferences();
+                data.term = input.val();
+                data.in = searchOptions.in;
+                hooks.fire('action:search.submit', {
+                    searchOptions: data,
+                    searchElements: searchElements,
+                });
+                Search.query(data, function () {
+                    input.val('');
+                });
 
-            return false;
-        });
+                return false;
+            });
     };
 
     Search.enableQuickSearch = function (options) {
@@ -119,17 +127,23 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (transla
                 }
                 data.posts.forEach(function (p) {
                     const text = $('<div>' + p.content + '</div>').text();
-                    const query = inputEl.val().toLowerCase().replace(/^in:topic-\d+/, '');
+                    const query = inputEl
+                        .val()
+                        .toLowerCase()
+                        .replace(/^in:topic-\d+/, '');
                     const start = Math.max(0, text.toLowerCase().indexOf(query) - 40);
-                    p.snippet = utils.escapeHTML((start > 0 ? '...' : '') +
-                        text.slice(start, start + 80) +
-                        (text.length - start > 80 ? '...' : ''));
+                    p.snippet = utils.escapeHTML(
+                        (start > 0 ? '...' : '') +
+                            text.slice(start, start + 80) +
+                            (text.length - start > 80 ? '...' : '')
+                    );
                 });
                 app.parseAndTranslate('partials/quick-search-results', data, function (html) {
                     if (html.length) {
                         html.find('.timeago').timeago();
                     }
-                    quickSearchResults.toggleClass('hidden', !html.length || !inputEl.is(':focus'))
+                    quickSearchResults
+                        .toggleClass('hidden', !html.length || !inputEl.is(':focus'))
                         .find('.quick-search-results-container')
                         .html(html.length ? html : '');
                     const highlightEls = quickSearchResults.find(
@@ -149,21 +163,24 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (transla
             doSearch();
         });
 
-        inputEl.off('keyup').on('keyup', utils.debounce(function () {
-            if (inputEl.val().length < 3) {
-                quickSearchResults.addClass('hidden');
+        inputEl.off('keyup').on(
+            'keyup',
+            utils.debounce(function () {
+                if (inputEl.val().length < 3) {
+                    quickSearchResults.addClass('hidden');
+                    oldValue = inputEl.val();
+                    return;
+                }
+                if (inputEl.val() === oldValue) {
+                    return;
+                }
                 oldValue = inputEl.val();
-                return;
-            }
-            if (inputEl.val() === oldValue) {
-                return;
-            }
-            oldValue = inputEl.val();
-            if (!inputEl.is(':focus')) {
-                return quickSearchResults.addClass('hidden');
-            }
-            doSearch();
-        }, 500));
+                if (!inputEl.is(':focus')) {
+                    return quickSearchResults.addClass('hidden');
+                }
+                doSearch();
+            }, 500)
+        );
 
         let mousedownOnResults = false;
         quickSearchResults.on('mousedown', function () {
@@ -197,10 +214,7 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (transla
                 } else {
                     quickSearchResults.removeClass('hidden');
                 }
-                inputEl[0].setSelectionRange(
-                    query.startsWith('in:topic') ? query.indexOf(' ') + 1 : 0,
-                    query.length
-                );
+                inputEl[0].setSelectionRange(query.startsWith('in:topic') ? query.indexOf(' ') + 1 : 0, query.length);
             }
         });
 
@@ -250,7 +264,11 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (transla
             query.matchWords = data.matchWords;
         }
 
-        if (postedBy && postedBy.length && (searchIn === 'posts' || searchIn === 'titles' || searchIn === 'titlesposts')) {
+        if (
+            postedBy &&
+            postedBy.length &&
+            (searchIn === 'posts' || searchIn === 'titles' || searchIn === 'titlesposts')
+        ) {
             query.by = postedBy;
         }
 
@@ -309,8 +327,11 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (transla
             return;
         }
         searchQuery = utils.escapeHTML(searchQuery.replace(/^"/, '').replace(/"$/, '').trim());
-        const regexStr = searchQuery.split(' ')
-            .map(function (word) { return utils.escapeRegexChars(word); })
+        const regexStr = searchQuery
+            .split(' ')
+            .map(function (word) {
+                return utils.escapeRegexChars(word);
+            })
             .join('|');
         const regex = new RegExp('(' + regexStr + ')', 'gi');
 
@@ -323,14 +344,18 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (transla
                 nested.push($('<div></div>').append($(this)));
             });
 
-            result.html(result.html().replace(regex, function (match, p1) {
-                return '<strong class="search-match">' + p1 + '</strong>';
-            }));
+            result.html(
+                result.html().replace(regex, function (match, p1) {
+                    return '<strong class="search-match">' + p1 + '</strong>';
+                })
+            );
 
             nested.forEach(function (nestedEl, i) {
-                result.html(result.html().replace('<!-- ' + i + ' -->', function () {
-                    return nestedEl.html();
-                }));
+                result.html(
+                    result.html().replace('<!-- ' + i + ' -->', function () {
+                        return nestedEl.html();
+                    })
+                );
             });
         });
 

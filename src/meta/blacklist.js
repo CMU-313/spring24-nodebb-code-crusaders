@@ -17,7 +17,9 @@ Blacklist.load = async function () {
     let rules = await Blacklist.get();
     rules = Blacklist.validate(rules);
 
-    winston.verbose(`[meta/blacklist] Loading ${rules.valid.length} blacklist rule(s)${rules.duplicateCount > 0 ? `, ignored ${rules.duplicateCount} duplicate(s)` : ''}`);
+    winston.verbose(
+        `[meta/blacklist] Loading ${rules.valid.length} blacklist rule(s)${rules.duplicateCount > 0 ? `, ignored ${rules.duplicateCount} duplicate(s)` : ''}`
+    );
     if (rules.invalid.length) {
         winston.warn(`[meta/blacklist] ${rules.invalid.length} invalid blacklist rule(s) were ignored.`);
     }
@@ -101,10 +103,12 @@ Blacklist.validate = function (rules) {
 
     // Filter out blank lines and lines starting with the hash character (comments)
     // Also trim inputs and remove inline comments
-    rules = rules.map((rule) => {
-        rule = rule.replace(inlineCommentMatch, '').trim();
-        return rule.length && !rule.startsWith('#') ? rule : null;
-    }).filter(Boolean);
+    rules = rules
+        .map((rule) => {
+            rule = rule.replace(inlineCommentMatch, '').trim();
+            return rule.length && !rule.startsWith('#') ? rule : null;
+        })
+        .filter(Boolean);
 
     // Filter out duplicates
     const uniqRules = _.uniq(rules);

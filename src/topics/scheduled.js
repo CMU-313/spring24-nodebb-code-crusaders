@@ -32,17 +32,21 @@ Scheduled.handleExpired = async function () {
 
     // Restore first to be not filtered for being deleted
     // Restoring handles "updateRecentTid"
-    await Promise.all([].concat(
-        topicsData.map(topicData => topics.restore(topicData.tid)),
-        topicsData.map(topicData => topics.updateLastPostTimeFromLastPid(topicData.tid))
-    ));
+    await Promise.all(
+        [].concat(
+            topicsData.map(topicData => topics.restore(topicData.tid)),
+            topicsData.map(topicData => topics.updateLastPostTimeFromLastPid(topicData.tid))
+        )
+    );
 
-    await Promise.all([].concat(
-        sendNotifications(uids, topicsData),
-        updateUserLastposttimes(uids, topicsData),
-        ...topicsData.map(topicData => unpin(topicData.tid, topicData)),
-        db.sortedSetsRemoveRangeByScore([`topics:scheduled`], '-inf', now)
-    ));
+    await Promise.all(
+        [].concat(
+            sendNotifications(uids, topicsData),
+            updateUserLastposttimes(uids, topicsData),
+            ...topicsData.map(topicData => unpin(topicData.tid, topicData)),
+            db.sortedSetsRemoveRangeByScore([`topics:scheduled`], '-inf', now)
+        )
+    );
 };
 
 // topics/tools.js#pin/unpin would block non-admins/mods, thus the local versions
@@ -50,23 +54,25 @@ Scheduled.pin = async function (tid, topicData) {
     return Promise.all([
         topics.setTopicField(tid, 'pinned', 1),
         db.sortedSetAdd(`cid:${topicData.cid}:tids:pinned`, Date.now(), tid),
-        db.sortedSetsRemove([
-            `cid:${topicData.cid}:tids`,
-            `cid:${topicData.cid}:tids:posts`,
-            `cid:${topicData.cid}:tids:votes`,
-            `cid:${topicData.cid}:tids:views`,
-        ], tid),
+        db.sortedSetsRemove(
+            [
+                `cid:${topicData.cid}:tids`,
+                `cid:${topicData.cid}:tids:posts`,
+                `cid:${topicData.cid}:tids:votes`,
+                `cid:${topicData.cid}:tids:views`,
+            ],
+            tid
+        ),
     ]);
 };
 
 Scheduled.reschedule = async function ({ cid, tid, timestamp, uid }) {
     await Promise.all([
-        db.sortedSetsAdd([
-            'topics:scheduled',
-            `uid:${uid}:topics`,
-            'topics:tid',
-            `cid:${cid}:uid:${uid}:tids`,
-        ], timestamp, tid),
+        db.sortedSetsAdd(
+            ['topics:scheduled', `uid:${uid}:topics`, 'topics:tid', `cid:${cid}:uid:${uid}:tids`],
+            timestamp,
+            tid
+        ),
         shiftPostTimes(tid, timestamp),
     ]);
     return topics.updateLastPostTimeFromLastPid(tid);
@@ -97,13 +103,16 @@ async function sendNotifications(uids, topicsData) {
         postData.topic = topicsData[idx];
     });
 
-    return Promise.all(topicsData.map(
-        (t, idx) => user.notifications.sendTopicNotificationToFollowers(t.uid, t, postsData[idx])
-    ).concat(
-        topicsData.map(
-            (t, idx) => socketHelpers.notifyNew(t.uid, 'newTopic', { posts: [postsData[idx]], topic: t })
-        )
-    ));
+    return Promise.all(
+        topicsData
+            .map((t, idx) => user.notifications.sendTopicNotificationToFollowers(t.uid, t, postsData[idx]))
+            .concat(
+                topicsData.map((t, idx) => socketHelpers.notifyNew(t.uid, 'newTopic', {
+                    posts: [postsData[idx]],
+                    topic: t,
+                }))
+            )
+    );
 }
 
 async function updateUserLastposttimes(uids, topicsData) {
@@ -122,7 +131,7 @@ async function updateUserLastposttimes(uids, topicsData) {
 }
 
 async function shiftPostTimes(tid, timestamp) {
-    const pids = (await posts.getPidsFromSet(`tid:${tid}:posts`, 0, -1, false));
+    const pids = await posts.getPidsFromSet(`tid:${tid}:posts`, 0, -1, false);
     // Leaving other related score values intact, since they reflect post order correctly,
     // and it seems that's good enough
     return db.setObjectBulk(pids.map((pid, idx) => [`post:${pid}`, { timestamp: timestamp + idx + 1 }]));
