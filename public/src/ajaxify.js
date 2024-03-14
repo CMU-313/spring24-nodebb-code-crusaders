@@ -31,7 +31,7 @@ ajaxify.widgets = { render: render };
         }
 
         // Abort subsequent requests if clicked multiple times within a short window of time
-        if (ajaxifyTimer && (Date.now() - ajaxifyTimer) < 500) {
+        if (ajaxifyTimer && Date.now() - ajaxifyTimer < 500) {
             return true;
         }
         ajaxifyTimer = Date.now();
@@ -58,7 +58,11 @@ ajaxify.widgets = { render: render };
 
         // If any listeners alter url and set it to an empty string, abort the ajaxification
         if (url === null) {
-            hooks.fire('action:ajaxify.end', { url: url, tpl_url: ajaxify.data.template.name, title: ajaxify.data.title });
+            hooks.fire('action:ajaxify.end', {
+                url: url,
+                tpl_url: ajaxify.data.template.name,
+                title: ajaxify.data.title,
+            });
             return false;
         }
 
@@ -66,11 +70,10 @@ ajaxify.widgets = { render: render };
         $('#footer, #content').removeClass('hide').addClass('ajaxifying');
 
         ajaxify.loadData(url, function (err, data) {
-            if (!err || (
-                err &&
-                err.data &&
-                (parseInt(err.data.status, 10) !== 302 && parseInt(err.data.status, 10) !== 308)
-            )) {
+            if (
+                !err ||
+                (err && err.data && parseInt(err.data.status, 10) !== 302 && parseInt(err.data.status, 10) !== 308)
+            ) {
                 ajaxify.updateHistory(url, quiet);
             }
 
@@ -100,8 +103,10 @@ ajaxify.widgets = { render: render };
 
     ajaxify.handleRedirects = function (url) {
         url = ajaxify.removeRelativePath(url.replace(/^\/|\/$/g, '')).toLowerCase();
-        const isClientToAdmin = url.startsWith('admin') && window.location.pathname.indexOf(config.relative_path + '/admin') !== 0;
-        const isAdminToClient = !url.startsWith('admin') && window.location.pathname.indexOf(config.relative_path + '/admin') === 0;
+        const isClientToAdmin =
+            url.startsWith('admin') && window.location.pathname.indexOf(config.relative_path + '/admin') !== 0;
+        const isAdminToClient =
+            !url.startsWith('admin') && window.location.pathname.indexOf(config.relative_path + '/admin') === 0;
 
         if (isClientToAdmin || isAdminToClient) {
             window.open(config.relative_path + '/' + url, '_top');
@@ -128,9 +133,13 @@ ajaxify.widgets = { render: render };
     ajaxify.updateHistory = function (url, quiet) {
         ajaxify.currentPage = url.split(/[?#]/)[0];
         if (window.history && window.history.pushState) {
-            window.history[!quiet ? 'pushState' : 'replaceState']({
-                url: url,
-            }, url, config.relative_path + '/' + url);
+            window.history[!quiet ? 'pushState' : 'replaceState'](
+                {
+                    url: url,
+                },
+                url,
+                config.relative_path + '/' + url
+            );
         }
     };
 
@@ -212,9 +221,15 @@ ajaxify.widgets = { render: render };
             return;
         }
         require(['translator'], function (translator) {
-            title = config.titleLayout.replace(/&#123;/g, '{').replace(/&#125;/g, '}')
-                .replace('{pageTitle}', function () { return title; })
-                .replace('{browserTitle}', function () { return config.browserTitle; });
+            title = config.titleLayout
+                .replace(/&#123;/g, '{')
+                .replace(/&#125;/g, '}')
+                .replace('{pageTitle}', function () {
+                    return title;
+                })
+                .replace('{browserTitle}', function () {
+                    return config.browserTitle;
+                });
 
             // Allow translation strings in title on ajaxify (#5927)
             title = translator.unescape(title);
@@ -252,7 +267,8 @@ ajaxify.widgets = { render: render };
                     return metaWhitelist.some(function (exp) {
                         return !!exp.test(name);
                     });
-                }).forEach(async function (tagObj) {
+                })
+                .forEach(async function (tagObj) {
                     if (tagObj.content) {
                         tagObj.content = await translator.translate(tagObj.content);
                     }
@@ -299,7 +315,11 @@ ajaxify.widgets = { render: render };
             window.scrollTo(0, 0);
         }
         ajaxify.loadScript(tpl_url, function done() {
-            hooks.fire('action:ajaxify.end', { url: url, tpl_url: tpl_url, title: ajaxify.data.title });
+            hooks.fire('action:ajaxify.end', {
+                url: url,
+                tpl_url: tpl_url,
+                title: ajaxify.data.title,
+            });
             hooks.logs.flush();
         });
         ajaxify.widgets.render(tpl_url);
@@ -351,28 +371,36 @@ ajaxify.widgets = { render: render };
             // Require and parse modules
             let outstanding = data.scripts.length;
 
-            const scripts = data.scripts.map(function (script) {
-                if (typeof script === 'function') {
-                    return function (next) {
-                        script();
-                        next();
-                    };
-                }
-                if (typeof script === 'string') {
-                    return async function (next) {
-                        const module = await app.require(script);
-                        // Hint: useful if you want to override a loaded library (e.g. replace core client-side logic),
-                        // or call a method other than .init()
-                        hooks.fire('static:script.init', { tpl_url, name: script, module }).then(() => {
-                            if (module && module.init) {
-                                module.init();
-                            }
+            const scripts = data.scripts
+                .map(function (script) {
+                    if (typeof script === 'function') {
+                        return function (next) {
+                            script();
                             next();
-                        });
-                    };
-                }
-                return null;
-            }).filter(Boolean);
+                        };
+                    }
+                    if (typeof script === 'string') {
+                        return async function (next) {
+                            const module = await app.require(script);
+                            // Hint: useful if you want to override a loaded library (e.g. replace core client-side logic),
+                            // or call a method other than .init()
+                            hooks
+                                .fire('static:script.init', {
+                                    tpl_url,
+                                    name: script,
+                                    module,
+                                })
+                                .then(() => {
+                                    if (module && module.init) {
+                                        module.init();
+                                    }
+                                    next();
+                                });
+                        };
+                    }
+                    return null;
+                })
+                .filter(Boolean);
 
             if (scripts.length) {
                 scripts.forEach(function (fn) {
@@ -418,7 +446,10 @@ ajaxify.widgets = { render: render };
                 ajaxify.data = data;
                 data.config = config;
 
-                hooks.fire('action:ajaxify.dataLoaded', { url: url, data: data });
+                hooks.fire('action:ajaxify.dataLoaded', {
+                    url: url,
+                    data: data,
+                });
 
                 callback(null, data);
             },
@@ -476,13 +507,21 @@ $(document).ready(function () {
 
         if (ev !== null && ev.state) {
             if (ev.state.url === null && ev.state.returnPath !== undefined) {
-                window.history.replaceState({
-                    url: ev.state.returnPath,
-                }, ev.state.returnPath, config.relative_path + '/' + ev.state.returnPath);
+                window.history.replaceState(
+                    {
+                        url: ev.state.returnPath,
+                    },
+                    ev.state.returnPath,
+                    config.relative_path + '/' + ev.state.returnPath
+                );
             } else if (ev.state.url !== undefined) {
-                ajaxify.go(ev.state.url, function () {
-                    hooks.fire('action:popstate', { url: ev.state.url });
-                }, true);
+                ajaxify.go(
+                    ev.state.url,
+                    function () {
+                        hooks.fire('action:popstate', { url: ev.state.url });
+                    },
+                    true
+                );
             }
         }
     });
@@ -493,7 +532,11 @@ $(document).ready(function () {
             return href === undefined || href === '' || href === 'javascript:;';
         }
         const location = document.location || window.location;
-        const rootUrl = location.protocol + '//' + (location.hostname || location.host) + (location.port ? ':' + location.port : '');
+        const rootUrl =
+            location.protocol +
+            '//' +
+            (location.hostname || location.host) +
+            (location.port ? ':' + location.port : '');
         const contentEl = document.getElementById('content');
 
         // Enhancing all anchors to ajaxify...
@@ -526,10 +569,17 @@ $(document).ready(function () {
                             externalTab.location = this.href;
                             e.preventDefault();
                         } else if (config.useOutgoingLinksPage) {
-                            const safeUrls = config.outgoingLinksWhitelist.trim().split(/[\s,]+/g).filter(Boolean);
+                            const safeUrls = config.outgoingLinksWhitelist
+                                .trim()
+                                .split(/[\s,]+/g)
+                                .filter(Boolean);
                             const href = this.href;
-                            if (!safeUrls.length ||
-                                !safeUrls.some(function (url) { return href.indexOf(url) !== -1; })) {
+                            if (
+                                !safeUrls.length ||
+                                !safeUrls.some(function (url) {
+                                    return href.indexOf(url) !== -1;
+                                })
+                            ) {
                                 ajaxify.go('outgoing?url=' + encodeURIComponent(href));
                                 e.preventDefault();
                             }
@@ -551,14 +601,22 @@ $(document).ready(function () {
             }
 
             // Default behaviour for sitemap
-            if (internalLink && href && String(_self.pathname).startsWith(config.relative_path + '/sitemap') && href.endsWith('.xml')) {
+            if (
+                internalLink &&
+                href &&
+                String(_self.pathname).startsWith(config.relative_path + '/sitemap') &&
+                href.endsWith('.xml')
+            ) {
                 return;
             }
 
             // Default behaviour for uploads and direct links to API urls
-            if (internalLink && ['/uploads', '/assets/', '/api/'].some(function (prefix) {
-                return String(_self.pathname).startsWith(config.relative_path + prefix);
-            })) {
+            if (
+                internalLink &&
+                ['/uploads', '/assets/', '/api/'].some(function (prefix) {
+                    return String(_self.pathname).startsWith(config.relative_path + prefix);
+                })
+            ) {
                 return;
             }
 

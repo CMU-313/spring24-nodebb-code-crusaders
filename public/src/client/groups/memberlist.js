@@ -45,20 +45,29 @@ define('forum/groups/memberlist', ['api', 'bootbox', 'alerts'], function (api, b
                     $(this).find('i').toggleClass('invisible');
                 });
                 modal.find('input').on('keyup', function () {
-                    api.get('/api/users', {
-                        query: $(this).val(),
-                        paginate: false,
-                    }, function (err, result) {
-                        if (err) {
-                            return alerts.error(err);
+                    api.get(
+                        '/api/users',
+                        {
+                            query: $(this).val(),
+                            paginate: false,
+                        },
+                        function (err, result) {
+                            if (err) {
+                                return alerts.error(err);
+                            }
+                            result.users.forEach(function (user) {
+                                foundUsers[user.uid] = user;
+                            });
+                            app.parseAndTranslate(
+                                'admin/partials/groups/add-members',
+                                'users',
+                                { users: result.users },
+                                function (html) {
+                                    modal.find('#search-result').html(html);
+                                }
+                            );
                         }
-                        result.users.forEach(function (user) {
-                            foundUsers[user.uid] = user;
-                        });
-                        app.parseAndTranslate('admin/partials/groups/add-members', 'users', { users: result.users }, function (html) {
-                            modal.find('#search-result').html(html);
-                        });
-                    });
+                    );
                 });
             });
         });
@@ -74,7 +83,9 @@ define('forum/groups/memberlist', ['api', 'bootbox', 'alerts'], function (api, b
             });
             callback();
         }
-        const uids = users.map(function (user) { return user.uid; });
+        const uids = users.map(function (user) {
+            return user.uid;
+        });
         if (groupName === 'administrators') {
             socket.emit('admin.user.makeAdmins', uids, function (err) {
                 if (err) {
@@ -83,27 +94,36 @@ define('forum/groups/memberlist', ['api', 'bootbox', 'alerts'], function (api, b
                 done();
             });
         } else {
-            Promise.all(uids.map(uid => api.put('/groups/' + ajaxify.data.group.slug + '/membership/' + uid))).then(done).catch(alerts.error);
+            Promise.all(uids.map(uid => api.put('/groups/' + ajaxify.data.group.slug + '/membership/' + uid)))
+                .then(done)
+                .catch(alerts.error);
         }
     }
 
     function handleMemberSearch() {
         const searchEl = $('[component="groups/members/search"]');
-        searchEl.on('keyup', utils.debounce(function () {
-            const query = searchEl.val();
-            socket.emit('groups.searchMembers', {
-                groupName: groupName,
-                query: query,
-            }, function (err, results) {
-                if (err) {
-                    return alerts.error(err);
-                }
-                parseAndTranslate(results.users, function (html) {
-                    $('[component="groups/members"] tbody').html(html);
-                    $('[component="groups/members"]').attr('data-nextstart', 20);
-                });
-            });
-        }, 250));
+        searchEl.on(
+            'keyup',
+            utils.debounce(function () {
+                const query = searchEl.val();
+                socket.emit(
+                    'groups.searchMembers',
+                    {
+                        groupName: groupName,
+                        query: query,
+                    },
+                    function (err, results) {
+                        if (err) {
+                            return alerts.error(err);
+                        }
+                        parseAndTranslate(results.users, function (html) {
+                            $('[component="groups/members"] tbody').html(html);
+                            $('[component="groups/members"]').attr('data-nextstart', 20);
+                        });
+                    }
+                );
+            }, 250)
+        );
     }
 
     function handleMemberInfiniteScroll() {
@@ -124,23 +144,27 @@ define('forum/groups/memberlist', ['api', 'bootbox', 'alerts'], function (api, b
         }
 
         members.attr('loading', 1);
-        socket.emit('groups.loadMoreMembers', {
-            groupName: groupName,
-            after: members.attr('data-nextstart'),
-        }, function (err, data) {
-            if (err) {
-                return alerts.error(err);
-            }
+        socket.emit(
+            'groups.loadMoreMembers',
+            {
+                groupName: groupName,
+                after: members.attr('data-nextstart'),
+            },
+            function (err, data) {
+                if (err) {
+                    return alerts.error(err);
+                }
 
-            if (data && data.users.length) {
-                onMembersLoaded(data.users, function () {
+                if (data && data.users.length) {
+                    onMembersLoaded(data.users, function () {
+                        members.removeAttr('loading');
+                        members.attr('data-nextstart', data.nextStart);
+                    });
+                } else {
                     members.removeAttr('loading');
-                    members.attr('data-nextstart', data.nextStart);
-                });
-            } else {
-                members.removeAttr('loading');
+                }
             }
-        });
+        );
     }
 
     function onMembersLoaded(users, callback) {
@@ -155,12 +179,17 @@ define('forum/groups/memberlist', ['api', 'bootbox', 'alerts'], function (api, b
     }
 
     function parseAndTranslate(users, callback) {
-        app.parseAndTranslate(templateName, 'group.members', {
-            group: {
-                members: users,
-                isOwner: ajaxify.data.group.isOwner,
+        app.parseAndTranslate(
+            templateName,
+            'group.members',
+            {
+                group: {
+                    members: users,
+                    isOwner: ajaxify.data.group.isOwner,
+                },
             },
-        }, callback);
+            callback
+        );
     }
 
     return MemberList;

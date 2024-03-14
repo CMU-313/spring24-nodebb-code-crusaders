@@ -94,7 +94,9 @@ define('settings/object', function () {
                             propertyName,
                             value[propertyName],
                             separator.clone(),
-                            function (el) { element.append(el); }
+                            function (el) {
+                                element.append(el);
+                            }
                         );
                     }
                 }

@@ -1,9 +1,12 @@
 'use strict';
 
-
-define('admin/dashboard', [
-    'Chart', 'translator', 'benchpress', 'bootbox', 'alerts',
-], function (Chart, translator, Benchpress, bootbox, alerts) {
+define('admin/dashboard', ['Chart', 'translator', 'benchpress', 'bootbox', 'alerts'], function (
+    Chart,
+    translator,
+    Benchpress,
+    bootbox,
+    alerts
+) {
     const Admin = {};
     const intervals = {
         rooms: false,
@@ -64,22 +67,31 @@ define('admin/dashboard', [
 
         graphData.rooms = data;
 
-        const html = '<div class="text-center pull-left">' +
-                        '<span class="formatted-number">' + data.onlineRegisteredCount + '</span>' +
-                        '<div class="stat">[[admin/dashboard:active-users.users]]</div>' +
-                    '</div>' +
-                    '<div class="text-center pull-left">' +
-                        '<span class="formatted-number">' + data.onlineGuestCount + '</span>' +
-                        '<div class="stat">[[admin/dashboard:active-users.guests]]</div>' +
-                    '</div>' +
-                    '<div class="text-center pull-left">' +
-                        '<span class="formatted-number">' + (data.onlineRegisteredCount + data.onlineGuestCount) + '</span>' +
-                        '<div class="stat">[[admin/dashboard:active-users.total]]</div>' +
-                    '</div>' +
-                    '<div class="text-center pull-left">' +
-                        '<span class="formatted-number">' + data.socketCount + '</span>' +
-                        '<div class="stat">[[admin/dashboard:active-users.connections]]</div>' +
-                    '</div>';
+        const html =
+            '<div class="text-center pull-left">' +
+            '<span class="formatted-number">' +
+            data.onlineRegisteredCount +
+            '</span>' +
+            '<div class="stat">[[admin/dashboard:active-users.users]]</div>' +
+            '</div>' +
+            '<div class="text-center pull-left">' +
+            '<span class="formatted-number">' +
+            data.onlineGuestCount +
+            '</span>' +
+            '<div class="stat">[[admin/dashboard:active-users.guests]]</div>' +
+            '</div>' +
+            '<div class="text-center pull-left">' +
+            '<span class="formatted-number">' +
+            (data.onlineRegisteredCount + data.onlineGuestCount) +
+            '</span>' +
+            '<div class="stat">[[admin/dashboard:active-users.total]]</div>' +
+            '</div>' +
+            '<div class="text-center pull-left">' +
+            '<span class="formatted-number">' +
+            data.socketCount +
+            '</span>' +
+            '<div class="stat">[[admin/dashboard:active-users.connections]]</div>' +
+            '</div>';
 
         updateRegisteredGraph(data.onlineRegisteredCount, data.onlineGuestCount);
         updatePresenceGraph(data.users);
@@ -95,7 +107,18 @@ define('admin/dashboard', [
         topics: null,
     };
 
-    const topicColors = ['#bf616a', '#5B90BF', '#d08770', '#ebcb8b', '#a3be8c', '#96b5b4', '#8fa1b3', '#b48ead', '#ab7967', '#46BFBD'];
+    const topicColors = [
+        '#bf616a',
+        '#5B90BF',
+        '#d08770',
+        '#ebcb8b',
+        '#a3be8c',
+        '#96b5b4',
+        '#8fa1b3',
+        '#b48ead',
+        '#ab7967',
+        '#46BFBD',
+    ];
 
     /* eslint-disable */
     // from chartjs.org
@@ -114,12 +137,12 @@ define('admin/dashboard', [
         if (r > 255) r = 255;
         else if (r < 0) r = 0;
 
-        let b = ((num >> 8) & 0x00FF) + amt;
+        let b = ((num >> 8) & 0x00ff) + amt;
 
         if (b > 255) b = 255;
         else if (b < 0) b = 0;
 
-        let g = (num & 0x0000FF) + amt;
+        let g = (num & 0x0000ff) + amt;
 
         if (g > 255) g = 255;
         else if (g < 0) g = 0;
@@ -232,32 +255,35 @@ define('admin/dashboard', [
                         display: true,
                     },
                     scales: {
-                        yAxes: [{
-                            id: 'left-y-axis',
-                            ticks: {
-                                beginAtZero: true,
-                                precision: 0,
+                        yAxes: [
+                            {
+                                id: 'left-y-axis',
+                                ticks: {
+                                    beginAtZero: true,
+                                    precision: 0,
+                                },
+                                type: 'linear',
+                                position: 'left',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: translations[0],
+                                },
                             },
-                            type: 'linear',
-                            position: 'left',
-                            scaleLabel: {
-                                display: true,
-                                labelString: translations[0],
+                            {
+                                id: 'right-y-axis',
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 10,
+                                    precision: 0,
+                                },
+                                type: 'linear',
+                                position: 'right',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: translations[4],
+                                },
                             },
-                        }, {
-                            id: 'right-y-axis',
-                            ticks: {
-                                beginAtZero: true,
-                                suggestedMax: 10,
-                                precision: 0,
-                            },
-                            type: 'linear',
-                            position: 'right',
-                            scaleLabel: {
-                                display: true,
-                                labelString: translations[4],
-                            },
-                        }],
+                        ],
                     },
                     tooltips: {
                         mode: 'x',
@@ -269,11 +295,13 @@ define('admin/dashboard', [
                 type: 'doughnut',
                 data: {
                     labels: translations.slice(5, 7),
-                    datasets: [{
-                        data: [1, 1],
-                        backgroundColor: ['#F7464A', '#46BFBD'],
-                        hoverBackgroundColor: ['#FF5A5E', '#5AD3D1'],
-                    }],
+                    datasets: [
+                        {
+                            data: [1, 1],
+                            backgroundColor: ['#F7464A', '#46BFBD'],
+                            hoverBackgroundColor: ['#FF5A5E', '#5AD3D1'],
+                        },
+                    ],
                 },
                 options: {
                     responsive: true,
@@ -287,11 +315,13 @@ define('admin/dashboard', [
                 type: 'doughnut',
                 data: {
                     labels: translations.slice(7, 12),
-                    datasets: [{
-                        data: [1, 1, 1, 1, 1],
-                        backgroundColor: ['#F7464A', '#46BFBD', '#FDB45C', '#949FB1', '#9FB194'],
-                        hoverBackgroundColor: ['#FF5A5E', '#5AD3D1', '#FFC870', '#A8B3C5', '#A8B3C5'],
-                    }],
+                    datasets: [
+                        {
+                            data: [1, 1, 1, 1, 1],
+                            backgroundColor: ['#F7464A', '#46BFBD', '#FDB45C', '#949FB1', '#9FB194'],
+                            hoverBackgroundColor: ['#FF5A5E', '#5AD3D1', '#FFC870', '#A8B3C5', '#A8B3C5'],
+                        },
+                    ],
                 },
                 options: {
                     responsive: true,
@@ -305,11 +335,13 @@ define('admin/dashboard', [
                 type: 'doughnut',
                 data: {
                     labels: [],
-                    datasets: [{
-                        data: [],
-                        backgroundColor: [],
-                        hoverBackgroundColor: [],
-                    }],
+                    datasets: [
+                        {
+                            data: [],
+                            backgroundColor: [],
+                            hoverBackgroundColor: [],
+                        },
+                    ],
                 },
                 options: {
                     responsive: true,
@@ -344,25 +376,27 @@ define('admin/dashboard', [
                 const targetEl = $(this);
 
                 Benchpress.render('admin/partials/pageviews-range-select', {}).then(function (html) {
-                    const modal = bootbox.dialog({
-                        title: '[[admin/dashboard:page-views-custom]]',
-                        message: html,
-                        buttons: {
-                            submit: {
-                                label: '[[global:search]]',
-                                className: 'btn-primary',
-                                callback: submit,
+                    const modal = bootbox
+                        .dialog({
+                            title: '[[admin/dashboard:page-views-custom]]',
+                            message: html,
+                            buttons: {
+                                submit: {
+                                    label: '[[global:search]]',
+                                    className: 'btn-primary',
+                                    callback: submit,
+                                },
                             },
-                        },
-                    }).on('shown.bs.modal', function () {
-                        const date = new Date();
-                        const today = date.toISOString().slice(0, 10);
-                        date.setDate(date.getDate() - 1);
-                        const yesterday = date.toISOString().slice(0, 10);
+                        })
+                        .on('shown.bs.modal', function () {
+                            const date = new Date();
+                            const today = date.toISOString().slice(0, 10);
+                            date.setDate(date.getDate() - 1);
+                            const yesterday = date.toISOString().slice(0, 10);
 
-                        modal.find('#startRange').val(targetEl.attr('data-startRange') || yesterday);
-                        modal.find('#endRange').val(targetEl.attr('data-endRange') || today);
-                    });
+                            modal.find('#startRange').val(targetEl.attr('data-startRange') || yesterday);
+                            modal.find('#endRange').val(targetEl.attr('data-endRange') || today);
+                        });
 
                     function submit() {
                         // NEED TO ADD VALIDATION HERE FOR YYYY-MM-DD
@@ -420,55 +454,59 @@ define('admin/dashboard', [
             return;
         }
 
-        socket.emit('admin.analytics.get', {
-            graph: 'traffic',
-            units: units || 'hours',
-            until: until,
-            amount: amount,
-        }, function (err, data) {
-            if (err) {
-                return alerts.error(err);
-            }
-            if (JSON.stringify(graphData.traffic) === JSON.stringify(data)) {
-                return;
-            }
-
-            graphData.traffic = data;
-
-            if (units === 'days') {
-                graphs.traffic.data.xLabels = utils.getDaysArray(until, amount);
-            } else {
-                graphs.traffic.data.xLabels = utils.getHoursArray();
-
-                $('#pageViewsThirty').html(data.summary.thirty);
-                $('#pageViewsSeven').html(data.summary.seven);
-                $('#pageViewsPastDay').html(data.pastDay);
-                utils.addCommasToNumbers($('#pageViewsThirty'));
-                utils.addCommasToNumbers($('#pageViewsSeven'));
-                utils.addCommasToNumbers($('#pageViewsPastDay'));
-            }
-
-            graphs.traffic.data.datasets[0].data = data.pageviews;
-            graphs.traffic.data.datasets[1].data = data.pageviewsRegistered;
-            graphs.traffic.data.datasets[2].data = data.pageviewsGuest;
-            graphs.traffic.data.datasets[3].data = data.pageviewsBot;
-            graphs.traffic.data.datasets[4].data = data.uniqueVisitors;
-            graphs.traffic.data.labels = graphs.traffic.data.xLabels;
-
-            graphs.traffic.update();
-            currentGraph.units = units;
-            currentGraph.until = until;
-            currentGraph.amount = amount;
-
-            // Update the View as JSON button url
-            const apiEl = $('#view-as-json');
-            const newHref = $.param({
+        socket.emit(
+            'admin.analytics.get',
+            {
+                graph: 'traffic',
                 units: units || 'hours',
                 until: until,
-                count: amount,
-            });
-            apiEl.attr('href', config.relative_path + '/api/admin/analytics?' + newHref);
-        });
+                amount: amount,
+            },
+            function (err, data) {
+                if (err) {
+                    return alerts.error(err);
+                }
+                if (JSON.stringify(graphData.traffic) === JSON.stringify(data)) {
+                    return;
+                }
+
+                graphData.traffic = data;
+
+                if (units === 'days') {
+                    graphs.traffic.data.xLabels = utils.getDaysArray(until, amount);
+                } else {
+                    graphs.traffic.data.xLabels = utils.getHoursArray();
+
+                    $('#pageViewsThirty').html(data.summary.thirty);
+                    $('#pageViewsSeven').html(data.summary.seven);
+                    $('#pageViewsPastDay').html(data.pastDay);
+                    utils.addCommasToNumbers($('#pageViewsThirty'));
+                    utils.addCommasToNumbers($('#pageViewsSeven'));
+                    utils.addCommasToNumbers($('#pageViewsPastDay'));
+                }
+
+                graphs.traffic.data.datasets[0].data = data.pageviews;
+                graphs.traffic.data.datasets[1].data = data.pageviewsRegistered;
+                graphs.traffic.data.datasets[2].data = data.pageviewsGuest;
+                graphs.traffic.data.datasets[3].data = data.pageviewsBot;
+                graphs.traffic.data.datasets[4].data = data.uniqueVisitors;
+                graphs.traffic.data.labels = graphs.traffic.data.xLabels;
+
+                graphs.traffic.update();
+                currentGraph.units = units;
+                currentGraph.until = until;
+                currentGraph.amount = amount;
+
+                // Update the View as JSON button url
+                const apiEl = $('#view-as-json');
+                const newHref = $.param({
+                    units: units || 'hours',
+                    until: until,
+                    count: amount,
+                });
+                apiEl.attr('href', config.relative_path + '/api/admin/analytics?' + newHref);
+            }
+        );
     }
 
     function updateRegisteredGraph(registered, guest) {
@@ -497,10 +535,12 @@ define('admin/dashboard', [
     function updateTopicsGraph(topics) {
         if (!topics.length) {
             translator.translate('[[admin/dashboard:no-users-browsing]]', function (translated) {
-                topics = [{
-                    title: translated,
-                    count: 1,
-                }];
+                topics = [
+                    {
+                        title: translated,
+                        count: 1,
+                    },
+                ];
                 updateTopicsGraph(topics);
             });
             return;
@@ -521,12 +561,29 @@ define('admin/dashboard', [
         function buildTopicsLegend() {
             let html = '';
             topics.forEach(function (t, i) {
-                const link = t.tid ? '<a title="' + t.title + '"href="' + config.relative_path + '/topic/' + t.tid + '" target="_blank"> ' + t.title + '</a>' : t.title;
+                const link = t.tid ?
+                    '<a title="' +
+                      t.title +
+                      '"href="' +
+                      config.relative_path +
+                      '/topic/' +
+                      t.tid +
+                      '" target="_blank"> ' +
+                      t.title +
+                      '</a>' :
+                    t.title;
                 const label = t.count === '0' ? t.title : link;
 
-                html += '<li>' +
-                    '<div style="background-color: ' + topicColors[i] + ';"></div>' +
-                    '<span> (' + t.count + ') ' + label + '</span>' +
+                html +=
+                    '<li>' +
+                    '<div style="background-color: ' +
+                    topicColors[i] +
+                    ';"></div>' +
+                    '<span> (' +
+                    t.count +
+                    ') ' +
+                    label +
+                    '</span>' +
                     '</li>';
             });
             $('#topics-legend').translateHtml(html);
@@ -555,15 +612,21 @@ define('admin/dashboard', [
         clearInterval(intervals.rooms);
         clearInterval(intervals.graphs);
 
-        intervals.rooms = setInterval(function () {
-            if (app.isFocused && socket.connected) {
-                socket.emit('admin.rooms.getAll', Admin.updateRoomUsage);
-            }
-        }, realtime ? DEFAULTS.realtimeInterval : DEFAULTS.roomInterval);
+        intervals.rooms = setInterval(
+            function () {
+                if (app.isFocused && socket.connected) {
+                    socket.emit('admin.rooms.getAll', Admin.updateRoomUsage);
+                }
+            },
+            realtime ? DEFAULTS.realtimeInterval : DEFAULTS.roomInterval
+        );
 
-        intervals.graphs = setInterval(function () {
-            updateTrafficGraph(currentGraph.units, currentGraph.until, currentGraph.amount);
-        }, realtime ? DEFAULTS.realtimeInterval : DEFAULTS.graphInterval);
+        intervals.graphs = setInterval(
+            function () {
+                updateTrafficGraph(currentGraph.units, currentGraph.until, currentGraph.amount);
+            },
+            realtime ? DEFAULTS.realtimeInterval : DEFAULTS.graphInterval
+        );
     }
 
     function setupFullscreen() {

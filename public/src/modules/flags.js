@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('flags', ['hooks', 'components', 'api', 'alerts'], function (hooks, components, api, alerts) {
     const Flag = {};
     let flagModal;
@@ -56,10 +55,12 @@ define('flags', ['hooks', 'components', 'api', 'alerts'], function (hooks, compo
     Flag.resolve = function (flagId) {
         api.put(`/flags/${flagId}`, {
             state: 'resolved',
-        }).then(() => {
-            alerts.success('[[flags:resolved]]');
-            hooks.fire('action:flag.resolved', { flagId: flagId });
-        }).catch(alerts.error);
+        })
+            .then(() => {
+                alerts.success('[[flags:resolved]]');
+                hooks.fire('action:flag.resolved', { flagId: flagId });
+            })
+            .catch(alerts.error);
     };
 
     function createFlag(type, id, reason) {

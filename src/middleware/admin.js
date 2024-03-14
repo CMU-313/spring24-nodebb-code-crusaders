@@ -63,7 +63,9 @@ middleware.renderHeader = async (req, res, data) => {
     res.locals.config.userLang = res.locals.config.acpLang || res.locals.config.userLang;
     let templateValues = {
         config: res.locals.config,
-        configJSON: jsesc(JSON.stringify(res.locals.config), { isScriptContext: true }),
+        configJSON: jsesc(JSON.stringify(res.locals.config), {
+            isScriptContext: true,
+        }),
         relative_path: res.locals.config.relative_path,
         adminConfigJSON: encodeURIComponent(JSON.stringify(results.configs)),
         metaTags: results.tags.meta,
@@ -80,7 +82,11 @@ middleware.renderHeader = async (req, res, data) => {
         version: version,
         latestVersion: results.latestVersion,
         upgradeAvailable: results.latestVersion && semver.gt(results.latestVersion, version),
-        showManageMenu: results.privileges.superadmin || ['categories', 'privileges', 'users', 'admins-mods', 'groups', 'tags', 'settings'].some(priv => results.privileges[`admin:${priv}`]),
+        showManageMenu:
+            results.privileges.superadmin ||
+            ['categories', 'privileges', 'users', 'admins-mods', 'groups', 'tags', 'settings'].some(
+                priv => results.privileges[`admin:${priv}`]
+            ),
     };
 
     templateValues.template = { name: res.locals.template };
@@ -124,7 +130,7 @@ middleware.checkPrivileges = helpers.try(async (req, res, next) => {
     const path = req.path.replace(/^(\/api)?(\/v3)?\/admin\/?/g, '');
     if (path) {
         const privilege = privileges.admin.resolve(path);
-        if (!await privileges.admin.can(privilege, req.uid)) {
+        if (!(await privileges.admin.can(privilege, req.uid))) {
             return controllers.helpers.notAllowed(req, res);
         }
     } else {

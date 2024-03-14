@@ -84,7 +84,10 @@ Notifications.getMultiple = async function (nids) {
             if (notification.user) {
                 notification.image = notification.user.picture || null;
                 if (notification.user.username === '[[global:guest]]') {
-                    notification.bodyShort = notification.bodyShort.replace(/([\s\S]*?),[\s\S]*?,([\s\S]*?)/, '$1, [[global:guest]], $2');
+                    notification.bodyShort = notification.bodyShort.replace(
+                        /([\s\S]*?),[\s\S]*?,([\s\S]*?)/,
+                        '$1, [[global:guest]], $2'
+                    );
                 }
             } else if (notification.image === 'brand:logo' || !notification.image) {
                 notification.image = meta.config['brand:logo'] || `${nconf.get('relative_path')}/logo.png`;
@@ -152,13 +155,18 @@ Notifications.push = async function (notification, uids) {
     }
 
     setTimeout(() => {
-        batch.processArray(uids, async (uids) => {
-            await pushToUids(uids, notification);
-        }, { interval: 1000, batch: 500 }, (err) => {
-            if (err) {
-                winston.error(err.stack);
+        batch.processArray(
+            uids,
+            async (uids) => {
+                await pushToUids(uids, notification);
+            },
+            { interval: 1000, batch: 500 },
+            (err) => {
+                if (err) {
+                    winston.error(err.stack);
+                }
             }
-        });
+        );
     }, 1000);
 };
 
@@ -196,20 +204,24 @@ async function pushToUids(uids, notification) {
         body = posts.relativeToAbsolute(body, posts.imgRegex);
         let errorLogged = false;
         await async.eachLimit(uids, 3, async (uid) => {
-            await emailer.send('notification', uid, {
-                path: notification.path,
-                notification_url: notification.path.startsWith('http') ? notification.path : nconf.get('url') + notification.path,
-                subject: utils.stripHTMLTags(notification.subject || '[[notifications:new_notification]]'),
-                intro: utils.stripHTMLTags(notification.bodyShort),
-                body: body,
-                notification: notification,
-                showUnsubscribe: true,
-            }).catch((err) => {
-                if (!errorLogged) {
-                    winston.error(`[emailer.send] ${err.stack}`);
-                    errorLogged = true;
-                }
-            });
+            await emailer
+                .send('notification', uid, {
+                    path: notification.path,
+                    notification_url: notification.path.startsWith('http') ?
+                        notification.path :
+                        nconf.get('url') + notification.path,
+                    subject: utils.stripHTMLTags(notification.subject || '[[notifications:new_notification]]'),
+                    intro: utils.stripHTMLTags(notification.bodyShort),
+                    body: body,
+                    notification: notification,
+                    showUnsubscribe: true,
+                })
+                .catch((err) => {
+                    if (!errorLogged) {
+                        winston.error(`[emailer.send] ${err.stack}`);
+                        errorLogged = true;
+                    }
+                });
         });
     }
 
@@ -233,7 +245,10 @@ async function pushToUids(uids, notification) {
 
     // Remove uid from recipients list if they have blocked the user triggering the notification
     uids = await User.blocks.filterUids(notification.from, uids);
-    const data = await plugins.hooks.fire('filter:notification.push', { notification: notification, uids: uids });
+    const data = await plugins.hooks.fire('filter:notification.push', {
+        notification: notification,
+        uids: uids,
+    });
     if (!data || !data.notification || !data.uids || !data.uids.length) {
         return;
     }
@@ -243,10 +258,7 @@ async function pushToUids(uids, notification) {
     if (notification.type) {
         results = await getUidsBySettings(data.uids);
     }
-    await Promise.all([
-        sendNotification(results.uidsToNotify),
-        sendEmail(results.uidsToEmail),
-    ]);
+    await Promise.all([sendNotification(results.uidsToNotify), sendEmail(results.uidsToEmail)]);
     plugins.hooks.fire('action:notification.pushed', {
         notification: notification,
         uids: results.uidsToNotify,
@@ -345,11 +357,15 @@ Notifications.prune = async function () {
             db.deleteAll(nids.map(nid => `notifications:${nid}`)),
         ]);
 
-        await batch.processSortedSet('users:joindate', async (uids) => {
-            const unread = uids.map(uid => `uid:${uid}:notifications:unread`);
-            const read = uids.map(uid => `uid:${uid}:notifications:read`);
-            await db.sortedSetsRemoveRangeByScore(unread.concat(read), '-inf', cutoffTime);
-        }, { batch: 500, interval: 100 });
+        await batch.processSortedSet(
+            'users:joindate',
+            async (uids) => {
+                const unread = uids.map(uid => `uid:${uid}:notifications:unread`);
+                const read = uids.map(uid => `uid:${uid}:notifications:read`);
+                await db.sortedSetsRemoveRangeByScore(unread.concat(read), '-inf', cutoffTime);
+            },
+            { batch: 500, interval: 100 }
+        );
     } catch (err) {
         if (err) {
             winston.error(`Encountered error pruning notifications\n${err.stack}`);
@@ -370,7 +386,9 @@ Notifications.merge = async function (notifications) {
     ];
 
     notifications = mergeIds.reduce((notifications, mergeId) => {
-        const isolated = notifications.filter(n => n && n.hasOwnProperty('mergeId') && n.mergeId.split('|')[0] === mergeId);
+        const isolated = notifications.filter(
+            n => n && n.hasOwnProperty('mergeId') && n.mergeId.split('|')[0] === mergeId
+        );
         if (isolated.length <= 1) {
             return notifications; // Nothing to merge
         }
@@ -390,7 +408,7 @@ Notifications.merge = async function (notifications) {
             if (differentiator === 0 && differentiators.length === 1) {
                 set = isolated;
             } else {
-                set = isolated.filter(n => n.mergeId === (`${mergeId}|${differentiator}`));
+                set = isolated.filter(n => n.mergeId === `${mergeId}|${differentiator}`);
             }
 
             const modifyIndex = notifications.indexOf(set[0]);
@@ -403,22 +421,28 @@ Notifications.merge = async function (notifications) {
             case 'notifications:user_started_following_you':
             case 'notifications:user_posted_to':
             case 'notifications:user_flagged_post_in':
-            case 'notifications:user_flagged_user': {
-                const usernames = _.uniq(set.map(notifObj => notifObj && notifObj.user && notifObj.user.username));
-                const numUsers = usernames.length;
+            case 'notifications:user_flagged_user':
+                {
+                    const usernames = _.uniq(
+                        set.map(notifObj => notifObj && notifObj.user && notifObj.user.username)
+                    );
+                    const numUsers = usernames.length;
 
-                const title = utils.decodeHTMLEntities(notifications[modifyIndex].topicTitle || '');
-                let titleEscaped = title.replace(/%/g, '&#37;').replace(/,/g, '&#44;');
-                titleEscaped = titleEscaped ? (`, ${titleEscaped}`) : '';
+                    const title = utils.decodeHTMLEntities(notifications[modifyIndex].topicTitle || '');
+                    let titleEscaped = title.replace(/%/g, '&#37;').replace(/,/g, '&#44;');
+                    titleEscaped = titleEscaped ? `, ${titleEscaped}` : '';
 
-                if (numUsers === 2) {
-                    notifications[modifyIndex].bodyShort = `[[${mergeId}_dual, ${usernames.join(', ')}${titleEscaped}]]`;
-                } else if (numUsers > 2) {
-                    notifications[modifyIndex].bodyShort = `[[${mergeId}_multiple, ${usernames[0]}, ${numUsers - 1}${titleEscaped}]]`;
+                    if (numUsers === 2) {
+                        notifications[modifyIndex].bodyShort =
+                                `[[${mergeId}_dual, ${usernames.join(', ')}${titleEscaped}]]`;
+                    } else if (numUsers > 2) {
+                        notifications[modifyIndex].bodyShort =
+                                `[[${mergeId}_multiple, ${usernames[0]}, ${numUsers - 1}${titleEscaped}]]`;
+                    }
+
+                    notifications[modifyIndex].path = set[set.length - 1].path;
                 }
-
-                notifications[modifyIndex].path = set[set.length - 1].path;
-            } break;
+                break;
 
             case 'new_register':
                 notifications[modifyIndex].bodyShort = `[[notifications:${mergeId}_multiple, ${set.length}]]`;
@@ -431,7 +455,9 @@ Notifications.merge = async function (notifications) {
                     return true;
                 }
 
-                return !(notifObj.mergeId === (mergeId + (differentiator ? `|${differentiator}` : '')) && idx !== modifyIndex);
+                return !(
+                    notifObj.mergeId === mergeId + (differentiator ? `|${differentiator}` : '') && idx !== modifyIndex
+                );
             });
         });
 

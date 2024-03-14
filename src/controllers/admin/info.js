@@ -79,7 +79,10 @@ async function getNodeInfo() {
             platform: os.platform(),
             arch: os.arch(),
             release: os.release(),
-            load: os.loadavg().map(load => load.toFixed(2)).join(', '),
+            load: os
+                .loadavg()
+                .map(load => load.toFixed(2))
+                .join(', '),
             freemem: os.freemem(),
             totalmem: os.totalmem(),
         },
@@ -96,10 +99,7 @@ async function getNodeInfo() {
     data.os.freemem = (data.os.freemem / (1024 * 1024 * 1024)).toFixed(2);
     data.os.totalmem = (data.os.totalmem / (1024 * 1024 * 1024)).toFixed(2);
     data.os.usedmem = (data.os.totalmem - data.os.freemem).toFixed(2);
-    const [stats, gitInfo] = await Promise.all([
-        rooms.getLocalStats(),
-        getGitInfo(),
-    ]);
+    const [stats, gitInfo] = await Promise.all([rooms.getLocalStats(), getGitInfo()]);
     data.git = gitInfo;
     data.stats = stats;
     return data;
@@ -107,9 +107,9 @@ async function getNodeInfo() {
 
 function getCpuUsage() {
     const newUsage = process.cpuUsage();
-    const diff = (newUsage.user + newUsage.system) - (previousUsage.user + previousUsage.system);
+    const diff = newUsage.user + newUsage.system - (previousUsage.user + previousUsage.system);
     const now = Date.now();
-    const result = diff / ((now - usageStartDate) * 1000) * 100;
+    const result = (diff / ((now - usageStartDate) * 1000)) * 100;
     previousUsage = newUsage;
     usageStartDate = now;
     return result.toFixed(2);

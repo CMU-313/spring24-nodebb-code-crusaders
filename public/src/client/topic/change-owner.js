@@ -1,11 +1,10 @@
 'use strict';
 
-
-define('forum/topic/change-owner', [
-    'postSelect',
-    'autocomplete',
-    'alerts',
-], function (postSelect, autocomplete, alerts) {
+define('forum/topic/change-owner', ['postSelect', 'autocomplete', 'alerts'], function (
+    postSelect,
+    autocomplete,
+    alerts
+) {
     const ChangeOwner = {};
 
     let modal;

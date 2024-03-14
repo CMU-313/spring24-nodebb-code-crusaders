@@ -38,15 +38,17 @@ define('forum/account/edit', [
 
         hooks.fire('action:profile.update', userData);
 
-        api.put('/users/' + userData.uid, userData).then((res) => {
-            alerts.success('[[user:profile_update_success]]');
+        api.put('/users/' + userData.uid, userData)
+            .then((res) => {
+                alerts.success('[[user:profile_update_success]]');
 
-            if (res.picture) {
-                $('#user-current-picture').attr('src', res.picture);
-            }
+                if (res.picture) {
+                    $('#user-current-picture').attr('src', res.picture);
+                }
 
-            picture.updateHeader(res.picture);
-        }).catch(alerts.error);
+                picture.updateHeader(res.picture);
+            })
+            .catch(alerts.error);
 
         return false;
     }
@@ -61,35 +63,42 @@ define('forum/account/edit', [
     function handleAccountDelete() {
         $('#deleteAccountBtn').on('click', function () {
             translator.translate('[[user:delete_account_confirm]]', function (translated) {
-                const modal = bootbox.confirm(translated + '<p><input type="password" class="form-control" id="confirm-password" /></p>', function (confirm) {
-                    if (!confirm) {
-                        return;
+                const modal = bootbox.confirm(
+                    translated + '<p><input type="password" class="form-control" id="confirm-password" /></p>',
+                    function (confirm) {
+                        if (!confirm) {
+                            return;
+                        }
+
+                        const confirmBtn = modal.find('.btn-primary');
+                        confirmBtn.html('<i class="fa fa-spinner fa-spin"></i>');
+                        confirmBtn.prop('disabled', true);
+                        api.del(
+                            `/users/${ajaxify.data.uid}/account`,
+                            {
+                                password: $('#confirm-password').val(),
+                            },
+                            function (err) {
+                                function restoreButton() {
+                                    translator.translate('[[modules:bootbox.confirm]]', function (confirmText) {
+                                        confirmBtn.text(confirmText);
+                                        confirmBtn.prop('disabled', false);
+                                    });
+                                }
+
+                                if (err) {
+                                    restoreButton();
+                                    return alerts.error(err);
+                                }
+
+                                confirmBtn.html('<i class="fa fa-check"></i>');
+                                window.location.href = `${config.relative_path}/`;
+                            }
+                        );
+
+                        return false;
                     }
-
-                    const confirmBtn = modal.find('.btn-primary');
-                    confirmBtn.html('<i class="fa fa-spinner fa-spin"></i>');
-                    confirmBtn.prop('disabled', true);
-                    api.del(`/users/${ajaxify.data.uid}/account`, {
-                        password: $('#confirm-password').val(),
-                    }, function (err) {
-                        function restoreButton() {
-                            translator.translate('[[modules:bootbox.confirm]]', function (confirmText) {
-                                confirmBtn.text(confirmText);
-                                confirmBtn.prop('disabled', false);
-                            });
-                        }
-
-                        if (err) {
-                            restoreButton();
-                            return alerts.error(err);
-                        }
-
-                        confirmBtn.html('<i class="fa fa-check"></i>');
-                        window.location.href = `${config.relative_path}/`;
-                    });
-
-                    return false;
-                });
+                );
 
                 modal.on('shown.bs.modal', function () {
                     modal.find('input').focus();

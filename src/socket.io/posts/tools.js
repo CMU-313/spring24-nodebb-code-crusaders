@@ -79,7 +79,7 @@ module.exports = function (SocketPosts) {
         }
 
         const postData = await posts.changeOwner(data.pids, data.toUid);
-        const logs = postData.map(({ pid, uid, cid }) => (events.log({
+        const logs = postData.map(({ pid, uid, cid }) => events.log({
             type: 'post-change-owner',
             uid: socket.uid,
             ip: socket.ip,
@@ -87,7 +87,7 @@ module.exports = function (SocketPosts) {
             pid: pid,
             originalUid: uid,
             cid: cid,
-        })));
+        }));
 
         await Promise.all(logs);
     };

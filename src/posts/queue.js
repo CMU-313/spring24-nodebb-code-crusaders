@@ -55,9 +55,7 @@ module.exports = function (Posts) {
             postData = postData.filter(item => item.data.tid && parseInt(item.data.tid, 10) === tid);
         } else if (Array.isArray(filter.tid)) {
             const tids = filter.tid.map(tid => parseInt(tid, 10));
-            postData = postData.filter(
-                item => item.data.tid && tids.includes(parseInt(item.data.tid, 10))
-            );
+            postData = postData.filter(item => item.data.tid && tids.includes(parseInt(item.data.tid, 10)));
         }
 
         return postData;
@@ -74,7 +72,9 @@ module.exports = function (Posts) {
             postData.topic = await topics.getTopicFields(postData.data.tid, ['title', 'cid']);
         }
         postData.category = await categories.getCategoryData(postData.topic.cid);
-        const result = await plugins.hooks.fire('filter:parse.post', { postData: postData.data });
+        const result = await plugins.hooks.fire('filter:parse.post', {
+            postData: postData.data,
+        });
         postData.data.content = result.postData.content;
     }
 
@@ -85,9 +85,12 @@ module.exports = function (Posts) {
             isCategoryQueueEnabled(data),
         ]);
 
-        const shouldQueue = meta.config.postQueue && categoryQueueEnabled &&
+        const shouldQueue =
+            meta.config.postQueue &&
+            categoryQueueEnabled &&
             !isMemberOfExempt &&
-            (!userData.uid || userData.reputation < meta.config.postQueueReputationThreshold ||
+            (!userData.uid ||
+                userData.reputation < meta.config.postQueueReputationThreshold ||
                 userData.postcount <= 0);
         const result = await plugins.hooks.fire('filter:post.shouldQueue', {
             shouldQueue: !!shouldQueue,
@@ -242,7 +245,9 @@ module.exports = function (Posts) {
         }
         const result = await plugins.hooks.fire('filter:post-queue:removeFromQueue', { data: data });
         await removeFromQueue(id);
-        plugins.hooks.fire('action:post-queue:removeFromQueue', { data: result.data });
+        plugins.hooks.fire('action:post-queue:removeFromQueue', {
+            data: result.data,
+        });
         return result.data;
     };
 
@@ -288,7 +293,10 @@ module.exports = function (Posts) {
 
     async function createTopic(data) {
         const result = await topics.post(data);
-        socketHelpers.notifyNew(data.uid, 'newTopic', { posts: [result.postData], topic: result.topicData });
+        socketHelpers.notifyNew(data.uid, 'newTopic', {
+            posts: [result.postData],
+            topic: result.topicData,
+        });
         return result;
     }
 
@@ -358,9 +366,7 @@ module.exports = function (Posts) {
             postData.forEach((post) => {
                 post.data.tid = newTid;
             });
-            await db.setObjectBulk(
-                postData.map(p => [`post:queue:${p.id}`, { data: JSON.stringify(p.data) }]),
-            );
+            await db.setObjectBulk(postData.map(p => [`post:queue:${p.id}`, { data: JSON.stringify(p.data) }]));
             cache.del('post-queue');
         }
     };

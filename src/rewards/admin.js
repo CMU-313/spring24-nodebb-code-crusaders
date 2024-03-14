@@ -57,7 +57,9 @@ async function saveConditions(data) {
 
     await db.setAdd('conditions:active', conditions);
 
-    await Promise.all(Object.keys(rewardsPerCondition).map(c => db.setAdd(`condition:${c}:rewards`, rewardsPerCondition[c])));
+    await Promise.all(
+        Object.keys(rewardsPerCondition).map(c => db.setAdd(`condition:${c}:rewards`, rewardsPerCondition[c]))
+    );
 }
 
 async function getActiveRewards() {

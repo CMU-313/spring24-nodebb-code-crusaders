@@ -87,7 +87,7 @@ describe('uploads.js', () => {
             await user.associateUpload(uid, relativePath);
         });
 
-        it('should remove the upload from the user\'s uploads zset', async () => {
+        it("should remove the upload from the user's uploads zset", async () => {
             await user.deleteUpload(uid, uid, relativePath);
 
             const uploads = await db.getSortedSetMembers(`uid:${uid}:uploads`);
@@ -148,7 +148,9 @@ describe('uploads.js', () => {
         });
 
         it('should remove the post association as well, if present', async () => {
-            const { cid } = await categories.create({ name: utils.generateUUID() });
+            const { cid } = await categories.create({
+                name: utils.generateUUID(),
+            });
             const { postData } = await topics.post({
                 uid,
                 cid,
@@ -156,7 +158,9 @@ describe('uploads.js', () => {
                 content: `[an upload](/assets/uploads/${relativePath})`,
             });
 
-            assert.deepStrictEqual(await db.getSortedSetMembers(`upload:${md5(relativePath)}:pids`), [postData.pid.toString()]);
+            assert.deepStrictEqual(await db.getSortedSetMembers(`upload:${md5(relativePath)}:pids`), [
+                postData.pid.toString(),
+            ]);
 
             await user.deleteUpload(uid, uid, relativePath);
 

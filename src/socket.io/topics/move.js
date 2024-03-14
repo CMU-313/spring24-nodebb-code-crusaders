@@ -47,7 +47,6 @@ module.exports = function (SocketTopics) {
         });
     };
 
-
     SocketTopics.moveAll = async function (socket, data) {
         if (!data || !data.cid || !data.currentCid) {
             throw new Error('[[error:invalid-data]]');

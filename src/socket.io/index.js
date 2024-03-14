@@ -62,7 +62,9 @@ Sockets.init = async function (server) {
 };
 
 function onConnection(socket) {
-    socket.ip = (socket.request.headers['x-forwarded-for'] || socket.request.connection.remoteAddress || '').split(',')[0];
+    socket.ip = (socket.request.headers['x-forwarded-for'] || socket.request.connection.remoteAddress || '').split(
+        ','
+    )[0];
     socket.request.ip = socket.ip;
     logger.io_one(socket, socket.uid);
 
@@ -114,7 +116,10 @@ async function onMessage(socket, payload) {
 
     const eventName = payload.data[0];
     const params = typeof payload.data[1] === 'function' ? {} : payload.data[1];
-    const callback = typeof payload.data[payload.data.length - 1] === 'function' ? payload.data[payload.data.length - 1] : function () {};
+    const callback =
+        typeof payload.data[payload.data.length - 1] === 'function' ?
+            payload.data[payload.data.length - 1] :
+            function () {};
 
     if (!eventName) {
         return winston.warn('[socket.io] Empty method name');
@@ -144,7 +149,9 @@ async function onMessage(socket, payload) {
     }
 
     if (!eventName.startsWith('admin.') && ratelimit.isFlooding(socket)) {
-        winston.warn(`[socket.io] Too many emits! Disconnecting uid : ${socket.uid}. Events : ${socket.previousEvents}`);
+        winston.warn(
+            `[socket.io] Too many emits! Disconnecting uid : ${socket.uid}. Events : ${socket.previousEvents}`
+        );
         return socket.disconnect();
     }
 
@@ -172,9 +179,18 @@ async function onMessage(socket, payload) {
 
 function requireModules() {
     const modules = [
-        'admin', 'categories', 'groups', 'meta', 'modules',
-        'notifications', 'plugins', 'posts', 'topics', 'user',
-        'blacklist', 'uploads',
+        'admin',
+        'categories',
+        'groups',
+        'meta',
+        'modules',
+        'notifications',
+        'plugins',
+        'posts',
+        'topics',
+        'user',
+        'blacklist',
+        'uploads',
     ];
 
     modules.forEach((module) => {
@@ -195,9 +211,7 @@ async function checkMaintenance(socket) {
     throw new Error(`[[pages:maintenance.text, ${validator.escape(String(meta.config.title || 'NodeBB'))}]]`);
 }
 
-const getSessionAsync = util.promisify(
-    (sid, callback) => db.sessionStore.get(sid, (err, sessionObj) => callback(err, sessionObj || null))
-);
+const getSessionAsync = util.promisify((sid, callback) => db.sessionStore.get(sid, (err, sessionObj) => callback(err, sessionObj || null)));
 
 async function validateSession(socket, errorMsg) {
     const req = socket.request;

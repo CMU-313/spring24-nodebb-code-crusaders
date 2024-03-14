@@ -9,10 +9,24 @@ const translator = require('../translator');
 const plugins = require('../plugins');
 
 const intFields = [
-    'tid', 'cid', 'uid', 'mainPid', 'postcount',
-    'viewcount', 'postercount', 'deleted', 'locked', 'pinned',
-    'pinExpiry', 'timestamp', 'upvotes', 'downvotes', 'lastposttime',
-    'deleterUid', 'anonymous', 'bestPid',
+    'tid',
+    'cid',
+    'uid',
+    'mainPid',
+    'postcount',
+    'viewcount',
+    'postercount',
+    'deleted',
+    'locked',
+    'pinned',
+    'pinExpiry',
+    'timestamp',
+    'upvotes',
+    'downvotes',
+    'lastposttime',
+    'deleterUid',
+    'anonymous',
+    'bestPid',
 ];
 
 module.exports = function (Topics) {
@@ -129,14 +143,17 @@ function modifyTopic(topic, fields) {
 
     if (fields.includes('tags') || !fields.length) {
         const tags = String(topic.tags || '');
-        topic.tags = tags.split(',').filter(Boolean).map((tag) => {
-            const escaped = validator.escape(String(tag));
-            return {
-                value: tag,
-                valueEscaped: escaped,
-                valueEncoded: encodeURIComponent(escaped),
-                class: escaped.replace(/\s/g, '-'),
-            };
-        });
+        topic.tags = tags
+            .split(',')
+            .filter(Boolean)
+            .map((tag) => {
+                const escaped = validator.escape(String(tag));
+                return {
+                    value: tag,
+                    valueEscaped: escaped,
+                    valueEncoded: encodeURIComponent(escaped),
+                    class: escaped.replace(/\s/g, '-'),
+                };
+            });
     }
 }

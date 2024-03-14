@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('forum/account/consent', ['forum/account/header', 'alerts', 'api'], function (header, alerts, api) {
     const Consent = {};
 
@@ -23,9 +22,11 @@ define('forum/account/consent', ['forum/account/header', 'alerts', 'api'], funct
 
         function handleExport(el, type, success) {
             el.on('click', function () {
-                api.post(`/users/${ajaxify.data.uid}/exports/${type}`).then(() => {
-                    alerts.success(success);
-                }).catch(alerts.error);
+                api.post(`/users/${ajaxify.data.uid}/exports/${type}`)
+                    .then(() => {
+                        alerts.success(success);
+                    })
+                    .catch(alerts.error);
             });
         }
     };

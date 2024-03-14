@@ -8,36 +8,54 @@ const utils = require('../utils');
 const Hooks = module.exports;
 
 Hooks._deprecated = new Map([
-    ['filter:email.send', {
-        new: 'static:email.send',
-        since: 'v1.17.0',
-        until: 'v2.0.0',
-    }],
-    ['filter:router.page', {
-        new: 'response:router.page',
-        since: 'v1.15.3',
-        until: 'v2.1.0',
-    }],
-    ['filter:post.purge', {
-        new: 'filter:posts.purge',
-        since: 'v1.19.6',
-        until: 'v2.1.0',
-    }],
-    ['action:post.purge', {
-        new: 'action:posts.purge',
-        since: 'v1.19.6',
-        until: 'v2.1.0',
-    }],
-    ['filter:user.verify.code', {
-        new: 'filter:user.verify',
-        since: 'v2.2.0',
-        until: 'v3.0.0',
-    }],
-    ['filter:flags.getFilters', {
-        new: 'filter:flags.init',
-        since: 'v2.7.0',
-        until: 'v3.0.0',
-    }],
+    [
+        'filter:email.send',
+        {
+            new: 'static:email.send',
+            since: 'v1.17.0',
+            until: 'v2.0.0',
+        },
+    ],
+    [
+        'filter:router.page',
+        {
+            new: 'response:router.page',
+            since: 'v1.15.3',
+            until: 'v2.1.0',
+        },
+    ],
+    [
+        'filter:post.purge',
+        {
+            new: 'filter:posts.purge',
+            since: 'v1.19.6',
+            until: 'v2.1.0',
+        },
+    ],
+    [
+        'action:post.purge',
+        {
+            new: 'action:posts.purge',
+            since: 'v1.19.6',
+            until: 'v2.1.0',
+        },
+    ],
+    [
+        'filter:user.verify.code',
+        {
+            new: 'filter:user.verify',
+            since: 'v2.2.0',
+            until: 'v3.0.0',
+        },
+    ],
+    [
+        'filter:flags.getFilters',
+        {
+            new: 'filter:flags.init',
+            since: 'v2.7.0',
+            until: 'v3.0.0',
+        },
+    ],
 ]);
 
 Hooks.internals = {
@@ -81,7 +99,10 @@ Hooks.register = function (id, data) {
         data.priority = 10;
     }
 
-    if (Array.isArray(data.method) && data.method.every(method => typeof method === 'function' || typeof method === 'string')) {
+    if (
+        Array.isArray(data.method) &&
+        data.method.every(method => typeof method === 'function' || typeof method === 'string')
+    ) {
         // Go go gadget recursion!
         data.method.forEach((method) => {
             const singularData = { ...data, method: method };
@@ -109,7 +130,9 @@ Hooks.register = function (id, data) {
 
 Hooks.unregister = function (id, hook, method) {
     const hooks = plugins.loadedHooks[hook] || [];
-    plugins.loadedHooks[hook] = hooks.filter(hookData => hookData && hookData.id !== id && hookData.method !== method);
+    plugins.loadedHooks[hook] = hooks.filter(
+        hookData => hookData && hookData.id !== id && hookData.method !== method
+    );
 };
 
 Hooks.fire = async function (hook, params) {
@@ -132,7 +155,10 @@ Hooks.fire = async function (hook, params) {
     const result = await hookTypeToMethod[hookType](hook, hookList, params);
 
     if (hook !== 'action:plugins.firehook' && hook !== 'filter:plugins.firehook') {
-        const payload = await Hooks.fire('filter:plugins.firehook', { hook: hook, params: result || params });
+        const payload = await Hooks.fire('filter:plugins.firehook', {
+            hook: hook,
+            params: result || params,
+        });
         Hooks.fire('action:plugins.firehook', payload);
     }
     if (result !== undefined) {
@@ -155,7 +181,9 @@ async function fireFilterHook(hook, hookList, params) {
     async function fireMethod(hookObj, params) {
         if (typeof hookObj.method !== 'function') {
             if (global.env === 'development') {
-                winston.warn(`[plugins] Expected method for hook '${hook}' in plugin '${hookObj.id}' not found, skipping.`);
+                winston.warn(
+                    `[plugins] Expected method for hook '${hook}' in plugin '${hookObj.id}' not found, skipping.`
+                );
             }
             return params;
         }
@@ -174,7 +202,8 @@ async function fireFilterHook(hook, hookList, params) {
                 resolve(result);
             }
             const returned = hookObj.method(params, (err, result) => {
-                if (err) reject(err); else _resolve(result);
+                if (err) reject(err);
+                else _resolve(result);
             });
 
             if (utils.isPromise(returned)) {
@@ -204,7 +233,9 @@ async function fireActionHook(hook, hookList, params) {
     for (const hookObj of hookList) {
         if (typeof hookObj.method !== 'function') {
             if (global.env === 'development') {
-                winston.warn(`[plugins] Expected method for hook '${hook}' in plugin '${hookObj.id}' not found, skipping.`);
+                winston.warn(
+                    `[plugins] Expected method for hook '${hook}' in plugin '${hookObj.id}' not found, skipping.`
+                );
             }
         } else {
             // eslint-disable-next-line
@@ -223,7 +254,9 @@ async function fireStaticHook(hook, hookList, params) {
     for (const hookObj of hookList) {
         if (typeof hookObj.method !== 'function') {
             if (global.env === 'development') {
-                winston.warn(`[plugins] Expected method for hook '${hook}' in plugin '${hookObj.id}' not found, skipping.`);
+                winston.warn(
+                    `[plugins] Expected method for hook '${hook}' in plugin '${hookObj.id}' not found, skipping.`
+                );
             }
         } else {
             let hookFn = hookObj.method;
@@ -266,7 +299,9 @@ async function fireResponseHook(hook, hookList, params) {
     for (const hookObj of hookList) {
         if (typeof hookObj.method !== 'function') {
             if (global.env === 'development') {
-                winston.warn(`[plugins] Expected method for hook '${hook}' in plugin '${hookObj.id}' not found, skipping.`);
+                winston.warn(
+                    `[plugins] Expected method for hook '${hook}' in plugin '${hookObj.id}' not found, skipping.`
+                );
             }
         } else {
             // Skip remaining hooks if headers have been sent

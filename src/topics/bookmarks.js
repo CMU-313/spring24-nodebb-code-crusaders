@@ -1,4 +1,3 @@
-
 'use strict';
 
 const async = require('async');
@@ -18,7 +17,10 @@ module.exports = function (Topics) {
         if (parseInt(uid, 10) <= 0) {
             return tids.map(() => null);
         }
-        return await db.sortedSetsScore(tids.map(tid => `tid:${tid}:bookmarks`), uid);
+        return await db.sortedSetsScore(
+            tids.map(tid => `tid:${tid}:bookmarks`),
+            uid
+        );
     };
 
     Topics.setUserBookmark = async function (tid, uid, index) {
@@ -37,7 +39,8 @@ module.exports = function (Topics) {
 
         const bookmarks = await Topics.getTopicBookmarks(tid);
 
-        const uidData = bookmarks.map(b => ({ uid: b.value, bookmark: parseInt(b.score, 10) }))
+        const uidData = bookmarks
+            .map(b => ({ uid: b.value, bookmark: parseInt(b.score, 10) }))
             .filter(data => data.bookmark >= minIndex);
 
         await async.eachLimit(uidData, 50, async (data) => {

@@ -1,6 +1,4 @@
-
 'use strict';
-
 
 const winston = require('winston');
 const nconf = require('nconf');
@@ -21,7 +19,8 @@ function isUriNotSpecified() {
 mongoModule.questions = [
     {
         name: 'mongo:uri',
-        description: 'MongoDB connection URI: (leave blank if you wish to specify host, port, username/password and database individually)\nFormat: mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]',
+        description:
+            'MongoDB connection URI: (leave blank if you wish to specify host, port, username/password and database individually)\nFormat: mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]',
         default: nconf.get('mongo:uri') || '',
         hideOnWebInstall: true,
     },
@@ -49,7 +48,10 @@ mongoModule.questions = [
         default: nconf.get('mongo:password') || '',
         hidden: true,
         ask: isUriNotSpecified,
-        before: function (value) { value = value || nconf.get('mongo:password') || ''; return value; },
+        before: function (value) {
+            value = value || nconf.get('mongo:password') || '';
+            return value;
+        },
     },
     {
         name: 'mongo:database',
@@ -149,7 +151,11 @@ mongoModule.info = async function (db) {
     stats.mem.virtual = (stats.mem.virtual / 1024).toFixed(3);
     stats.mem.mapped = (stats.mem.mapped / 1024).toFixed(3);
     stats.collectionData = listCollections;
-    stats.network = serverStatus.network || { bytesIn: 0, bytesOut: 0, numRequests: 0 };
+    stats.network = serverStatus.network || {
+        bytesIn: 0,
+        bytesOut: 0,
+        numRequests: 0,
+    };
     stats.network.bytesIn = (stats.network.bytesIn / scale).toFixed(3);
     stats.network.bytesOut = (stats.network.bytesOut / scale).toFixed(3);
     stats.network.numRequests = utils.addCommas(stats.network.numRequests);

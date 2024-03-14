@@ -16,7 +16,10 @@ describe('Middlewares', () => {
         let adminUid;
 
         before(async () => {
-            adminUid = await user.create({ username: 'admin', password: '123456' });
+            adminUid = await user.create({
+                username: 'admin',
+                password: '123456',
+            });
             await groups.join('administrators', adminUid);
         });
 
@@ -41,7 +44,10 @@ describe('Middlewares', () => {
 
         it('should expose privileges in res.locals.privileges and isSelf=true', (done) => {
             const middleware = require('../src/middleware');
-            const reqMock = { user: { uid: adminUid }, params: { uid: adminUid } };
+            const reqMock = {
+                user: { uid: adminUid },
+                params: { uid: adminUid },
+            };
             const resMock = { locals: {} };
             middleware.exposePrivileges(reqMock, resMock, () => {
                 assert(resMock.locals.privileges);
@@ -110,7 +116,10 @@ describe('Middlewares', () => {
         let jar;
 
         before(async () => {
-            uid = await user.create({ username: 'testuser', password: '123456' });
+            uid = await user.create({
+                username: 'testuser',
+                password: '123456',
+            });
             ({ jar } = await helpers.loginUser('testuser', '123456'));
         });
 
@@ -193,4 +202,3 @@ describe('Middlewares', () => {
         });
     });
 });
-

@@ -1,8 +1,13 @@
 'use strict';
 
-define('forum/flags/list', [
-    'components', 'Chart', 'categoryFilter', 'autocomplete', 'api', 'alerts',
-], function (components, Chart, categoryFilter, autocomplete, api, alerts) {
+define('forum/flags/list', ['components', 'Chart', 'categoryFilter', 'autocomplete', 'api', 'alerts'], function (
+    components,
+    Chart,
+    categoryFilter,
+    autocomplete,
+    api,
+    alerts
+) {
     const Flags = {};
 
     let selectedCids;
@@ -15,7 +20,8 @@ define('forum/flags/list', [
         selectedCids = [];
         if (ajaxify.data.filters.hasOwnProperty('cid')) {
             selectedCids = Array.isArray(ajaxify.data.filters.cid) ?
-                ajaxify.data.filters.cid : [ajaxify.data.filters.cid];
+                ajaxify.data.filters.cid :
+                [ajaxify.data.filters.cid];
         }
 
         categoryFilter.init($('[component="category/dropdown"]'), {
@@ -26,22 +32,23 @@ define('forum/flags/list', [
             },
         });
 
-        components.get('flags/list')
-            .on('click', '[data-flag-id]', function (e) {
-                if (['BUTTON', 'A'].includes(e.target.nodeName)) {
-                    return;
-                }
+        components.get('flags/list').on('click', '[data-flag-id]', function (e) {
+            if (['BUTTON', 'A'].includes(e.target.nodeName)) {
+                return;
+            }
 
-                const flagId = this.getAttribute('data-flag-id');
-                ajaxify.go('flags/' + flagId);
-            });
+            const flagId = this.getAttribute('data-flag-id');
+            ajaxify.go('flags/' + flagId);
+        });
 
         $('#flags-daily-wrapper').one('shown.bs.collapse', function () {
             Flags.handleGraphs();
         });
 
         autocomplete.user($('#filter-assignee, #filter-targetUid, #filter-reporterId'), (ev, ui) => {
-            setTimeout(() => { ev.target.value = ui.item.user.uid; });
+            setTimeout(() => {
+                ev.target.value = ui.item.user.uid;
+            });
         });
     };
 
@@ -103,9 +110,11 @@ define('forum/flags/list', [
                     let started = false;
 
                     checkboxes.forEach(function (el) {
-                        if ([subselector, lastClicked].some(function (ref) {
-                            return ref === el;
-                        })) {
+                        if (
+                            [subselector, lastClicked].some(function (ref) {
+                                return ref === el;
+                            })
+                        ) {
                             started = !started;
                         }
 
@@ -216,12 +225,14 @@ define('forum/flags/list', [
                     display: false,
                 },
                 scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
-                            precision: 0,
+                    yAxes: [
+                        {
+                            ticks: {
+                                beginAtZero: true,
+                                precision: 0,
+                            },
                         },
-                    }],
+                    ],
                 },
             },
         });

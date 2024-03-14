@@ -3,7 +3,7 @@ get:
     - authentication
   summary: Verify an email address
   responses:
-    "200":
+    '200':
       description: Email address verified, or confirmation code was incorrect
       content:
         application/json:

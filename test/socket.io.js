@@ -2,7 +2,6 @@
 
 // see https://gist.github.com/jfromaniello/4087861#gistcomment-1447029
 
-
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const util = require('util');
@@ -51,36 +50,42 @@ describe('socket.io', () => {
         cid = data[2].cid;
     });
 
-
     it('should connect and auth properly', (done) => {
-        request.get({
-            url: `${nconf.get('url')}/api/config`,
-            jar: cookies,
-            json: true,
-        }, (err, res, body) => {
-            assert.ifError(err);
-
-            request.post(`${nconf.get('url')}/login`, {
+        request.get(
+            {
+                url: `${nconf.get('url')}/api/config`,
                 jar: cookies,
-                form: {
-                    username: 'admin',
-                    password: 'adminpwd',
-                },
-                headers: {
-                    'x-csrf-token': body.csrf_token,
-                },
                 json: true,
-            }, (err, res) => {
+            },
+            (err, res, body) => {
                 assert.ifError(err);
 
-                helpers.connectSocketIO(res, (err, _io) => {
-                    io = _io;
-                    assert.ifError(err);
+                request.post(
+                    `${nconf.get('url')}/login`,
+                    {
+                        jar: cookies,
+                        form: {
+                            username: 'admin',
+                            password: 'adminpwd',
+                        },
+                        headers: {
+                            'x-csrf-token': body.csrf_token,
+                        },
+                        json: true,
+                    },
+                    (err, res) => {
+                        assert.ifError(err);
 
-                    done();
-                });
-            });
-        });
+                        helpers.connectSocketIO(res, (err, _io) => {
+                            io = _io;
+                            assert.ifError(err);
+
+                            done();
+                        });
+                    }
+                );
+            }
+        );
     });
 
     it('should return error for unknown event', (done) => {
@@ -278,7 +283,6 @@ describe('socket.io', () => {
         });
     });
 
-
     it('should error if the room is missing', (done) => {
         io.emit('meta.rooms.enter', null, (err) => {
             assert.equal(err.message, '[[error:invalid-data]]');
@@ -425,19 +429,26 @@ describe('socket.io', () => {
     });
 
     it('should set theme to bootswatch', (done) => {
-        socketAdmin.themes.set({ uid: adminUid }, {
-            type: 'bootswatch',
-            src: '//maxcdn.bootstrapcdn.com/bootswatch/latest/darkly/bootstrap.min.css',
-            id: 'darkly',
-        }, (err) => {
-            assert.ifError(err);
-            meta.configs.getFields(['theme:src', 'bootswatchSkin'], (err, fields) => {
+        socketAdmin.themes.set(
+            { uid: adminUid },
+            {
+                type: 'bootswatch',
+                src: '//maxcdn.bootstrapcdn.com/bootswatch/latest/darkly/bootstrap.min.css',
+                id: 'darkly',
+            },
+            (err) => {
                 assert.ifError(err);
-                assert.equal(fields['theme:src'], '//maxcdn.bootstrapcdn.com/bootswatch/latest/darkly/bootstrap.min.css');
-                assert.equal(fields.bootswatchSkin, 'darkly');
-                done();
-            });
-        });
+                meta.configs.getFields(['theme:src', 'bootswatchSkin'], (err, fields) => {
+                    assert.ifError(err);
+                    assert.equal(
+                        fields['theme:src'],
+                        '//maxcdn.bootstrapcdn.com/bootswatch/latest/darkly/bootstrap.min.css'
+                    );
+                    assert.equal(fields.bootswatchSkin, 'darkly');
+                    done();
+                });
+            }
+        );
     });
 
     it('should set theme to local persona', (done) => {
@@ -454,7 +465,10 @@ describe('socket.io', () => {
     it('should toggle plugin active', (done) => {
         socketAdmin.plugins.toggleActive({ uid: adminUid }, 'nodebb-plugin-location-to-map', (err, data) => {
             assert.ifError(err);
-            assert.deepEqual(data, { id: 'nodebb-plugin-location-to-map', active: true });
+            assert.deepEqual(data, {
+                id: 'nodebb-plugin-location-to-map',
+                active: true,
+            });
             done();
         });
     });
@@ -463,17 +477,21 @@ describe('socket.io', () => {
         this.timeout(0);
         const oldValue = process.env.NODE_ENV;
         process.env.NODE_ENV = 'development';
-        socketAdmin.plugins.toggleInstall({
-            uid: adminUid,
-        }, {
-            id: 'nodebb-plugin-location-to-map',
-            version: 'latest',
-        }, (err, data) => {
-            assert.ifError(err);
-            assert.equal(data.name, 'nodebb-plugin-location-to-map');
-            process.env.NODE_ENV = oldValue;
-            done();
-        });
+        socketAdmin.plugins.toggleInstall(
+            {
+                uid: adminUid,
+            },
+            {
+                id: 'nodebb-plugin-location-to-map',
+                version: 'latest',
+            },
+            (err, data) => {
+                assert.ifError(err);
+                assert.equal(data.name, 'nodebb-plugin-location-to-map');
+                process.env.NODE_ENV = oldValue;
+                done();
+            }
+        );
     });
 
     it('should get list of active plugins', (done) => {
@@ -505,16 +523,20 @@ describe('socket.io', () => {
         this.timeout(0);
         const oldValue = process.env.NODE_ENV;
         process.env.NODE_ENV = 'development';
-        socketAdmin.plugins.upgrade({
-            uid: adminUid,
-        }, {
-            id: 'nodebb-plugin-location-to-map',
-            version: 'latest',
-        }, (err) => {
-            assert.ifError(err);
-            process.env.NODE_ENV = oldValue;
-            done();
-        });
+        socketAdmin.plugins.upgrade(
+            {
+                uid: adminUid,
+            },
+            {
+                id: 'nodebb-plugin-location-to-map',
+                version: 'latest',
+            },
+            (err) => {
+                assert.ifError(err);
+                process.env.NODE_ENV = oldValue;
+                done();
+            }
+        );
     });
 
     it('should error with invalid data', (done) => {
@@ -529,7 +551,12 @@ describe('socket.io', () => {
             {
                 template: 'global',
                 location: 'sidebar',
-                widgets: [{ widget: 'html', data: { html: 'test', title: 'test', container: '' } }],
+                widgets: [
+                    {
+                        widget: 'html',
+                        data: { html: 'test', title: 'test', container: '' },
+                    },
+                ],
             },
         ];
         socketAdmin.widgets.set({ uid: adminUid }, data, (err) => {
@@ -701,7 +728,10 @@ describe('socket.io', () => {
 
         it('should for password reset', async () => {
             const then = Date.now();
-            const uid = await user.create({ username: 'forceme', password: '123345' });
+            const uid = await user.create({
+                username: 'forceme',
+                password: '123345',
+            });
             await socketAdmin.user.forcePasswordReset({ uid: adminUid }, [uid]);
             const pwExpiry = await user.getUserField(uid, 'passwordExpiry');
             const sleep = util.promisify(setTimeout);
@@ -713,21 +743,24 @@ describe('socket.io', () => {
             socketUser.reset.send({ uid: 0 }, 'regular@test.com', (err) => {
                 assert.ifError(err);
 
-                async.parallel({
-                    count: async.apply(db.sortedSetCount.bind(db), 'reset:issueDate', 0, Date.now()),
-                    event: async.apply(events.getEvents, '', 0, 0),
-                }, (err, data) => {
-                    assert.ifError(err);
-                    assert.strictEqual(data.count, 2);
+                async.parallel(
+                    {
+                        count: async.apply(db.sortedSetCount.bind(db), 'reset:issueDate', 0, Date.now()),
+                        event: async.apply(events.getEvents, '', 0, 0),
+                    },
+                    (err, data) => {
+                        assert.ifError(err);
+                        assert.strictEqual(data.count, 2);
 
-                    // Event validity
-                    assert.strictEqual(data.event.length, 1);
-                    const event = data.event[0];
-                    assert.strictEqual(event.type, 'password-reset');
-                    assert.strictEqual(event.text, '[[success:success]]');
+                        // Event validity
+                        assert.strictEqual(data.event.length, 1);
+                        const event = data.event[0];
+                        assert.strictEqual(event.type, 'password-reset');
+                        assert.strictEqual(event.text, '[[success:success]]');
 
-                    done();
-                });
+                        done();
+                    }
+                );
             });
         });
 
@@ -735,21 +768,24 @@ describe('socket.io', () => {
             socketUser.reset.send({ uid: 0 }, 'regular@test.com', (err) => {
                 assert.ifError(err);
 
-                async.parallel({
-                    count: async.apply(db.sortedSetCount.bind(db), 'reset:issueDate', 0, Date.now()),
-                    event: async.apply(events.getEvents, '', 0, 0),
-                }, (err, data) => {
-                    assert.ifError(err);
-                    assert.strictEqual(data.count, 2);
+                async.parallel(
+                    {
+                        count: async.apply(db.sortedSetCount.bind(db), 'reset:issueDate', 0, Date.now()),
+                        event: async.apply(events.getEvents, '', 0, 0),
+                    },
+                    (err, data) => {
+                        assert.ifError(err);
+                        assert.strictEqual(data.count, 2);
 
-                    // Event validity
-                    assert.strictEqual(data.event.length, 1);
-                    const event = data.event[0];
-                    assert.strictEqual(event.type, 'password-reset');
-                    assert.strictEqual(event.text, '[[error:reset-rate-limited]]');
+                        // Event validity
+                        assert.strictEqual(data.event.length, 1);
+                        const event = data.event[0];
+                        assert.strictEqual(event.type, 'password-reset');
+                        assert.strictEqual(event.text, '[[error:reset-rate-limited]]');
 
-                    done();
-                });
+                        done();
+                    }
+                );
             });
         });
 

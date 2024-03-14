@@ -41,40 +41,32 @@ async function linkModules() {
         mkdirp(path.join(__dirname, '../../build/public/src/client/plugins')),
     ]);
 
-    await Promise.all(Object.keys(modules).map(async (relPath) => {
-        const srcPath = path.join(__dirname, '../../', modules[relPath]);
-        const destPath = path.join(__dirname, '../../build/public/src/modules', relPath);
-        const [stats] = await Promise.all([
-            fs.promises.stat(srcPath),
-            mkdirp(path.dirname(destPath)),
-        ]);
-        if (stats.isDirectory()) {
-            await file.linkDirs(srcPath, destPath, true);
-        } else {
-            await fs.promises.copyFile(srcPath, destPath);
-        }
-    }));
+    await Promise.all(
+        Object.keys(modules).map(async (relPath) => {
+            const srcPath = path.join(__dirname, '../../', modules[relPath]);
+            const destPath = path.join(__dirname, '../../build/public/src/modules', relPath);
+            const [stats] = await Promise.all([fs.promises.stat(srcPath), mkdirp(path.dirname(destPath))]);
+            if (stats.isDirectory()) {
+                await file.linkDirs(srcPath, destPath, true);
+            } else {
+                await fs.promises.copyFile(srcPath, destPath);
+            }
+        })
+    );
 }
 
 const moduleDirs = ['modules', 'admin', 'client'];
 
 async function clearModules() {
-    const builtPaths = moduleDirs.map(
-        p => path.join(__dirname, '../../build/public/src', p)
-    );
-    await Promise.all(
-        builtPaths.map(builtPath => rimrafAsync(builtPath))
-    );
+    const builtPaths = moduleDirs.map(p => path.join(__dirname, '../../build/public/src', p));
+    await Promise.all(builtPaths.map(builtPath => rimrafAsync(builtPath)));
 }
 
 JS.buildModules = async function () {
     await clearModules();
 
     const fse = require('fs-extra');
-    await fse.copy(
-        path.join(__dirname, `../../public/src`),
-        path.join(__dirname, `../../build/public/src`)
-    );
+    await fse.copy(path.join(__dirname, `../../public/src`), path.join(__dirname, `../../build/public/src`));
 
     await linkModules();
 };
@@ -82,13 +74,15 @@ JS.buildModules = async function () {
 JS.linkStatics = async function () {
     await rimrafAsync(path.join(__dirname, '../../build/public/plugins'));
 
-    await Promise.all(Object.keys(plugins.staticDirs).map(async (mappedPath) => {
-        const sourceDir = plugins.staticDirs[mappedPath];
-        const destDir = path.join(__dirname, '../../build/public/plugins', mappedPath);
+    await Promise.all(
+        Object.keys(plugins.staticDirs).map(async (mappedPath) => {
+            const sourceDir = plugins.staticDirs[mappedPath];
+            const destDir = path.join(__dirname, '../../build/public/plugins', mappedPath);
 
-        await mkdirp(path.dirname(destDir));
-        await file.linkDirs(sourceDir, destDir, true);
-    }));
+            await mkdirp(path.dirname(destDir));
+            await file.linkDirs(sourceDir, destDir, true);
+        })
+    );
 };
 
 async function getBundleScriptList(target) {
@@ -106,10 +100,12 @@ async function getBundleScriptList(target) {
         return false;
     });
 
-    await Promise.all(pluginDirectories.map(async (directory) => {
-        const scripts = await file.walk(directory);
-        pluginScripts = pluginScripts.concat(scripts);
-    }));
+    await Promise.all(
+        pluginDirectories.map(async (directory) => {
+            const scripts = await file.walk(directory);
+            pluginScripts = pluginScripts.concat(scripts);
+        })
+    );
 
     pluginScripts = JS.scripts.base.concat(pluginScripts).map((script) => {
         const srcPath = path.resolve(basePath, script).replace(/\\/g, '/');
@@ -128,11 +124,15 @@ JS.buildBundle = async function (target, fork) {
     const minify = false; // webpack will minify in prod
     const filePath = path.join(__dirname, '../../build/public', filename);
 
-    await minifier.js.bundle({
-        files: files,
-        filename: filename,
-        destPath: filePath,
-    }, minify, fork);
+    await minifier.js.bundle(
+        {
+            files: files,
+            filename: filename,
+            destPath: filePath,
+        },
+        minify,
+        fork
+    );
 };
 
 JS.killMinifier = function () {

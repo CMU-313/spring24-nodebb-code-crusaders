@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('admin/manage/registration', ['bootbox', 'alerts'], function (bootbox, alerts) {
     const Registration = {};
 

@@ -26,7 +26,12 @@ if (!fs.existsSync(logDir)) {
     mkdirp.sync(path.dirname(outputLogFilePath));
 }
 
-const output = logrotate({ file: outputLogFilePath, size: '1m', keep: 3, compress: true });
+const output = logrotate({
+    file: outputLogFilePath,
+    size: '1m',
+    keep: 3,
+    compress: true,
+});
 const silent = nconf.get('silent') === 'false' ? false : nconf.get('silent') !== false;
 let numProcs;
 const workers = [];
@@ -48,7 +53,7 @@ Loader.init = function () {
 
 Loader.displayStartupMessages = function () {
     console.log('');
-    console.log(`NodeBB v${pkg.version} Copyright (C) 2013-${(new Date()).getFullYear()} NodeBB Inc.`);
+    console.log(`NodeBB v${pkg.version} Copyright (C) 2013-${new Date().getFullYear()} NodeBB Inc.`);
     console.log('This program comes with ABSOLUTELY NO WARRANTY.');
     console.log('This is free software, and you are welcome to redistribute it under certain conditions.');
     console.log('For the full license, please visit: http://www.gnu.org/copyleft/gpl.html');
@@ -138,7 +143,12 @@ function forkWorker(index, isPrimary) {
     Loader.addWorkerEvents(worker);
 
     if (silent) {
-        const output = logrotate({ file: outputLogFilePath, size: '1m', keep: 3, compress: true });
+        const output = logrotate({
+            file: outputLogFilePath,
+            size: '1m',
+            keep: 3,
+            compress: true,
+        });
         worker.stdout.pipe(output);
         worker.stderr.pipe(output);
     }

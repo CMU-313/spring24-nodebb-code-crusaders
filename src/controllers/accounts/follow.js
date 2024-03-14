@@ -35,7 +35,10 @@ async function getFollow(tpl, name, req, res, next) {
     const pageCount = Math.ceil(count / resultsPerPage);
     userData.pagination = pagination.create(page, pageCount);
 
-    userData.breadcrumbs = helpers.buildBreadcrumbs([{ text: userData.username, url: `/user/${userData.userslug}` }, { text: `[[user:${name}]]` }]);
+    userData.breadcrumbs = helpers.buildBreadcrumbs([
+        { text: userData.username, url: `/user/${userData.userslug}` },
+        { text: `[[user:${name}]]` },
+    ]);
 
     res.render(tpl, userData);
 }

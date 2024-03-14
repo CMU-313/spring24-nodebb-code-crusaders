@@ -157,12 +157,10 @@ async function deleteOrRestoreTopicOf(command, pid, caller) {
         return;
     }
     // command: delete/restore
-    await apiHelpers.doTopicAction(
-        command,
-        topic.deleted ? 'event:topic_restored' : 'event:topic_deleted',
-        caller,
-        { tids: [topic.tid], cid: topic.cid }
-    );
+    await apiHelpers.doTopicAction(command, topic.deleted ? 'event:topic_restored' : 'event:topic_deleted', caller, {
+        tids: [topic.tid],
+        cid: topic.cid,
+    });
 }
 
 postsAPI.purge = async function (caller, data) {
@@ -199,20 +197,15 @@ postsAPI.purge = async function (caller, data) {
     });
 
     if (isMainAndLast) {
-        await apiHelpers.doTopicAction(
-            'purge',
-            'event:topic_purged',
-            caller,
-            { tids: [postData.tid], cid: topicData.cid }
-        );
+        await apiHelpers.doTopicAction('purge', 'event:topic_purged', caller, {
+            tids: [postData.tid],
+            cid: topicData.cid,
+        });
     }
 };
 
 async function isMainAndLastPost(pid) {
-    const [isMain, topicData] = await Promise.all([
-        posts.isMain(pid),
-        posts.getTopicFields(pid, ['postcount']),
-    ]);
+    const [isMain, topicData] = await Promise.all([posts.isMain(pid), posts.getTopicFields(pid, ['postcount'])]);
     return {
         isMain: isMain,
         isLast: topicData && topicData.postcount === 1,

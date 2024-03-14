@@ -19,5 +19,5 @@ export type PostObject = {
   isMainPost: boolean;
   bestResponse: boolean;
   replies: number;
-  anonymous: boolean
+  anonymous: boolean;
 };

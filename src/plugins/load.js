@@ -95,7 +95,7 @@ module.exports = function (Plugins) {
                 Plugins.languageData.languages = [];
                 Plugins.languageData.namespaces = [];
                 break;
-            // do nothing for modules and staticDirs
+                // do nothing for modules and staticDirs
             }
         });
 

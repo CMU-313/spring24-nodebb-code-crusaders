@@ -18,8 +18,8 @@ permissions:
 jobs:
   lint:
     permissions:
-      checks: write  # for coverallsapp/github-action to create new checks
-      contents: read  # for actions/checkout to fetch code
+      checks: write # for coverallsapp/github-action to create new checks
+      contents: read # for actions/checkout to fetch code
     name: Lint
     strategy:
       fail-fast: false

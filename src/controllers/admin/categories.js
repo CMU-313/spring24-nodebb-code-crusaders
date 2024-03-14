@@ -56,15 +56,28 @@ categoriesController.getAll = async function (req, res) {
 
     let rootParent = 0;
     if (rootCid) {
-        rootParent = await categories.getCategoryField(rootCid, 'parentCid') || 0;
+        rootParent = (await categories.getCategoryField(rootCid, 'parentCid')) || 0;
     }
 
     const fields = [
-        'cid', 'name', 'icon', 'parentCid', 'disabled', 'link', 'order',
-        'color', 'bgColor', 'backgroundImage', 'imageClass', 'subCategoriesPerPage',
+        'cid',
+        'name',
+        'icon',
+        'parentCid',
+        'disabled',
+        'link',
+        'order',
+        'color',
+        'bgColor',
+        'backgroundImage',
+        'imageClass',
+        'subCategoriesPerPage',
     ];
     const categoriesData = await categories.getCategoriesFields(cids, fields);
-    const result = await plugins.hooks.fire('filter:admin.categories.get', { categories: categoriesData, fields: fields });
+    const result = await plugins.hooks.fire('filter:admin.categories.get', {
+        categories: categoriesData,
+        fields: fields,
+    });
     let tree = categories.getTree(result.categories, rootParent);
     const cidsCount = rootCid && tree[0] ? tree[0].children.length : tree.length;
 

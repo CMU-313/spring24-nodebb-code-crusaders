@@ -1,6 +1,4 @@
-
 'use strict';
-
 
 define('forum/topic/events', [
     'forum/topic/postTools',
@@ -70,18 +68,23 @@ define('forum/topic/events', [
     }
 
     function updatePostVotesAndUserReputation(data) {
-        const votes = $('[data-pid="' + data.post.pid + '"] [component="post/vote-count"]').filter(function (index, el) {
-            return parseInt($(el).closest('[data-pid]').attr('data-pid'), 10) === parseInt(data.post.pid, 10);
-        });
+        const votes = $('[data-pid="' + data.post.pid + '"] [component="post/vote-count"]').filter(
+            function (index, el) {
+                return parseInt($(el).closest('[data-pid]').attr('data-pid'), 10) === parseInt(data.post.pid, 10);
+            }
+        );
         const reputationElements = $('.reputation[data-uid="' + data.post.uid + '"]');
         votes.html(data.post.votes).attr('data-votes', data.post.votes);
         reputationElements.html(data.user.reputation).attr('data-reputation', data.user.reputation);
     }
 
     function updateBookmarkCount(data) {
-        $('[data-pid="' + data.post.pid + '"] .bookmarkCount').filter(function (index, el) {
-            return parseInt($(el).closest('[data-pid]').attr('data-pid'), 10) === parseInt(data.post.pid, 10);
-        }).html(data.post.bookmarks).attr('data-bookmarks', data.post.bookmarks);
+        $('[data-pid="' + data.post.pid + '"] .bookmarkCount')
+            .filter(function (index, el) {
+                return parseInt($(el).closest('[data-pid]').attr('data-pid'), 10) === parseInt(data.post.pid, 10);
+            })
+            .html(data.post.bookmarks)
+            .attr('data-bookmarks', data.post.bookmarks);
     }
 
     function onTopicPurged(data) {
@@ -122,7 +125,11 @@ define('forum/topic/events', [
         if (topicTitle.length && data.topic.title && data.topic.renamed) {
             ajaxify.data.title = data.topic.title;
             const newUrl = 'topic/' + data.topic.slug + (window.location.search ? window.location.search : '');
-            history.replaceState({ url: newUrl }, null, window.location.protocol + '//' + window.location.host + config.relative_path + '/' + newUrl);
+            history.replaceState(
+                { url: newUrl },
+                null,
+                window.location.protocol + '//' + window.location.host + config.relative_path + '/' + newUrl
+            );
 
             topicTitle.fadeOut(250, function () {
                 topicTitle.html(data.topic.title).fadeIn(250);
@@ -159,7 +166,9 @@ define('forum/topic/events', [
         }
 
         if (data.topic.tags && data.topic.tagsupdated) {
-            Benchpress.render('partials/topic/tags', { tags: data.topic.tags }).then(function (html) {
+            Benchpress.render('partials/topic/tags', {
+                tags: data.topic.tags,
+            }).then(function (html) {
                 const tags = $('.tags');
 
                 tags.fadeOut(250, function () {
@@ -223,12 +232,16 @@ define('forum/topic/events', [
 
     function togglePostVote(data) {
         const post = $('[data-pid="' + data.post.pid + '"]');
-        post.find('[component="post/upvote"]').filter(function (index, el) {
-            return parseInt($(el).closest('[data-pid]').attr('data-pid'), 10) === parseInt(data.post.pid, 10);
-        }).toggleClass('upvoted', data.upvote);
-        post.find('[component="post/downvote"]').filter(function (index, el) {
-            return parseInt($(el).closest('[data-pid]').attr('data-pid'), 10) === parseInt(data.post.pid, 10);
-        }).toggleClass('downvoted', data.downvote);
+        post.find('[component="post/upvote"]')
+            .filter(function (index, el) {
+                return parseInt($(el).closest('[data-pid]').attr('data-pid'), 10) === parseInt(data.post.pid, 10);
+            })
+            .toggleClass('upvoted', data.upvote);
+        post.find('[component="post/downvote"]')
+            .filter(function (index, el) {
+                return parseInt($(el).closest('[data-pid]').attr('data-pid'), 10) === parseInt(data.post.pid, 10);
+            })
+            .toggleClass('downvoted', data.downvote);
     }
 
     function onNewNotification(data) {

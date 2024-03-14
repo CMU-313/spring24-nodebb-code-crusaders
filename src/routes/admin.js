@@ -11,17 +11,37 @@ module.exports = function (app, name, middleware, controllers) {
     helpers.setupAdminPageRoute(app, `/${name}/dashboard/logins`, middlewares, controllers.admin.dashboard.getLogins);
     helpers.setupAdminPageRoute(app, `/${name}/dashboard/users`, middlewares, controllers.admin.dashboard.getUsers);
     helpers.setupAdminPageRoute(app, `/${name}/dashboard/topics`, middlewares, controllers.admin.dashboard.getTopics);
-    helpers.setupAdminPageRoute(app, `/${name}/dashboard/searches`, middlewares, controllers.admin.dashboard.getSearches);
+    helpers.setupAdminPageRoute(
+        app,
+        `/${name}/dashboard/searches`,
+        middlewares,
+        controllers.admin.dashboard.getSearches
+    );
 
     helpers.setupAdminPageRoute(app, `/${name}/manage/categories`, middlewares, controllers.admin.categories.getAll);
-    helpers.setupAdminPageRoute(app, `/${name}/manage/categories/:category_id`, middlewares, controllers.admin.categories.get);
-    helpers.setupAdminPageRoute(app, `/${name}/manage/categories/:category_id/analytics`, middlewares, controllers.admin.categories.getAnalytics);
+    helpers.setupAdminPageRoute(
+        app,
+        `/${name}/manage/categories/:category_id`,
+        middlewares,
+        controllers.admin.categories.get
+    );
+    helpers.setupAdminPageRoute(
+        app,
+        `/${name}/manage/categories/:category_id/analytics`,
+        middlewares,
+        controllers.admin.categories.getAnalytics
+    );
 
     helpers.setupAdminPageRoute(app, `/${name}/manage/privileges/:cid?`, middlewares, controllers.admin.privileges.get);
     helpers.setupAdminPageRoute(app, `/${name}/manage/tags`, middlewares, controllers.admin.tags.get);
 
     helpers.setupAdminPageRoute(app, `/${name}/manage/users`, middlewares, controllers.admin.users.index);
-    helpers.setupAdminPageRoute(app, `/${name}/manage/registration`, middlewares, controllers.admin.users.registrationQueue);
+    helpers.setupAdminPageRoute(
+        app,
+        `/${name}/manage/registration`,
+        middlewares,
+        controllers.admin.users.registrationQueue
+    );
 
     helpers.setupAdminPageRoute(app, `/${name}/manage/admins-mods`, middlewares, controllers.admin.adminsMods.get);
 
@@ -36,7 +56,12 @@ module.exports = function (app, name, middleware, controllers) {
     helpers.setupAdminPageRoute(app, `/${name}/settings/post`, middlewares, controllers.admin.settings.post);
     helpers.setupAdminPageRoute(app, `/${name}/settings/advanced`, middlewares, controllers.admin.settings.advanced);
     helpers.setupAdminPageRoute(app, `/${name}/settings/languages`, middlewares, controllers.admin.settings.languages);
-    helpers.setupAdminPageRoute(app, `/${name}/settings/navigation`, middlewares, controllers.admin.settings.navigation);
+    helpers.setupAdminPageRoute(
+        app,
+        `/${name}/settings/navigation`,
+        middlewares,
+        controllers.admin.settings.navigation
+    );
     helpers.setupAdminPageRoute(app, `/${name}/settings/homepage`, middlewares, controllers.admin.settings.homepage);
     helpers.setupAdminPageRoute(app, `/${name}/settings/social`, middlewares, controllers.admin.settings.social);
     helpers.setupAdminPageRoute(app, `/${name}/settings/:term?`, middlewares, controllers.admin.settings.get);
@@ -61,25 +86,56 @@ module.exports = function (app, name, middleware, controllers) {
     apiRoutes(app, name, middleware, controllers);
 };
 
-
 function apiRoutes(router, name, middleware, controllers) {
     router.get(`/api/${name}/users/csv`, middleware.ensureLoggedIn, helpers.tryRoute(controllers.admin.users.getCSV));
-    router.get(`/api/${name}/groups/:groupname/csv`, middleware.ensureLoggedIn, helpers.tryRoute(controllers.admin.groups.getCSV));
-    router.get(`/api/${name}/analytics`, middleware.ensureLoggedIn, helpers.tryRoute(controllers.admin.dashboard.getAnalytics));
-    router.get(`/api/${name}/advanced/cache/dump`, middleware.ensureLoggedIn, helpers.tryRoute(controllers.admin.cache.dump));
+    router.get(
+        `/api/${name}/groups/:groupname/csv`,
+        middleware.ensureLoggedIn,
+        helpers.tryRoute(controllers.admin.groups.getCSV)
+    );
+    router.get(
+        `/api/${name}/analytics`,
+        middleware.ensureLoggedIn,
+        helpers.tryRoute(controllers.admin.dashboard.getAnalytics)
+    );
+    router.get(
+        `/api/${name}/advanced/cache/dump`,
+        middleware.ensureLoggedIn,
+        helpers.tryRoute(controllers.admin.cache.dump)
+    );
 
     const multipart = require('connect-multiparty');
     const multipartMiddleware = multipart();
 
-    const middlewares = [multipartMiddleware, middleware.validateFiles,
-        middleware.applyCSRF, middleware.ensureLoggedIn];
+    const middlewares = [
+        multipartMiddleware,
+        middleware.validateFiles,
+        middleware.applyCSRF,
+        middleware.ensureLoggedIn,
+    ];
 
-    router.post(`/api/${name}/category/uploadpicture`, middlewares, helpers.tryRoute(controllers.admin.uploads.uploadCategoryPicture));
+    router.post(
+        `/api/${name}/category/uploadpicture`,
+        middlewares,
+        helpers.tryRoute(controllers.admin.uploads.uploadCategoryPicture)
+    );
     router.post(`/api/${name}/uploadfavicon`, middlewares, helpers.tryRoute(controllers.admin.uploads.uploadFavicon));
-    router.post(`/api/${name}/uploadTouchIcon`, middlewares, helpers.tryRoute(controllers.admin.uploads.uploadTouchIcon));
-    router.post(`/api/${name}/uploadMaskableIcon`, middlewares, helpers.tryRoute(controllers.admin.uploads.uploadMaskableIcon));
+    router.post(
+        `/api/${name}/uploadTouchIcon`,
+        middlewares,
+        helpers.tryRoute(controllers.admin.uploads.uploadTouchIcon)
+    );
+    router.post(
+        `/api/${name}/uploadMaskableIcon`,
+        middlewares,
+        helpers.tryRoute(controllers.admin.uploads.uploadMaskableIcon)
+    );
     router.post(`/api/${name}/uploadlogo`, middlewares, helpers.tryRoute(controllers.admin.uploads.uploadLogo));
     router.post(`/api/${name}/uploadOgImage`, middlewares, helpers.tryRoute(controllers.admin.uploads.uploadOgImage));
     router.post(`/api/${name}/upload/file`, middlewares, helpers.tryRoute(controllers.admin.uploads.uploadFile));
-    router.post(`/api/${name}/uploadDefaultAvatar`, middlewares, helpers.tryRoute(controllers.admin.uploads.uploadDefaultAvatar));
+    router.post(
+        `/api/${name}/uploadDefaultAvatar`,
+        middlewares,
+        helpers.tryRoute(controllers.admin.uploads.uploadDefaultAvatar)
+    );
 }

@@ -1,4 +1,3 @@
-
 'use strict';
 
 const winston = require('winston');
@@ -42,10 +41,11 @@ async function filterNotifications(nids, filter) {
 }
 
 UserNotifications.getAll = async function (uid, filter) {
-    let nids = await db.getSortedSetRevRange([
-        `uid:${uid}:notifications:unread`,
-        `uid:${uid}:notifications:read`,
-    ], 0, -1);
+    let nids = await db.getSortedSetRevRange(
+        [`uid:${uid}:notifications:unread`, `uid:${uid}:notifications:read`],
+        0,
+        -1
+    );
     nids = _.uniq(nids);
     const exists = await db.isSortedSetMembers('notifications', nids);
     const deleteNids = [];
@@ -62,10 +62,7 @@ UserNotifications.getAll = async function (uid, filter) {
 };
 
 async function deleteUserNids(nids, uid) {
-    await db.sortedSetRemove([
-        `uid:${uid}:notifications:read`,
-        `uid:${uid}:notifications:unread`,
-    ], nids);
+    await db.sortedSetRemove([`uid:${uid}:notifications:read`, `uid:${uid}:notifications:unread`], nids);
 }
 
 async function getNotificationsFromSet(set, uid, start, stop) {
@@ -163,10 +160,7 @@ UserNotifications.deleteAll = async function (uid) {
     if (parseInt(uid, 10) <= 0) {
         return;
     }
-    await db.deleteAll([
-        `uid:${uid}:notifications:unread`,
-        `uid:${uid}:notifications:read`,
-    ]);
+    await db.deleteAll([`uid:${uid}:notifications:unread`, `uid:${uid}:notifications:read`]);
 };
 
 UserNotifications.sendTopicNotificationToFollowers = async function (uid, topicData, postData) {

@@ -1,9 +1,13 @@
 'use strict';
 
-
-define('forum/register', [
-    'translator', 'slugify', 'api', 'bootbox', 'forum/login', 'zxcvbn', 'jquery-form',
-], function (translator, slugify, api, bootbox, Login, zxcvbn) {
+define('forum/register', ['translator', 'slugify', 'api', 'bootbox', 'forum/login', 'zxcvbn', 'jquery-form'], function (
+    translator,
+    slugify,
+    api,
+    bootbox,
+    Login,
+    zxcvbn
+) {
     const Register = {};
     let validationError = false;
     const successIcon = '';
@@ -116,26 +120,27 @@ define('forum/register', [
 
         const username_notify = $('#username-notify');
         const userslug = slugify(username);
-        if (username.length < ajaxify.data.minimumUsernameLength ||
-            userslug.length < ajaxify.data.minimumUsernameLength) {
+        if (
+            username.length < ajaxify.data.minimumUsernameLength ||
+            userslug.length < ajaxify.data.minimumUsernameLength
+        ) {
             showError(username_notify, '[[error:username-too-short]]');
         } else if (username.length > ajaxify.data.maximumUsernameLength) {
             showError(username_notify, '[[error:username-too-long]]');
         } else if (!utils.isUserNameValid(username) || !userslug) {
             showError(username_notify, '[[error:invalid-username]]');
         } else {
-            Promise.allSettled([
-                api.head(`/users/bySlug/${username}`, {}),
-                api.head(`/groups/${username}`, {}),
-            ]).then((results) => {
-                if (results.every(obj => obj.status === 'rejected')) {
-                    showSuccess(username_notify, successIcon);
-                } else {
-                    showError(username_notify, '[[error:username-taken]]');
-                }
+            Promise.allSettled([api.head(`/users/bySlug/${username}`, {}), api.head(`/groups/${username}`, {})]).then(
+                (results) => {
+                    if (results.every(obj => obj.status === 'rejected')) {
+                        showSuccess(username_notify, successIcon);
+                    } else {
+                        showError(username_notify, '[[error:username-taken]]');
+                    }
 
-                callback();
-            });
+                    callback();
+                }
+            );
         }
     }
 
@@ -178,9 +183,7 @@ define('forum/register', [
     function showError(element, msg) {
         translator.translate(msg, function (msg) {
             element.html(msg);
-            element.parent()
-                .removeClass('register-success')
-                .addClass('register-danger');
+            element.parent().removeClass('register-success').addClass('register-danger');
             element.show();
         });
         validationError = true;
@@ -189,9 +192,7 @@ define('forum/register', [
     function showSuccess(element, msg) {
         translator.translate(msg, function (msg) {
             element.html(msg);
-            element.parent()
-                .removeClass('register-danger')
-                .addClass('register-success');
+            element.parent().removeClass('register-danger').addClass('register-success');
             element.show();
         });
     }

@@ -1,13 +1,11 @@
 'use strict';
 
-define('settings/sorted-list', [
-    'benchpress',
-    'bootbox',
-    'hooks',
-    'jquery-ui/widgets/sortable',
-], function (benchpress, bootbox, hooks) {
+define('settings/sorted-list', ['benchpress', 'bootbox', 'hooks', 'jquery-ui/widgets/sortable'], function (
+    benchpress,
+    bootbox,
+    hooks
+) {
     let Settings;
-
 
     const SortedList = {
         types: ['sorted-list'],
@@ -21,7 +19,9 @@ define('settings/sorted-list', [
             $container.find('[data-type="item"]').each(function (idx, item) {
                 const itemUUID = $(item).attr('data-sorted-list-uuid');
 
-                const formData = Settings.helper.serializeForm($('[data-sorted-list-object="' + key + '"][data-sorted-list-uuid="' + itemUUID + '"]'));
+                const formData = Settings.helper.serializeForm(
+                    $('[data-sorted-list-object="' + key + '"][data-sorted-list-uuid="' + itemUUID + '"]')
+                );
                 stripTags(formData);
                 values[key].push(formData);
             });
@@ -51,24 +51,28 @@ define('settings/sorted-list', [
             const list = ajaxify.data[call ? hash : 'settings'][key];
 
             if (Array.isArray(list) && typeof list[0] !== 'string') {
-                const items = await Promise.all(list.map(async (item) => {
-                    ({ item } = await hooks.fire('filter:settings.sorted-list.loadItem', { item }));
+                const items = await Promise.all(
+                    list.map(async (item) => {
+                        ({ item } = await hooks.fire('filter:settings.sorted-list.loadItem', { item }));
 
-                    const itemUUID = utils.generateUUID();
-                    const form = $(formHtml).deserialize(item);
-                    form.attr('data-sorted-list-uuid', itemUUID);
-                    form.attr('data-sorted-list-object', key);
-                    $('#content').append(form.hide());
+                        const itemUUID = utils.generateUUID();
+                        const form = $(formHtml).deserialize(item);
+                        form.attr('data-sorted-list-uuid', itemUUID);
+                        form.attr('data-sorted-list-object', key);
+                        $('#content').append(form.hide());
 
-                    return { itemUUID, item };
-                }));
+                        return { itemUUID, item };
+                    })
+                );
 
                 // todo: parse() needs to be refactored to return the html, so multiple calls can be parallelized
                 // eslint-disable-next-line no-restricted-syntax
                 for (const { itemUUID, item } of items) {
                     // eslint-disable-next-line no-await-in-loop
                     await parse($container, itemUUID, item);
-                    hooks.fire('action:settings.sorted-list.itemLoaded', { element: listEl.get(0) });
+                    hooks.fire('action:settings.sorted-list.itemLoaded', {
+                        element: listEl.get(0),
+                    });
                 }
 
                 hooks.fire('action:settings.sorted-list.loaded', {
@@ -84,7 +88,9 @@ define('settings/sorted-list', [
         addItem: async ($formElements, $target) => {
             const key = $target.attr('data-sorted-list');
             const itemUUID = utils.generateUUID();
-            const form = $('<form class="" data-sorted-list-uuid="' + itemUUID + '" data-sorted-list-object="' + key + '"></form>');
+            const form = $(
+                '<form class="" data-sorted-list-uuid="' + itemUUID + '" data-sorted-list-object="' + key + '"></form>'
+            );
             form.append($formElements);
 
             $('#content').append(form.hide());
@@ -118,15 +124,24 @@ define('settings/sorted-list', [
 
             const modal = bootbox.confirm(clone, async (save) => {
                 if (save) {
-                    const form = $('<form class="" data-sorted-list-uuid="' + itemUUID + '" data-sorted-list-object="' + key + '"></form>');
+                    const form = $(
+                        '<form class="" data-sorted-list-uuid="' +
+                            itemUUID +
+                            '" data-sorted-list-object="' +
+                            key +
+                            '"></form>'
+                    );
                     form.append(modal.find('form').children());
 
-                    $('#content').find('[data-sorted-list-uuid="' + itemUUID + '"][data-sorted-list-object="' + key + '"]').remove();
+                    $('#content')
+                        .find('[data-sorted-list-uuid="' + itemUUID + '"][data-sorted-list-object="' + key + '"]')
+                        .remove();
                     $('#content').append(form.hide());
 
-
                     let data = Settings.helper.serializeForm(form);
-                    ({ item: data } = await hooks.fire('filter:settings.sorted-list.loadItem', { item: data }));
+                    ({ item: data } = await hooks.fire('filter:settings.sorted-list.loadItem', {
+                        item: data,
+                    }));
                     stripTags(data);
 
                     const oldItem = $list.find('[data-sorted-list-uuid="' + itemUUID + '"]');

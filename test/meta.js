@@ -18,35 +18,51 @@ describe('meta', () => {
     before((done) => {
         Groups.cache.reset();
         // Create 3 users: 1 admin, 2 regular
-        async.series([
-            async.apply(User.create, { username: 'foo', password: 'barbar' }), // admin
-            async.apply(User.create, { username: 'baz', password: 'quuxquux' }), // restricted user
-            async.apply(User.create, { username: 'herp', password: 'derpderp' }), // regular user
-        ], (err, uids) => {
-            if (err) {
-                return done(err);
+        async.series(
+            [
+                async.apply(User.create, {
+                    username: 'foo',
+                    password: 'barbar',
+                }), // admin
+                async.apply(User.create, {
+                    username: 'baz',
+                    password: 'quuxquux',
+                }), // restricted user
+                async.apply(User.create, {
+                    username: 'herp',
+                    password: 'derpderp',
+                }), // regular user
+            ],
+            (err, uids) => {
+                if (err) {
+                    return done(err);
+                }
+
+                fooUid = uids[0];
+                bazUid = uids[1];
+                herpUid = uids[2];
+
+                Groups.join('administrators', fooUid, done);
             }
-
-            fooUid = uids[0];
-            bazUid = uids[1];
-            herpUid = uids[2];
-
-            Groups.join('administrators', fooUid, done);
-        });
+        );
     });
 
     describe('settings', () => {
         const socketAdmin = require('../src/socket.io/admin');
         it('it should set setting', (done) => {
-            socketAdmin.settings.set({ uid: fooUid }, { hash: 'some:hash', values: { foo: '1', derp: 'value' } }, (err) => {
-                assert.ifError(err);
-                db.getObject('settings:some:hash', (err, data) => {
+            socketAdmin.settings.set(
+                { uid: fooUid },
+                { hash: 'some:hash', values: { foo: '1', derp: 'value' } },
+                (err) => {
                     assert.ifError(err);
-                    assert.equal(data.foo, '1');
-                    assert.equal(data.derp, 'value');
-                    done();
-                });
-            });
+                    db.getObject('settings:some:hash', (err, data) => {
+                        assert.ifError(err);
+                        assert.equal(data.foo, '1');
+                        assert.equal(data.derp, 'value');
+                        done();
+                    });
+                }
+            );
         });
 
         it('it should get setting', (done) => {
@@ -106,23 +122,35 @@ describe('meta', () => {
         const anotherList = [];
 
         it('should set setting with sorted list', (done) => {
-            socketAdmin.settings.set({ uid: fooUid }, { hash: 'another:hash', values: { foo: '1', derp: 'value', someList: someList, anotherList: anotherList } }, (err) => {
-                if (err) {
-                    return done(err);
-                }
-
-                db.getObject('settings:another:hash', (err, data) => {
+            socketAdmin.settings.set(
+                { uid: fooUid },
+                {
+                    hash: 'another:hash',
+                    values: {
+                        foo: '1',
+                        derp: 'value',
+                        someList: someList,
+                        anotherList: anotherList,
+                    },
+                },
+                (err) => {
                     if (err) {
                         return done(err);
                     }
 
-                    assert.equal(data.foo, '1');
-                    assert.equal(data.derp, 'value');
-                    assert.equal(data.someList, undefined);
-                    assert.equal(data.anotherList, undefined);
-                    done();
-                });
-            });
+                    db.getObject('settings:another:hash', (err, data) => {
+                        if (err) {
+                            return done(err);
+                        }
+
+                        assert.equal(data.foo, '1');
+                        assert.equal(data.derp, 'value');
+                        assert.equal(data.someList, undefined);
+                        assert.equal(data.anotherList, undefined);
+                        done();
+                    });
+                }
+            );
         });
 
         it('should get setting with sorted list', (done) => {
@@ -184,7 +212,6 @@ describe('meta', () => {
             });
         });
     });
-
 
     describe('config', () => {
         const socketAdmin = require('../src/socket.io/admin');
@@ -355,19 +382,23 @@ describe('meta', () => {
         });
 
         it('should set multiple values', (done) => {
-            socketAdmin.config.setMultiple({ uid: fooUid }, {
-                someField1: 'someValue1',
-                someField2: 'someValue2',
-                customCSS: '.derp{color:#00ff00;}',
-            }, (err) => {
-                assert.ifError(err);
-                meta.configs.getFields(['someField1', 'someField2'], (err, data) => {
+            socketAdmin.config.setMultiple(
+                { uid: fooUid },
+                {
+                    someField1: 'someValue1',
+                    someField2: 'someValue2',
+                    customCSS: '.derp{color:#00ff00;}',
+                },
+                (err) => {
                     assert.ifError(err);
-                    assert.equal(data.someField1, 'someValue1');
-                    assert.equal(data.someField2, 'someValue2');
-                    done();
-                });
-            });
+                    meta.configs.getFields(['someField1', 'someField2'], (err, data) => {
+                        assert.ifError(err);
+                        assert.equal(data.someField1, 'someValue1');
+                        assert.equal(data.someField2, 'someValue2');
+                        done();
+                    });
+                }
+            );
         });
 
         it('should not set config if not empty', (done) => {
@@ -392,7 +423,6 @@ describe('meta', () => {
             });
         });
     });
-
 
     describe('session TTL', () => {
         it('should return 14 days in seconds', (done) => {
@@ -458,7 +488,16 @@ describe('meta', () => {
         });
 
         it('should return true if _resolved is from github', (done) => {
-            assert(meta.dependencies.doesSatisfy({ name: 'nodebb-plugin-test', _resolved: 'https://github.com/some/repo', version: '0.9.0' }, '1.0.0'));
+            assert(
+                meta.dependencies.doesSatisfy(
+                    {
+                        name: 'nodebb-plugin-test',
+                        _resolved: 'https://github.com/some/repo',
+                        version: '0.9.0',
+                    },
+                    '1.0.0'
+                )
+            );
             done();
         });
     });
@@ -491,115 +530,134 @@ describe('meta', () => {
     describe('Access-Control-Allow-Origin', () => {
         it('Access-Control-Allow-Origin header should be empty', (done) => {
             const jar = request.jar();
-            request.get(`${nconf.get('url')}/api/search?term=bug`, {
-                form: {},
-                json: true,
-                jar: jar,
-            }, (err, response, body) => {
-                assert.ifError(err);
-                assert.equal(response.headers['access-control-allow-origin'], undefined);
-                done();
-            });
+            request.get(
+                `${nconf.get('url')}/api/search?term=bug`,
+                {
+                    form: {},
+                    json: true,
+                    jar: jar,
+                },
+                (err, response, body) => {
+                    assert.ifError(err);
+                    assert.equal(response.headers['access-control-allow-origin'], undefined);
+                    done();
+                }
+            );
         });
 
         it('should set proper Access-Control-Allow-Origin header', (done) => {
             const jar = request.jar();
             const oldValue = meta.config['access-control-allow-origin'];
             meta.config['access-control-allow-origin'] = 'test.com, mydomain.com';
-            request.get(`${nconf.get('url')}/api/search?term=bug`, {
-                form: {
+            request.get(
+                `${nconf.get('url')}/api/search?term=bug`,
+                {
+                    form: {},
+                    json: true,
+                    jar: jar,
+                    headers: {
+                        origin: 'mydomain.com',
+                    },
                 },
-                json: true,
-                jar: jar,
-                headers: {
-                    origin: 'mydomain.com',
-                },
-            }, (err, response, body) => {
-                assert.ifError(err);
-                assert.equal(response.headers['access-control-allow-origin'], 'mydomain.com');
-                meta.config['access-control-allow-origin'] = oldValue;
-                done(err);
-            });
+                (err, response, body) => {
+                    assert.ifError(err);
+                    assert.equal(response.headers['access-control-allow-origin'], 'mydomain.com');
+                    meta.config['access-control-allow-origin'] = oldValue;
+                    done(err);
+                }
+            );
         });
 
         it('Access-Control-Allow-Origin header should be empty if origin does not match', (done) => {
             const jar = request.jar();
             const oldValue = meta.config['access-control-allow-origin'];
             meta.config['access-control-allow-origin'] = 'test.com, mydomain.com';
-            request.get(`${nconf.get('url')}/api/search?term=bug`, {
-                form: {
+            request.get(
+                `${nconf.get('url')}/api/search?term=bug`,
+                {
+                    form: {},
+                    json: true,
+                    jar: jar,
+                    headers: {
+                        origin: 'notallowed.com',
+                    },
                 },
-                json: true,
-                jar: jar,
-                headers: {
-                    origin: 'notallowed.com',
-                },
-            }, (err, response, body) => {
-                assert.ifError(err);
-                assert.equal(response.headers['access-control-allow-origin'], undefined);
-                meta.config['access-control-allow-origin'] = oldValue;
-                done(err);
-            });
+                (err, response, body) => {
+                    assert.ifError(err);
+                    assert.equal(response.headers['access-control-allow-origin'], undefined);
+                    meta.config['access-control-allow-origin'] = oldValue;
+                    done(err);
+                }
+            );
         });
 
         it('should set proper Access-Control-Allow-Origin header', (done) => {
             const jar = request.jar();
             const oldValue = meta.config['access-control-allow-origin-regex'];
             meta.config['access-control-allow-origin-regex'] = 'match\\.this\\..+\\.domain.com, mydomain\\.com';
-            request.get(`${nconf.get('url')}/api/search?term=bug`, {
-                form: {
+            request.get(
+                `${nconf.get('url')}/api/search?term=bug`,
+                {
+                    form: {},
+                    json: true,
+                    jar: jar,
+                    headers: {
+                        origin: 'match.this.anything123.domain.com',
+                    },
                 },
-                json: true,
-                jar: jar,
-                headers: {
-                    origin: 'match.this.anything123.domain.com',
-                },
-            }, (err, response, body) => {
-                assert.ifError(err);
-                assert.equal(response.headers['access-control-allow-origin'], 'match.this.anything123.domain.com');
-                meta.config['access-control-allow-origin-regex'] = oldValue;
-                done(err);
-            });
+                (err, response, body) => {
+                    assert.ifError(err);
+                    assert.equal(response.headers['access-control-allow-origin'], 'match.this.anything123.domain.com');
+                    meta.config['access-control-allow-origin-regex'] = oldValue;
+                    done(err);
+                }
+            );
         });
 
         it('Access-Control-Allow-Origin header should be empty if origin does not match', (done) => {
             const jar = request.jar();
             const oldValue = meta.config['access-control-allow-origin-regex'];
             meta.config['access-control-allow-origin-regex'] = 'match\\.this\\..+\\.domain.com, mydomain\\.com';
-            request.get(`${nconf.get('url')}/api/search?term=bug`, {
-                form: {
+            request.get(
+                `${nconf.get('url')}/api/search?term=bug`,
+                {
+                    form: {},
+                    json: true,
+                    jar: jar,
+                    headers: {
+                        origin: 'notallowed.com',
+                    },
                 },
-                json: true,
-                jar: jar,
-                headers: {
-                    origin: 'notallowed.com',
-                },
-            }, (err, response, body) => {
-                assert.ifError(err);
-                assert.equal(response.headers['access-control-allow-origin'], undefined);
-                meta.config['access-control-allow-origin-regex'] = oldValue;
-                done(err);
-            });
+                (err, response, body) => {
+                    assert.ifError(err);
+                    assert.equal(response.headers['access-control-allow-origin'], undefined);
+                    meta.config['access-control-allow-origin-regex'] = oldValue;
+                    done(err);
+                }
+            );
         });
 
         it('should not error with invalid regexp', (done) => {
             const jar = request.jar();
             const oldValue = meta.config['access-control-allow-origin-regex'];
             meta.config['access-control-allow-origin-regex'] = '[match\\.this\\..+\\.domain.com, mydomain\\.com';
-            request.get(`${nconf.get('url')}/api/search?term=bug`, {
-                form: {
+            request.get(
+                `${nconf.get('url')}/api/search?term=bug`,
+                {
+                    form: {},
+                    json: true,
+                    jar: jar,
+                    headers: {
+                        origin: 'mydomain.com',
+                    },
                 },
-                json: true,
-                jar: jar,
-                headers: {
-                    origin: 'mydomain.com',
-                },
-            }, (err, response, body) => {
-                assert.ifError(err);
-                assert.equal(response.headers['access-control-allow-origin'], 'mydomain.com');
-                meta.config['access-control-allow-origin-regex'] = oldValue;
-                done(err);
-            });
+                (err, response, body) => {
+                    assert.ifError(err);
+                    assert.equal(response.headers['access-control-allow-origin'], 'mydomain.com');
+                    meta.config['access-control-allow-origin-regex'] = oldValue;
+                    done(err);
+                }
+            );
         });
     });
 

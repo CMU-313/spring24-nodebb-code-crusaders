@@ -35,10 +35,7 @@ admin.save = async function (data) {
 };
 
 admin.getAdmin = async function () {
-    const [enabled, available] = await Promise.all([
-        admin.get(),
-        getAvailable(),
-    ]);
+    const [enabled, available] = await Promise.all([admin.get(), getAvailable()]);
     return { enabled: enabled, available: available };
 };
 

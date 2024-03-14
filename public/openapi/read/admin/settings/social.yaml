@@ -3,8 +3,8 @@ get:
     - admin
   summary: Get post social sharing settings
   responses:
-    "200":
-      description: "A JSON object containing post social sharing settings"
+    '200':
+      description: 'A JSON object containing post social sharing settings'
       content:
         application/json:
           schema:

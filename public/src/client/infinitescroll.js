@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('forum/infinitescroll', ['hooks', 'alerts'], function (hooks, alerts) {
     const scroll = {};
     let callback;
@@ -46,7 +45,7 @@ define('forum/infinitescroll', ['hooks', 'alerts'], function (hooks, alerts) {
         const wh = $(window).height();
         const viewportHeight = container.height() - wh;
         const offsetTop = container.offset() ? container.offset().top : 0;
-        const scrollPercent = 100 * (currentScrollTop - offsetTop) / (viewportHeight <= 0 ? wh : viewportHeight);
+        const scrollPercent = (100 * (currentScrollTop - offsetTop)) / (viewportHeight <= 0 ? wh : viewportHeight);
 
         const top = 15;
         const bottom = 85;
@@ -88,7 +87,8 @@ define('forum/infinitescroll', ['hooks', 'alerts'], function (hooks, alerts) {
             return;
         }
         loadingMore = true;
-        const url = config.relative_path + '/api' + location.pathname.replace(new RegExp('^' + config.relative_path), '');
+        const url =
+            config.relative_path + '/api' + location.pathname.replace(new RegExp('^' + config.relative_path), '');
         const hookData = { url: url, data: data };
         hooks.fire('action:infinitescroll.loadmore.xhr', hookData);
 

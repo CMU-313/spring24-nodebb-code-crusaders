@@ -1,9 +1,12 @@
 'use strict';
 
-
-define('forum/topic/move-post', [
-    'components', 'postSelect', 'translator', 'alerts', 'api',
-], function (components, postSelect, translator, alerts, api) {
+define('forum/topic/move-post', ['components', 'postSelect', 'translator', 'alerts', 'api'], function (
+    components,
+    postSelect,
+    translator,
+    alerts,
+    api
+) {
     const MovePost = {};
 
     let moveModal;
@@ -31,8 +34,7 @@ define('forum/topic/move-post', [
                 postSelect.togglePostSelection(postEl, postEl.attr('data-pid'));
             }
 
-            $(window).off('action:ajaxify.end', onAjaxifyEnd)
-                .on('action:ajaxify.end', onAjaxifyEnd);
+            $(window).off('action:ajaxify.end', onAjaxifyEnd).on('action:ajaxify.end', onAjaxifyEnd);
 
             moveCommit.on('click', function () {
                 const targetTid = getTargetTid();
@@ -73,9 +75,7 @@ define('forum/topic/move-post', [
         }
         const tidInput = moveModal.find('#topicId');
         let targetTid = null;
-        if (ajaxify.data.template.topic && ajaxify.data.tid &&
-            parseInt(ajaxify.data.tid, 10) !== fromTid
-        ) {
+        if (ajaxify.data.template.topic && ajaxify.data.tid && parseInt(ajaxify.data.tid, 10) !== fromTid) {
             targetTid = ajaxify.data.tid;
         }
         if (targetTid && !tidInput.val()) {
@@ -106,7 +106,11 @@ define('forum/topic/move-post', [
                     if (data.scheduled) {
                         return alerts.error('[[error:cant-move-posts-to-scheduled]]');
                     }
-                    const translateStr = translator.compile('topic:x-posts-will-be-moved-to-y', postSelect.pids.length, data.title);
+                    const translateStr = translator.compile(
+                        'topic:x-posts-will-be-moved-to-y',
+                        postSelect.pids.length,
+                        data.title
+                    );
                     moveModal.find('#pids').translateHtml(translateStr);
                 });
             } else {
@@ -122,9 +126,7 @@ define('forum/topic/move-post', [
             return;
         }
         const targetTid = getTargetTid();
-        if (postSelect.pids.length && targetTid &&
-            parseInt(targetTid, 10) !== parseInt(fromTid, 10)
-        ) {
+        if (postSelect.pids.length && targetTid && parseInt(targetTid, 10) !== parseInt(fromTid, 10)) {
             moveCommit.removeAttr('disabled');
         } else {
             moveCommit.attr('disabled', true);
@@ -141,17 +143,21 @@ define('forum/topic/move-post', [
             return;
         }
 
-        Promise.all(data.pids.map(pid => api.put(`/posts/${pid}/move`, {
-            tid: data.tid,
-        }))).then(() => {
-            data.pids.forEach(function (pid) {
-                components.get('post', 'pid', pid).fadeOut(500, function () {
-                    $(this).remove();
+        Promise.all(
+            data.pids.map(pid => api.put(`/posts/${pid}/move`, {
+                tid: data.tid,
+            }))
+        )
+            .then(() => {
+                data.pids.forEach(function (pid) {
+                    components.get('post', 'pid', pid).fadeOut(500, function () {
+                        $(this).remove();
+                    });
                 });
-            });
 
-            closeMoveModal();
-        }).catch(alerts.error);
+                closeMoveModal();
+            })
+            .catch(alerts.error);
     }
 
     function closeMoveModal() {

@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('admin/advanced/errors', ['bootbox', 'alerts', 'Chart'], function (bootbox, alerts, Chart) {
     const Errors = {};
 
@@ -81,11 +80,13 @@ define('admin/advanced/errors', ['bootbox', 'alerts', 'Chart'], function (bootbo
                     display: false,
                 },
                 scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
+                    yAxes: [
+                        {
+                            ticks: {
+                                beginAtZero: true,
+                            },
                         },
-                    }],
+                    ],
                 },
             },
         });
@@ -99,11 +100,13 @@ define('admin/advanced/errors', ['bootbox', 'alerts', 'Chart'], function (bootbo
                     display: false,
                 },
                 scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
+                    yAxes: [
+                        {
+                            ticks: {
+                                beginAtZero: true,
+                            },
                         },
-                    }],
+                    ],
                 },
             },
         });

@@ -1,4 +1,3 @@
-
 'use strict';
 
 const _ = require('lodash');
@@ -12,7 +11,10 @@ const meta = require('../meta');
 const plugins = require('../plugins');
 const utils = require('../utils');
 
-const backlinkRegex = new RegExp(`(?:${nconf.get('url').replace('/', '\\/')}|\b|\\s)\\/topic\\/(\\d+)(?:\\/\\w+)?`, 'g');
+const backlinkRegex = new RegExp(
+    `(?:${nconf.get('url').replace('/', '\\/')}|\b|\\s)\\/topic\\/(\\d+)(?:\\/\\w+)?`,
+    'g'
+);
 
 module.exports = function (Topics) {
     Topics.onNewPostMade = async function (postData) {
@@ -93,7 +95,11 @@ module.exports = function (Topics) {
             lastPost.eventStart = reverse ? topicData.timestamp : lastPost.timestamp;
             lastPost.eventEnd = reverse ? lastPost.timestamp : Date.now();
             if (lastPost.index) {
-                const nextPost = await db[reverse ? 'getSortedSetRevRangeWithScores' : 'getSortedSetRangeWithScores'](set, lastPost.index, lastPost.index);
+                const nextPost = await db[reverse ? 'getSortedSetRevRangeWithScores' : 'getSortedSetRangeWithScores'](
+                    set,
+                    lastPost.index,
+                    lastPost.index
+                );
                 if (reverse) {
                     lastPost.eventStart = nextPost.length ? nextPost[0].score : lastPost.eventStart;
                 } else {
@@ -114,13 +120,7 @@ module.exports = function (Topics) {
             const userData = await method(uids);
             return _.zipObject(uids, userData);
         }
-        const [
-            bookmarks,
-            voteData,
-            userData,
-            editors,
-            replies,
-        ] = await Promise.all([
+        const [bookmarks, voteData, userData, editors, replies] = await Promise.all([
             posts.hasBookmarked(pids, uid),
             posts.getVoteStatusByPostIDs(pids, uid),
             getPostUserData('uid', async uids => await posts.getUserInfoForPosts(uids, uid)),
@@ -160,14 +160,17 @@ module.exports = function (Topics) {
         topicData.posts.forEach((post) => {
             if (post) {
                 post.topicOwnerPost = parseInt(topicData.uid, 10) === parseInt(post.uid, 10);
-                post.display_edit_tools = topicPrivileges.isAdminOrMod || (post.selfPost && topicPrivileges['posts:edit']);
-                post.display_delete_tools = topicPrivileges.isAdminOrMod || (post.selfPost && topicPrivileges['posts:delete']);
+                post.display_edit_tools =
+                    topicPrivileges.isAdminOrMod || (post.selfPost && topicPrivileges['posts:edit']);
+                post.display_delete_tools =
+                    topicPrivileges.isAdminOrMod || (post.selfPost && topicPrivileges['posts:delete']);
                 post.display_moderator_tools = post.display_edit_tools || post.display_delete_tools;
                 post.display_move_tools = topicPrivileges.isAdminOrMod && post.index !== 0;
-                post.display_post_menu = topicPrivileges.isAdminOrMod ||
+                post.display_post_menu =
+                    topicPrivileges.isAdminOrMod ||
                     (post.selfPost &&
                         ((!topicData.locked && !post.deleted) ||
-                        (post.deleted && parseInt(post.deleterUid, 10) === parseInt(topicPrivileges.uid, 10)))) ||
+                            (post.deleted && parseInt(post.deleterUid, 10) === parseInt(topicPrivileges.uid, 10)))) ||
                     ((loggedIn || topicData.postSharing.length) && !post.deleted);
                 post.ip = topicPrivileges.isAdminOrMod ? post.ip : undefined;
 
@@ -177,7 +180,9 @@ module.exports = function (Topics) {
     };
 
     Topics.addParentPosts = async function (postData) {
-        let parentPids = postData.map(postObj => (postObj && postObj.hasOwnProperty('toPid') ? parseInt(postObj.toPid, 10) : null)).filter(Boolean);
+        let parentPids = postData
+            .map(postObj => (postObj && postObj.hasOwnProperty('toPid') ? parseInt(postObj.toPid, 10) : null))
+            .filter(Boolean);
 
         if (!parentPids.length) {
             return;
@@ -244,9 +249,11 @@ module.exports = function (Topics) {
             const upvotes = parseInt(postData.upvotes, 10) || 0;
             const downvotes = parseInt(postData.downvotes, 10) || 0;
             const votes = upvotes - downvotes;
-            await db.sortedSetsAdd([
-                `tid:${tid}:posts`, `tid:${tid}:posts:votes`,
-            ], [postData.timestamp, votes], postData.pid);
+            await db.sortedSetsAdd(
+                [`tid:${tid}:posts`, `tid:${tid}:posts:votes`],
+                [postData.timestamp, votes],
+                postData.pid
+            );
         }
         await Topics.increasePostCount(tid);
         await db.sortedSetIncrBy(`tid:${tid}:posters`, 1, postData.uid);
@@ -256,10 +263,7 @@ module.exports = function (Topics) {
     };
 
     Topics.removePostFromTopic = async function (tid, postData) {
-        await db.sortedSetsRemove([
-            `tid:${tid}:posts`,
-            `tid:${tid}:posts:votes`,
-        ], postData.pid);
+        await db.sortedSetsRemove([`tid:${tid}:posts`, `tid:${tid}:posts:votes`], postData.pid);
         await Topics.decreasePostCount(tid);
         await db.sortedSetIncrBy(`tid:${tid}:posters`, -1, postData.uid);
         await db.sortedSetsRemoveRangeByScore([`tid:${tid}:posters`], '-inf', 0);
@@ -332,10 +336,17 @@ module.exports = function (Topics) {
 
         const uniqueUids = _.uniq(uids);
 
-        const userData = await user.getUsersWithFields(uniqueUids, ['uid', 'username', 'userslug', 'picture'], callerUid);
+        const userData = await user.getUsersWithFields(
+            uniqueUids,
+            ['uid', 'username', 'userslug', 'picture'],
+            callerUid
+        );
 
         const uidMap = _.zipObject(uniqueUids, userData);
-        const pidMap = _.zipObject(replyData.map(r => r.pid), replyData);
+        const pidMap = _.zipObject(
+            replyData.map(r => r.pid),
+            replyData
+        );
 
         const returnData = arrayOfReplyPids.map((replyPids) => {
             replyPids = replyPids.filter(pid => pidMap[pid]);
@@ -343,7 +354,10 @@ module.exports = function (Topics) {
             const currentData = {
                 hasMore: false,
                 users: [],
-                text: replyPids.length > 1 ? `[[topic:replies_to_this_post, ${replyPids.length}]]` : '[[topic:one_reply_to_this_post]]',
+                text:
+                    replyPids.length > 1 ?
+                        `[[topic:replies_to_this_post, ${replyPids.length}]]` :
+                        '[[topic:one_reply_to_this_post]]',
                 count: replyPids.length,
                 timestampISO: replyPids.length ? utils.toISOString(pidMap[replyPids[0]].timestamp) : undefined,
             };
@@ -393,14 +407,20 @@ module.exports = function (Topics) {
         await db.sortedSetRemove(`pid:${pid}:backlinks`, remove);
 
         // Add new backlinks
-        await db.sortedSetAdd(`pid:${pid}:backlinks`, add.map(() => now), add);
-        await Promise.all(add.map(async (tid) => {
-            await Topics.events.log(tid, {
-                uid,
-                type: 'backlink',
-                href: `/post/${pid}`,
-            });
-        }));
+        await db.sortedSetAdd(
+            `pid:${pid}:backlinks`,
+            add.map(() => now),
+            add
+        );
+        await Promise.all(
+            add.map(async (tid) => {
+                await Topics.events.log(tid, {
+                    uid,
+                    type: 'backlink',
+                    href: `/post/${pid}`,
+                });
+            })
+        );
 
         return add.length + (current - remove);
     };

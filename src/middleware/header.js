@@ -37,7 +37,10 @@ middleware.buildHeader = helpers.try(async (req, res, next) => {
     const [config, canLoginIfBanned] = await Promise.all([
         controllers.api.loadConfig(req),
         user.bans.canLoginIfBanned(req.uid),
-        plugins.hooks.fire('filter:middleware.buildHeader', { req: req, locals: res.locals }),
+        plugins.hooks.fire('filter:middleware.buildHeader', {
+            req: req,
+            locals: res.locals,
+        }),
     ]);
 
     if (!canLoginIfBanned && req.loggedIn) {
@@ -73,7 +76,9 @@ middleware.renderHeader = async function renderHeader(req, res, data) {
         bodyClass: data.bodyClass,
     };
 
-    templateValues.configJSON = jsesc(JSON.stringify(res.locals.config), { isScriptContext: true });
+    templateValues.configJSON = jsesc(JSON.stringify(res.locals.config), {
+        isScriptContext: true,
+    });
 
     const results = await utils.promiseParallel({
         isAdmin: user.isAdministrator(req.uid),
@@ -107,12 +112,12 @@ middleware.renderHeader = async function renderHeader(req, res, data) {
     results.user['email:confirmed'] = results.user['email:confirmed'] === 1;
     results.user.isEmailConfirmSent = !!results.isEmailConfirmSent;
 
-    templateValues.bootswatchSkin = (parseInt(meta.config.disableCustomUserSkins, 10) !== 1 ? res.locals.config.bootswatchSkin : '') || meta.config.bootswatchSkin || '';
+    templateValues.bootswatchSkin =
+        (parseInt(meta.config.disableCustomUserSkins, 10) !== 1 ? res.locals.config.bootswatchSkin : '') ||
+        meta.config.bootswatchSkin ||
+        '';
     templateValues.browserTitle = results.browserTitle;
-    ({
-        navigation: templateValues.navigation,
-        unreadCount: templateValues.unreadCount,
-    } = await appendUnreadCounts({
+    ({ navigation: templateValues.navigation, unreadCount: templateValues.unreadCount } = await appendUnreadCounts({
         uid: req.uid,
         query: req.query,
         navigation: results.navigation,
@@ -123,9 +128,11 @@ middleware.renderHeader = async function renderHeader(req, res, data) {
     templateValues.showModMenu = results.user.isAdmin || results.user.isGlobalMod || results.user.isMod;
     templateValues.canChat = results.privileges.chat && meta.config.disableChat !== 1;
     templateValues.user = results.user;
-    templateValues.userJSON = jsesc(JSON.stringify(results.user), { isScriptContext: true });
+    templateValues.userJSON = jsesc(JSON.stringify(results.user), {
+        isScriptContext: true,
+    });
     templateValues.useCustomCSS = meta.config.useCustomCSS && meta.config.customCSS;
-    templateValues.customCSS = templateValues.useCustomCSS ? (meta.config.renderedCustomCSS || '') : '';
+    templateValues.customCSS = templateValues.useCustomCSS ? meta.config.renderedCustomCSS || '' : '';
     templateValues.useCustomHTML = meta.config.useCustomHTML;
     templateValues.customHTML = templateValues.useCustomHTML ? meta.config.customHTML : '';
     templateValues.maintenanceHeader = meta.config.maintenanceMode && !results.isAdmin;
@@ -165,13 +172,13 @@ async function appendUnreadCounts({ uid, navigation, unreadData, query }) {
         unreadChatCount: messaging.getUnreadCount(uid),
         unreadNotificationCount: user.notifications.getUnreadCount(uid),
         unreadFlagCount: (async function () {
-            if (originalRoutes.includes('/flags') && await user.isPrivileged(uid)) {
+            if (originalRoutes.includes('/flags') && (await user.isPrivileged(uid))) {
                 return flags.getCount({
                     uid,
                     query,
                     filters: {
                         quick: 'unresolved',
-                        cid: (await user.isAdminOrGlobalMod(uid)) ? [] : (await user.getModeratedCids(uid)),
+                        cid: (await user.isAdminOrGlobalMod(uid)) ? [] : await user.getModeratedCids(uid),
                     },
                 });
             }
@@ -203,7 +210,10 @@ async function appendUnreadCounts({ uid, navigation, unreadData, query }) {
     navigation = navigation.map((item) => {
         function modifyNavItem(item, route, filter, content) {
             if (item && item.originalRoute === route) {
-                unreadData[filter] = _.zipObject(tidsByFilter[filter], tidsByFilter[filter].map(() => true));
+                unreadData[filter] = _.zipObject(
+                    tidsByFilter[filter],
+                    tidsByFilter[filter].map(() => true)
+                );
                 item.content = content;
                 unreadCount.mobileUnread = content;
                 unreadCount.unreadUrl = route;

@@ -144,7 +144,9 @@ Groups.get = async function (groupName, options) {
     groupData.isPending = isPending;
     groupData.isInvited = isInvited;
     groupData.isOwner = isOwner;
-    const results = await plugins.hooks.fire('filter:group.get', { group: groupData });
+    const results = await plugins.hooks.fire('filter:group.get', {
+        group: groupData,
+    });
     return results.group;
 };
 

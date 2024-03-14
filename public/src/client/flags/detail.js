@@ -1,7 +1,14 @@
 'use strict';
 
 define('forum/flags/detail', [
-    'components', 'translator', 'benchpress', 'forum/account/header', 'accounts/delete', 'api', 'bootbox', 'alerts',
+    'components',
+    'translator',
+    'benchpress',
+    'forum/account/header',
+    'accounts/delete',
+    'api',
+    'bootbox',
+    'alerts',
 ], function (components, translator, Benchpress, AccountHeader, AccountsDelete, api, bootbox, alerts) {
     const Detail = {};
 
@@ -21,15 +28,19 @@ define('forum/flags/detail', [
                 // falls through
 
             case 'update': {
-                const data = $('#attributes').serializeArray().reduce((memo, cur) => {
-                    memo[cur.name] = cur.value;
-                    return memo;
-                }, {});
+                const data = $('#attributes')
+                    .serializeArray()
+                    .reduce((memo, cur) => {
+                        memo[cur.name] = cur.value;
+                        return memo;
+                    }, {});
 
-                api.put(`/flags/${ajaxify.data.flagId}`, data).then(({ history }) => {
-                    alerts.success('[[flags:updated]]');
-                    Detail.reloadHistory(history);
-                }).catch(alerts.error);
+                api.put(`/flags/${ajaxify.data.flagId}`, data)
+                    .then(({ history }) => {
+                        alerts.success('[[flags:updated]]');
+                        Detail.reloadHistory(history);
+                    })
+                    .catch(alerts.error);
                 break;
             }
 
@@ -37,24 +48,28 @@ define('forum/flags/detail', [
                 api.post(`/flags/${ajaxify.data.flagId}/notes`, {
                     note: noteEl.value,
                     datetime: parseInt(noteEl.getAttribute('data-datetime'), 10),
-                }).then((payload) => {
-                    alerts.success('[[flags:note-added]]');
-                    Detail.reloadNotes(payload.notes);
-                    Detail.reloadHistory(payload.history);
+                })
+                    .then((payload) => {
+                        alerts.success('[[flags:note-added]]');
+                        Detail.reloadNotes(payload.notes);
+                        Detail.reloadHistory(payload.history);
 
-                    noteEl.removeAttribute('data-datetime');
-                }).catch(alerts.error);
+                        noteEl.removeAttribute('data-datetime');
+                    })
+                    .catch(alerts.error);
                 break;
 
             case 'delete-note': {
                 const datetime = parseInt(this.closest('[data-datetime]').getAttribute('data-datetime'), 10);
                 bootbox.confirm('[[flags:delete-note-confirm]]', function (ok) {
                     if (ok) {
-                        api.delete(`/flags/${ajaxify.data.flagId}/notes/${datetime}`, {}).then((payload) => {
-                            alerts.success('[[flags:note-deleted]]');
-                            Detail.reloadNotes(payload.notes);
-                            Detail.reloadHistory(payload.history);
-                        }).catch(alerts.error);
+                        api.delete(`/flags/${ajaxify.data.flagId}/notes/${datetime}`, {})
+                            .then((payload) => {
+                                alerts.success('[[flags:note-deleted]]');
+                                Detail.reloadNotes(payload.notes);
+                                Detail.reloadHistory(payload.history);
+                            })
+                            .catch(alerts.error);
                     }
                 });
                 break;
@@ -126,10 +141,12 @@ define('forum/flags/detail', [
             case 'delete-flag': {
                 bootbox.confirm('[[flags:delete-flag-confirm]]', function (ok) {
                     if (ok) {
-                        api.delete(`/flags/${ajaxify.data.flagId}`, {}).then(() => {
-                            alerts.success('[[flags:flag-deleted]]');
-                            ajaxify.go('flags');
-                        }).catch(alerts.error);
+                        api.delete(`/flags/${ajaxify.data.flagId}`, {})
+                            .then(() => {
+                                alerts.success('[[flags:flag-deleted]]');
+                                ajaxify.go('flags');
+                            })
+                            .catch(alerts.error);
                     }
                 });
                 break;
@@ -152,9 +169,13 @@ define('forum/flags/detail', [
 
     Detail.reloadNotes = function (notes) {
         ajaxify.data.notes = notes;
-        Benchpress.render('flags/detail', {
-            notes: notes,
-        }, 'notes').then(function (html) {
+        Benchpress.render(
+            'flags/detail',
+            {
+                notes: notes,
+            },
+            'notes'
+        ).then(function (html) {
             const wrapperEl = components.get('flag/notes');
             wrapperEl.empty();
             wrapperEl.html(html);
@@ -164,14 +185,19 @@ define('forum/flags/detail', [
     };
 
     Detail.reloadHistory = function (history) {
-        app.parseAndTranslate('flags/detail', 'history', {
-            history: history,
-        }, function (html) {
-            const wrapperEl = components.get('flag/history');
-            wrapperEl.empty();
-            wrapperEl.html(html);
-            wrapperEl.find('span.timeago').timeago();
-        });
+        app.parseAndTranslate(
+            'flags/detail',
+            'history',
+            {
+                history: history,
+            },
+            function (html) {
+                const wrapperEl = components.get('flag/history');
+                wrapperEl.empty();
+                wrapperEl.html(html);
+                wrapperEl.find('span.timeago').timeago();
+            }
+        );
     };
 
     return Detail;

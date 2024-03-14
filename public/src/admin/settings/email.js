@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('admin/settings/email', ['ace/ace', 'alerts', 'admin/settings'], function (ace, alerts) {
     const module = {};
     let emailEditor;
@@ -19,16 +18,18 @@ define('admin/settings/email', ['ace/ace', 'alerts', 'admin/settings'], function
     };
 
     function configureEmailTester() {
-        $('button[data-action="email.test"]').off('click').on('click', function () {
-            socket.emit('admin.email.test', { template: $('#test-email').val() }, function (err) {
-                if (err) {
-                    console.error(err.message);
-                    return alerts.error(err);
-                }
-                alerts.success('Test Email Sent');
+        $('button[data-action="email.test"]')
+            .off('click')
+            .on('click', function () {
+                socket.emit('admin.email.test', { template: $('#test-email').val() }, function (err) {
+                    if (err) {
+                        console.error(err.message);
+                        return alerts.error(err);
+                    }
+                    alerts.success('Test Email Sent');
+                });
+                return false;
             });
-            return false;
-        });
     }
 
     function configureEmailEditor() {
@@ -51,14 +52,16 @@ define('admin/settings/email', ['ace/ace', 'alerts', 'admin/settings'], function
             $('#email-editor-holder').val(newEmail !== original ? newEmail : '');
         });
 
-        $('button[data-action="email.revert"]').off('click').on('click', function () {
-            ajaxify.data.emails.forEach(function (email) {
-                if (email.path === $('#email-editor-selector').val()) {
-                    emailEditor.getSession().setValue(email.original);
-                    $('#email-editor-holder').val('');
-                }
+        $('button[data-action="email.revert"]')
+            .off('click')
+            .on('click', function () {
+                ajaxify.data.emails.forEach(function (email) {
+                    if (email.path === $('#email-editor-selector').val()) {
+                        emailEditor.getSession().setValue(email.original);
+                        $('#email-editor-holder').val('');
+                    }
+                });
             });
-        });
 
         updateEmailEditor();
     }

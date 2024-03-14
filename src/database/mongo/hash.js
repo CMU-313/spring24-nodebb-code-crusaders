@@ -23,7 +23,9 @@ module.exports = function (module) {
                 key.forEach(key => bulk.find({ _key: key }).upsert().updateOne({ $set: writeData }));
                 await bulk.execute();
             } else {
-                await module.client.collection('objects').updateOne({ _key: key }, { $set: writeData }, { upsert: true });
+                await module.client
+                    .collection('objects')
+                    .updateOne({ _key: key }, { $set: writeData }, { upsert: true });
             }
         } catch (err) {
             if (err && err.message.startsWith('E11000 duplicate key error')) {
@@ -41,7 +43,9 @@ module.exports = function (module) {
             return;
         }
         if (Array.isArray(args[1])) {
-            console.warn('[deprecated] db.setObjectBulk(keys, data) usage is deprecated, please use db.setObjectBulk(data)');
+            console.warn(
+                '[deprecated] db.setObjectBulk(keys, data) usage is deprecated, please use db.setObjectBulk(data)'
+            );
             // conver old format to new format for backwards compatibility
             data = args[0].map((key, i) => [key, args[1][i]]);
         }
@@ -102,7 +106,9 @@ module.exports = function (module) {
             return cachedData[key].hasOwnProperty(field) ? cachedData[key][field] : null;
         }
         field = helpers.fieldToString(field);
-        const item = await module.client.collection('objects').findOne({ _key: key }, { projection: { _id: 0, [field]: 1 } });
+        const item = await module.client
+            .collection('objects')
+            .findOne({ _key: key }, { projection: { _id: 0, [field]: 1 } });
         if (!item) {
             return null;
         }
@@ -125,10 +131,15 @@ module.exports = function (module) {
         const unCachedKeys = cache.getUnCachedKeys(keys, cachedData);
         let data = [];
         if (unCachedKeys.length >= 1) {
-            data = await module.client.collection('objects').find(
-                { _key: unCachedKeys.length === 1 ? unCachedKeys[0] : { $in: unCachedKeys } },
-                { projection: { _id: 0 } }
-            ).toArray();
+            data = await module.client
+                .collection('objects')
+                .find(
+                    {
+                        _key: unCachedKeys.length === 1 ? unCachedKeys[0] : { $in: unCachedKeys },
+                    },
+                    { projection: { _id: 0 } }
+                )
+                .toArray();
             data = data.map(helpers.deserializeData);
         }
 
@@ -240,14 +251,18 @@ module.exports = function (module) {
             return result.map(data => data && data[field]);
         }
         try {
-            const result = await module.client.collection('objects').findOneAndUpdate({
-                _key: key,
-            }, {
-                $inc: increment,
-            }, {
-                returnDocument: 'after',
-                upsert: true,
-            });
+            const result = await module.client.collection('objects').findOneAndUpdate(
+                {
+                    _key: key,
+                },
+                {
+                    $inc: increment,
+                },
+                {
+                    returnDocument: 'after',
+                    upsert: true,
+                }
+            );
             cache.del(key);
             return result && result.value ? result.value[field] : null;
         } catch (err) {

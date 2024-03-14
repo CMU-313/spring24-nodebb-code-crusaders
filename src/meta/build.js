@@ -28,22 +28,14 @@ const targetHandlers = {
     'admin js bundle': async function (parallel) {
         await meta.js.buildBundle('admin', parallel);
     },
-    javascript: [
-        'plugin static dirs',
-        'requirejs modules',
-        'client js bundle',
-        'admin js bundle',
-    ],
+    javascript: ['plugin static dirs', 'requirejs modules', 'client js bundle', 'admin js bundle'],
     'client side styles': async function (parallel) {
         await meta.css.buildBundle('client', parallel);
     },
     'admin control panel styles': async function (parallel) {
         await meta.css.buildBundle('admin', parallel);
     },
-    styles: [
-        'client side styles',
-        'admin control panel styles',
-    ],
+    styles: ['client side styles', 'admin control panel styles'],
     templates: async function () {
         await meta.templates.compile();
     },
@@ -91,11 +83,7 @@ async function buildTargets(targets, parallel, options) {
     winston.info(`[build] TypeScript building complete`);
 
     async function buildJSTargets() {
-        await Promise.all(
-            jsTargets.map(
-                target => step(target, parallel, `${_.padStart(target, length)} `)
-            )
-        );
+        await Promise.all(jsTargets.map(target => step(target, parallel, `${_.padStart(target, length)} `)));
         // run webpack after jstargets are done, no need to wait for css/templates etc.
         if (options.webpack || options.watch) {
             await exports.webpack(options);
@@ -104,9 +92,7 @@ async function buildTargets(targets, parallel, options) {
     if (parallel) {
         await Promise.all([
             buildJSTargets(),
-            ...otherTargets.map(
-                target => step(target, parallel, `${_.padStart(target, length)} `)
-            ),
+            ...otherTargets.map(target => step(target, parallel, `${_.padStart(target, length)} `)),
         ]);
     } else {
         for (const target of targets) {
@@ -150,11 +136,13 @@ exports.build = async function (targets, options) {
         winston.verbose('[build] Querying CPU core count for build strategy');
         const cpus = os.cpus();
         series = cpus.length < 4;
-        winston.verbose(`[build] System returned ${cpus.length} cores, opting for ${series ? 'series' : 'parallel'} build strategy`);
+        winston.verbose(
+            `[build] System returned ${cpus.length} cores, opting for ${series ? 'series' : 'parallel'} build strategy`
+        );
     }
 
     targets = targets
-    // get full target name
+        // get full target name
         .map((target) => {
             target = target.toLowerCase().replace(/-/g, '');
             if (!aliasMap[target]) {
@@ -169,15 +157,13 @@ exports.build = async function (targets, options) {
 
             return aliasMap[target];
         })
-    // filter nonexistent targets
+        // filter nonexistent targets
         .filter(Boolean);
 
     // map multitargets to their sets
-    targets = _.uniq(_.flatMap(targets, target => (
-        Array.isArray(targetHandlers[target]) ?
-            targetHandlers[target] :
-            target
-    )));
+    targets = _.uniq(
+        _.flatMap(targets, target => (Array.isArray(targetHandlers[target]) ? targetHandlers[target] : target))
+    );
 
     winston.verbose(`[build] building the following targets: ${targets.join(', ')}`);
 
@@ -216,7 +202,7 @@ function getWebpackConfig() {
 }
 
 exports.webpack = async function (options) {
-    winston.info(`[build] ${(options.watch ? 'Watching' : 'Bundling')} with Webpack.`);
+    winston.info(`[build] ${options.watch ? 'Watching' : 'Bundling'} with Webpack.`);
     const webpack = require('webpack');
     const fs = require('fs');
     const util = require('util');
@@ -226,7 +212,10 @@ exports.webpack = async function (options) {
     if (!activePlugins.includes('nodebb-plugin-composer-default')) {
         activePlugins.push('nodebb-plugin-composer-default');
     }
-    await fs.promises.writeFile(path.resolve(__dirname, '../../build/active_plugins.json'), JSON.stringify(activePlugins));
+    await fs.promises.writeFile(
+        path.resolve(__dirname, '../../build/active_plugins.json'),
+        JSON.stringify(activePlugins)
+    );
 
     const webpackCfg = getWebpackConfig();
     const compiler = webpack(webpackCfg);
@@ -247,7 +236,7 @@ exports.webpack = async function (options) {
             console.log(stats.toString('minimal'));
         } else {
             const statsJson = stats.toJson();
-            winston.info(`[build] ${(options.watch ? 'Watching' : 'Bundling')} took ${statsJson.time} ms`);
+            winston.info(`[build] ${options.watch ? 'Watching' : 'Bundling'} took ${statsJson.time} ms`);
         }
     } catch (err) {
         console.error(err.stack || err);

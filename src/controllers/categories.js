@@ -12,13 +12,16 @@ const privileges = require('../privileges');
 const categoriesController = module.exports;
 
 categoriesController.list = async function (req, res) {
-    res.locals.metaTags = [{
-        name: 'title',
-        content: String(meta.config.title || 'NodeBB'),
-    }, {
-        property: 'og:type',
-        content: 'website',
-    }];
+    res.locals.metaTags = [
+        {
+            name: 'title',
+            content: String(meta.config.title || 'NodeBB'),
+        },
+        {
+            property: 'og:type',
+            content: 'website',
+        },
+    ];
 
     const allRootCids = await categories.getAllCidsFromSet('cid:0:children');
     const rootCids = await privileges.categories.filterCids('find', allRootCids, req.uid);
@@ -48,7 +51,10 @@ categoriesController.list = async function (req, res) {
         }
     });
 
-    if (req.originalUrl.startsWith(`${nconf.get('relative_path')}/api/categories`) || req.originalUrl.startsWith(`${nconf.get('relative_path')}/categories`)) {
+    if (
+        req.originalUrl.startsWith(`${nconf.get('relative_path')}/api/categories`) ||
+        req.originalUrl.startsWith(`${nconf.get('relative_path')}/categories`)
+    ) {
         data.title = '[[pages:categories]]';
         data.breadcrumbs = helpers.buildBreadcrumbs([{ text: data.title }]);
         res.locals.metaTags.push({

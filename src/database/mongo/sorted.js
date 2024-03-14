@@ -84,7 +84,9 @@ module.exports = function (module) {
 
         let result = [];
         async function doQuery(_key, fields, skip, limit) {
-            return await module.client.collection('objects').find({ ...query, ...{ _key: _key } }, { projection: fields })
+            return await module.client
+                .collection('objects')
+                .find({ ...query, ...{ _key: _key } }, { projection: fields })
                 .sort({ score: sort })
                 .skip(skip)
                 .limit(limit)
@@ -95,10 +97,12 @@ module.exports = function (module) {
             const batches = [];
             const batch = require('../../batch');
             const batchSize = Math.ceil(key.length / Math.ceil(key.length / 100));
-            await batch.processArray(key, async currentBatch => batches.push(currentBatch), { batch: batchSize });
-            const batchData = await Promise.all(batches.map(
-                batch => doQuery({ $in: batch }, { _id: 0, _key: 0 }, 0, stop + 1)
-            ));
+            await batch.processArray(key, async currentBatch => batches.push(currentBatch), {
+                batch: batchSize,
+            });
+            const batchData = await Promise.all(
+                batches.map(batch => doQuery({ $in: batch }, { _id: 0, _key: 0 }, 0, stop + 1))
+            );
             result = dbHelpers.mergeBatch(batchData, 0, stop, sort);
             if (start > 0) {
                 result = result.slice(start, stop !== -1 ? stop + 1 : undefined);
@@ -137,7 +141,7 @@ module.exports = function (module) {
         if (parseInt(count, 10) === 0) {
             return [];
         }
-        const stop = (parseInt(count, 10) === -1) ? -1 : (start + count - 1);
+        const stop = parseInt(count, 10) === -1 ? -1 : start + count - 1;
         return await getSortedSetRange(key, start, stop, min, max, sort, withScores);
     }
 
@@ -180,7 +184,9 @@ module.exports = function (module) {
             return 0;
         }
 
-        const count = await module.client.collection('objects').countDocuments({ _key: Array.isArray(keys) ? { $in: keys } : keys });
+        const count = await module.client.collection('objects').countDocuments({
+            _key: Array.isArray(keys) ? { $in: keys } : keys,
+        });
         return parseInt(count, 10) || 0;
     };
 
@@ -264,7 +270,9 @@ module.exports = function (module) {
             return null;
         }
         value = helpers.valueToString(value);
-        const result = await module.client.collection('objects').findOne({ _key: key, value: value }, { projection: { _id: 0, _key: 0, value: 0 } });
+        const result = await module.client
+            .collection('objects')
+            .findOne({ _key: key, value: value }, { projection: { _id: 0, _key: 0, value: 0 } });
         return result ? result.score : null;
     };
 
@@ -273,7 +281,10 @@ module.exports = function (module) {
             return [];
         }
         value = helpers.valueToString(value);
-        const result = await module.client.collection('objects').find({ _key: { $in: keys }, value: value }, { projection: { _id: 0, value: 0 } }).toArray();
+        const result = await module.client
+            .collection('objects')
+            .find({ _key: { $in: keys }, value: value }, { projection: { _id: 0, value: 0 } })
+            .toArray();
         const map = {};
         result.forEach((item) => {
             if (item) {
@@ -292,7 +303,10 @@ module.exports = function (module) {
             return [];
         }
         values = values.map(helpers.valueToString);
-        const result = await module.client.collection('objects').find({ _key: key, value: { $in: values } }, { projection: { _id: 0, _key: 0 } }).toArray();
+        const result = await module.client
+            .collection('objects')
+            .find({ _key: key, value: { $in: values } }, { projection: { _id: 0, _key: 0 } })
+            .toArray();
 
         const valueToScore = {};
         result.forEach((item) => {
@@ -309,11 +323,15 @@ module.exports = function (module) {
             return;
         }
         value = helpers.valueToString(value);
-        const result = await module.client.collection('objects').findOne({
-            _key: key, value: value,
-        }, {
-            projection: { _id: 0, value: 1 },
-        });
+        const result = await module.client.collection('objects').findOne(
+            {
+                _key: key,
+                value: value,
+            },
+            {
+                projection: { _id: 0, value: 1 },
+            }
+        );
         return !!result;
     };
 
@@ -325,11 +343,18 @@ module.exports = function (module) {
             return [];
         }
         values = values.map(helpers.valueToString);
-        const results = await module.client.collection('objects').find({
-            _key: key, value: { $in: values },
-        }, {
-            projection: { _id: 0, value: 1 },
-        }).toArray();
+        const results = await module.client
+            .collection('objects')
+            .find(
+                {
+                    _key: key,
+                    value: { $in: values },
+                },
+                {
+                    projection: { _id: 0, value: 1 },
+                }
+            )
+            .toArray();
 
         const isMember = {};
         results.forEach((item) => {
@@ -346,11 +371,18 @@ module.exports = function (module) {
             return [];
         }
         value = helpers.valueToString(value);
-        const results = await module.client.collection('objects').find({
-            _key: { $in: keys }, value: value,
-        }, {
-            projection: { _id: 0, _key: 1, value: 1 },
-        }).toArray();
+        const results = await module.client
+            .collection('objects')
+            .find(
+                {
+                    _key: { $in: keys },
+                    value: value,
+                },
+                {
+                    projection: { _id: 0, _key: 1, value: 1 },
+                }
+            )
+            .toArray();
 
         const isMember = {};
         results.forEach((item) => {
@@ -376,9 +408,15 @@ module.exports = function (module) {
         if (arrayOfKeys) {
             projection._key = 1;
         }
-        const data = await module.client.collection('objects').find({
-            _key: arrayOfKeys ? { $in: keys } : keys[0],
-        }, { projection: projection }).toArray();
+        const data = await module.client
+            .collection('objects')
+            .find(
+                {
+                    _key: arrayOfKeys ? { $in: keys } : keys[0],
+                },
+                { projection: projection }
+            )
+            .toArray();
 
         if (!arrayOfKeys) {
             return [data.map(item => item.value)];
@@ -401,15 +439,19 @@ module.exports = function (module) {
         data.score = parseFloat(increment);
 
         try {
-            const result = await module.client.collection('objects').findOneAndUpdate({
-                _key: key,
-                value: value,
-            }, {
-                $inc: data,
-            }, {
-                returnDocument: 'after',
-                upsert: true,
-            });
+            const result = await module.client.collection('objects').findOneAndUpdate(
+                {
+                    _key: key,
+                    value: value,
+                },
+                {
+                    $inc: data,
+                },
+                {
+                    returnDocument: 'after',
+                    upsert: true,
+                }
+            );
             return result && result.value ? result.value.score : null;
         } catch (err) {
             // if there is duplicate key error retry the upsert
@@ -431,12 +473,18 @@ module.exports = function (module) {
                 .update({ $inc: { score: parseFloat(item[1]) } });
         });
         await bulk.execute();
-        const result = await module.client.collection('objects').find({
-            _key: { $in: _.uniq(data.map(i => i[0])) },
-            value: { $in: _.uniq(data.map(i => i[2])) },
-        }, {
-            projection: { _id: 0, _key: 1, value: 1, score: 1 },
-        }).toArray();
+        const result = await module.client
+            .collection('objects')
+            .find(
+                {
+                    _key: { $in: _.uniq(data.map(i => i[0])) },
+                    value: { $in: _.uniq(data.map(i => i[2])) },
+                },
+                {
+                    projection: { _id: 0, _key: 1, value: 1, score: 1 },
+                }
+            )
+            .toArray();
 
         const map = {};
         result.forEach((item) => {
@@ -464,7 +512,9 @@ module.exports = function (module) {
         count = count !== undefined ? count : 0;
         buildLexQuery(query, min, max);
 
-        const data = await module.client.collection('objects').find(query, { projection: { _id: 0, value: 1 } })
+        const data = await module.client
+            .collection('objects')
+            .find(query, { projection: { _id: 0, value: 1 } })
             .sort({ value: sort })
             .skip(start)
             .limit(count === -1 ? 0 : count)
@@ -516,9 +566,13 @@ module.exports = function (module) {
             return [];
         }
 
-        const cursor = module.client.collection('objects').find({
-            _key: params.key, value: { $regex: regex },
-        }, { projection: project });
+        const cursor = module.client.collection('objects').find(
+            {
+                _key: params.key,
+                value: { $regex: regex },
+            },
+            { projection: project }
+        );
 
         if (params.limit) {
             cursor.limit(params.limit);
@@ -539,7 +593,9 @@ module.exports = function (module) {
         if (!options.withScores) {
             project.score = 0;
         }
-        const cursor = await module.client.collection('objects').find({ _key: setKey }, { projection: project })
+        const cursor = await module.client
+            .collection('objects')
+            .find({ _key: setKey }, { projection: project })
             .sort({ score: 1 })
             .batchSize(options.batch);
 

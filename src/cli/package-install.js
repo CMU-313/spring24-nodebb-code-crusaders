@@ -46,25 +46,29 @@ pkgInstall.updatePackageFile = () => {
     const { devDependencies } = defaultPackageContents;
 
     // Sort dependencies alphabetically
-    dependencies = sortDependencies({ ...dependencies, ...defaultPackageContents.dependencies });
+    dependencies = sortDependencies({
+        ...dependencies,
+        ...defaultPackageContents.dependencies,
+    });
 
-    const packageContents = { ..._.merge(oldPackageContents, defaultPackageContents), dependencies, devDependencies };
+    const packageContents = {
+        ..._.merge(oldPackageContents, defaultPackageContents),
+        dependencies,
+        devDependencies,
+    };
     fs.writeFileSync(paths.currentPackage, JSON.stringify(packageContents, null, 4));
 };
 
-pkgInstall.supportedPackageManager = [
-    'npm',
-    'cnpm',
-    'pnpm',
-    'yarn',
-];
+pkgInstall.supportedPackageManager = ['npm', 'cnpm', 'pnpm', 'yarn'];
 
 pkgInstall.getPackageManager = () => {
     try {
         const packageContents = require(paths.currentPackage);
         // This regex technically allows invalid values:
         // cnpm isn't supported by corepack and it doesn't enforce a version string being present
-        const pmRegex = new RegExp(`^(?<packageManager>${pkgInstall.supportedPackageManager.join('|')})@?[\\d\\w\\.\\-]*$`);
+        const pmRegex = new RegExp(
+            `^(?<packageManager>${pkgInstall.supportedPackageManager.join('|')})@?[\\d\\w\\.\\-]*$`
+        );
         const packageManager = packageContents.packageManager ? packageContents.packageManager.match(pmRegex) : false;
         if (packageManager) {
             return packageManager.groups.packageManager;
@@ -74,11 +78,15 @@ pkgInstall.getPackageManager = () => {
         if (!Object.keys(nconf.stores).length) {
             // Quick & dirty nconf setup for when you cannot rely on nconf having been required already
             const configFile = path.resolve(__dirname, '../../', nconf.any(['config', 'CONFIG']) || 'config.json');
-            nconf.env().file({ // not sure why adding .argv() causes the process to terminate
+            nconf.env().file({
+                // not sure why adding .argv() causes the process to terminate
                 file: configFile,
             });
         }
-        if (nconf.get('package_manager') && !pkgInstall.supportedPackageManager.includes(nconf.get('package_manager'))) {
+        if (
+            nconf.get('package_manager') &&
+            !pkgInstall.supportedPackageManager.includes(nconf.get('package_manager'))
+        ) {
             nconf.clear('package_manager');
         }
 
@@ -94,7 +102,11 @@ pkgInstall.getPackageManager = () => {
 };
 
 function getPackageManagerByLockfile() {
-    for (const [packageManager, lockfile] of Object.entries({ npm: 'package-lock.json', yarn: 'yarn.lock', pnpm: 'pnpm-lock.yaml' })) {
+    for (const [packageManager, lockfile] of Object.entries({
+        npm: 'package-lock.json',
+        yarn: 'yarn.lock',
+        pnpm: 'pnpm-lock.yaml',
+    })) {
         try {
             fs.accessSync(path.resolve(__dirname, `../../${lockfile}`), fs.constants.R_OK);
             return packageManager;
@@ -147,28 +159,32 @@ pkgInstall.preserveExtraneousPlugins = () => {
         return;
     }
 
-    const packages = fs.readdirSync(paths.nodeModules)
-        .filter(pkgName => pluginNamePattern.test(pkgName));
+    const packages = fs.readdirSync(paths.nodeModules).filter(pkgName => pluginNamePattern.test(pkgName));
 
     const packageContents = JSON.parse(fs.readFileSync(paths.currentPackage, 'utf8'));
 
     const extraneous = packages
-    // only extraneous plugins (ones not in package.json) which are not links
+        // only extraneous plugins (ones not in package.json) which are not links
         .filter((pkgName) => {
             const extraneous = !packageContents.dependencies.hasOwnProperty(pkgName);
             const isLink = fs.lstatSync(path.join(paths.nodeModules, pkgName)).isSymbolicLink();
 
             return extraneous && !isLink;
         })
-    // reduce to a map of package names to package versions
+        // reduce to a map of package names to package versions
         .reduce((map, pkgName) => {
-            const pkgConfig = JSON.parse(fs.readFileSync(path.join(paths.nodeModules, pkgName, 'package.json'), 'utf8'));
+            const pkgConfig = JSON.parse(
+                fs.readFileSync(path.join(paths.nodeModules, pkgName, 'package.json'), 'utf8')
+            );
             map[pkgName] = pkgConfig.version;
             return map;
         }, {});
 
     // Add those packages to package.json
-    packageContents.dependencies = sortDependencies({ ...packageContents.dependencies, ...extraneous });
+    packageContents.dependencies = sortDependencies({
+        ...packageContents.dependencies,
+        ...extraneous,
+    });
 
     fs.writeFileSync(paths.currentPackage, JSON.stringify(packageContents, null, 4));
 };

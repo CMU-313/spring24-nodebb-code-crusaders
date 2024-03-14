@@ -37,7 +37,10 @@ infoController.get = async function (req, res, next) {
         userData.pagination = pagination.create(page, pageCount, req.query);
     }
     userData.title = '[[pages:account/info]]';
-    userData.breadcrumbs = helpers.buildBreadcrumbs([{ text: userData.username, url: `/user/${userData.userslug}` }, { text: '[[user:account_info]]' }]);
+    userData.breadcrumbs = helpers.buildBreadcrumbs([
+        { text: userData.username, url: `/user/${userData.userslug}` },
+        { text: '[[user:account_info]]' },
+    ]);
 
     res.render('account/info', userData);
 };

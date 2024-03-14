@@ -36,9 +36,7 @@ require('./merge')(Topics);
 Topics.events = require('./events');
 
 Topics.exists = async function (tids) {
-    return await db.exists(
-        Array.isArray(tids) ? tids.map(tid => `topic:${tid}`) : `topic:${tids}`
-    );
+    return await db.exists(Array.isArray(tids) ? tids.map(tid => `topic:${tid}`) : `topic:${tids}`);
 };
 
 Topics.getTopicsFromSet = async function (set, uid, start, stop) {
@@ -83,7 +81,10 @@ Topics.getTopicsByTids = async function (tids, options) {
             if (meta.config.hideFullname) {
                 return uids.map(() => ({ showfullname: false }));
             }
-            const data = await db.getObjectsFields(uids.map(uid => `user:${uid}:settings`), ['showfullname']);
+            const data = await db.getObjectsFields(
+                uids.map(uid => `user:${uid}:settings`),
+                ['showfullname']
+            );
             data.forEach((settings) => {
                 settings.showfullname = parseInt(settings.showfullname, 10) === 1;
             });
@@ -92,9 +93,30 @@ Topics.getTopicsByTids = async function (tids, options) {
 
         const [teasers, users, userSettings, categoriesData, guestHandles, thumbs] = await Promise.all([
             Topics.getTeasers(topics, options),
-            user.getUsersFields(uids, ['uid', 'username', 'fullname', 'userslug', 'reputation', 'postcount', 'picture', 'signature', 'banned', 'status']),
+            user.getUsersFields(uids, [
+                'uid',
+                'username',
+                'fullname',
+                'userslug',
+                'reputation',
+                'postcount',
+                'picture',
+                'signature',
+                'banned',
+                'status',
+            ]),
             loadShowfullnameSettings(),
-            categories.getCategoriesFields(cids, ['cid', 'name', 'slug', 'icon', 'backgroundImage', 'imageClass', 'bgColor', 'color', 'disabled']),
+            categories.getCategoriesFields(cids, [
+                'cid',
+                'name',
+                'slug',
+                'icon',
+                'backgroundImage',
+                'imageClass',
+                'bgColor',
+                'color',
+                'disabled',
+            ]),
             loadGuestHandles(),
             Topics.thumbs.load(topics),
         ]);
@@ -111,7 +133,10 @@ Topics.getTopicsByTids = async function (tids, options) {
             teasers,
             usersMap: _.zipObject(uids, users),
             categoriesMap: _.zipObject(cids, categoriesData),
-            tidToGuestHandle: _.zipObject(guestTopics.map(t => t.tid), guestHandles),
+            tidToGuestHandle: _.zipObject(
+                guestTopics.map(t => t.tid),
+                guestHandles
+            ),
             thumbs,
         };
     }
@@ -149,7 +174,10 @@ Topics.getTopicsByTids = async function (tids, options) {
 
     const filteredTopics = result.topics.filter(topic => topic && topic.category && !topic.category.disabled);
 
-    const hookResult = await plugins.hooks.fire('filter:topics.get', { topics: filteredTopics, uid: uid });
+    const hookResult = await plugins.hooks.fire('filter:topics.get', {
+        topics: filteredTopics,
+        uid: uid,
+    });
     return hookResult.topics;
 };
 
@@ -171,7 +199,11 @@ Topics.getTopicWithPosts = async function (topicData, set, uid, start, stop, rev
         Topics.getTopicPosts(topicData, set, start, stop, uid, reverse),
         categories.getCategoryData(topicData.cid),
         categories.getTagWhitelist([topicData.cid]),
-        plugins.hooks.fire('filter:topic.thread_tools', { topic: topicData, uid: uid, tools: [] }),
+        plugins.hooks.fire('filter:topic.thread_tools', {
+            topic: topicData,
+            uid: uid,
+            tools: [],
+        }),
         Topics.getFollowData([topicData.tid], uid),
         Topics.getUserBookmark(topicData.tid, uid),
         social.getActivePostSharing(),
@@ -186,9 +218,7 @@ Topics.getTopicWithPosts = async function (topicData, set, uid, start, stop, rev
     topicData.posts = posts;
     topicData.events = events;
     topicData.posts.forEach((p) => {
-        p.events = events.filter(
-            event => event.timestamp >= p.eventStart && event.timestamp < p.eventEnd
-        );
+        p.events = events.filter(event => event.timestamp >= p.eventStart && event.timestamp < p.eventEnd);
     });
 
     topicData.category = category;
@@ -213,7 +243,10 @@ Topics.getTopicWithPosts = async function (topicData, set, uid, start, stop, rev
     topicData.unreplied = topicData.postcount === 1;
     topicData.icons = [];
 
-    const result = await plugins.hooks.fire('filter:topic.get', { topic: topicData, uid: uid });
+    const result = await plugins.hooks.fire('filter:topic.get', {
+        topic: topicData,
+        uid: uid,
+    });
     return result.topic;
 };
 
@@ -228,10 +261,7 @@ async function getMerger(topicData) {
     if (!parseInt(topicData.mergerUid, 10)) {
         return null;
     }
-    const [
-        merger,
-        mergedIntoTitle,
-    ] = await Promise.all([
+    const [merger, mergedIntoTitle] = await Promise.all([
         user.getUserFields(topicData.mergerUid, ['username', 'userslug', 'picture']),
         Topics.getTopicField(topicData.mergeIntoTid, 'title'),
     ]);

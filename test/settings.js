@@ -52,7 +52,9 @@ describe('settings v3', () => {
     });
 
     it('should get value from default value', (done) => {
-        const newSettings = new settings('some-plugin', '1.0', { default: { value: 1 } });
+        const newSettings = new settings('some-plugin', '1.0', {
+            default: { value: 1 },
+        });
         assert.equal(newSettings.get('default.value'), 1);
         done();
     });

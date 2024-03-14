@@ -1,4 +1,3 @@
-
 'use strict';
 
 const _ = require('lodash');
@@ -37,7 +36,10 @@ const _privilegeMap = new Map([
 ]);
 
 privsCategories.getUserPrivilegeList = async () => await plugins.hooks.fire('filter:privileges.list', Array.from(_privilegeMap.keys()));
-privsCategories.getGroupPrivilegeList = async () => await plugins.hooks.fire('filter:privileges.groups.list', Array.from(_privilegeMap.keys()).map(privilege => `groups:${privilege}`));
+privsCategories.getGroupPrivilegeList = async () => await plugins.hooks.fire(
+    'filter:privileges.groups.list',
+    Array.from(_privilegeMap.keys()).map(privilege => `groups:${privilege}`)
+);
 privsCategories.getPrivilegeList = async () => {
     const [user, group] = await Promise.all([
         privsCategories.getUserPrivilegeList(),
@@ -80,10 +82,7 @@ privsCategories.list = async function (cid) {
 };
 
 privsCategories.get = async function (cid, uid) {
-    const privs = [
-        'topics:create', 'topics:read', 'topics:schedule',
-        'topics:tag', 'read', 'posts:view_deleted',
-    ];
+    const privs = ['topics:create', 'topics:read', 'topics:schedule', 'topics:tag', 'read', 'posts:view_deleted'];
 
     const [userPrivileges, isAdministrator, isModerator] = await Promise.all([
         helpers.isAllowedTo(privs, uid, cid),
@@ -109,10 +108,7 @@ privsCategories.isAdminOrMod = async function (cid, uid) {
     if (parseInt(uid, 10) <= 0) {
         return false;
     }
-    const [isAdmin, isMod] = await Promise.all([
-        user.isAdministrator(uid),
-        user.isModerator(uid, cid),
-    ]);
+    const [isAdmin, isMod] = await Promise.all([user.isAdministrator(uid), user.isModerator(uid, cid)]);
     return isAdmin || isMod;
 };
 
@@ -154,9 +150,7 @@ privsCategories.filterCids = async function (privilege, cids, uid) {
         helpers.isAllowedTo(privilege, uid, cids),
         user.isAdministrator(uid),
     ]);
-    return cids.filter(
-        (cid, index) => !!cid && !categoryData[index].disabled && (allowedTo[index] || isAdmin)
-    );
+    return cids.filter((cid, index) => !!cid && !categoryData[index].disabled && (allowedTo[index] || isAdmin));
 };
 
 privsCategories.getBase = async function (privilege, cids, uid) {

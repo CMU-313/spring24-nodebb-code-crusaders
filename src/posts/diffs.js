@@ -28,8 +28,7 @@ module.exports = function (Posts) {
         }
 
         // Pass those made after `since`, and create keys
-        const keys = timestamps.filter(t => (parseInt(t, 10) || 0) > since)
-            .map(t => `diff:${pid}.${t}`);
+        const keys = timestamps.filter(t => (parseInt(t, 10) || 0) > since).map(t => `diff:${pid}.${t}`);
         return await db.getObjects(keys);
     };
 
@@ -51,7 +50,10 @@ module.exports = function (Posts) {
             diffData.title = topic.oldTitle;
         }
         if (topic.tagsupdated && Array.isArray(topic.oldTags)) {
-            diffData.tags = topic.oldTags.map(tag => tag && tag.value).filter(Boolean).join(',');
+            diffData.tags = topic.oldTags
+                .map(tag => tag && tag.value)
+                .filter(Boolean)
+                .join(',');
         }
         await Promise.all([
             db.listPrepend(`post:${pid}:diffs`, editTimestamp),
@@ -64,7 +66,9 @@ module.exports = function (Posts) {
         const post = await postDiffLoad(pid, since, uid);
         post.content = String(post.content || '');
 
-        const result = await plugins.hooks.fire('filter:parse.post', { postData: post });
+        const result = await plugins.hooks.fire('filter:parse.post', {
+            postData: post,
+        });
         result.postData.content = translator.escape(result.postData.content);
         return result.postData;
     };
@@ -121,13 +125,12 @@ module.exports = function (Posts) {
             const timestampToUpdate = newContentIndex + 1;
             const newContent = newContentIndex < 0 ? postContent : versionContents[timestamps[newContentIndex]];
             const patch = diff.createPatch('', newContent, versionContents[timestamps[i]]);
-            await db.setObject(`diff:${pid}.${timestamps[timestampToUpdate]}`, { patch });
+            await db.setObject(`diff:${pid}.${timestamps[timestampToUpdate]}`, {
+                patch,
+            });
         }
 
-        return Promise.all([
-            db.delete(`diff:${pid}.${timestamp}`),
-            db.listRemoveAll(`post:${pid}:diffs`, timestamp),
-        ]);
+        return Promise.all([db.delete(`diff:${pid}.${timestamp}`), db.listRemoveAll(`post:${pid}:diffs`, timestamp)]);
     };
 
     async function postDiffLoad(pid, since, uid) {

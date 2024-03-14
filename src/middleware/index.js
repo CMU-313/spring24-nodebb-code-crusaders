@@ -75,10 +75,7 @@ middleware.stripLeadingSlashes = function stripLeadingSlashes(req, res, next) {
 
 middleware.pageView = helpers.try(async (req, res, next) => {
     if (req.loggedIn) {
-        await Promise.all([
-            user.updateOnlineUsers(req.uid),
-            user.updateLastOnlineTime(req.uid),
-        ]);
+        await Promise.all([user.updateOnlineUsers(req.uid), user.updateLastOnlineTime(req.uid)]);
     }
     next();
     await analytics.pageView({ ip: req.ip, uid: req.uid });
@@ -196,7 +193,7 @@ middleware.delayLoading = function delayLoading(req, res, next) {
     if (timesSeen > 10) {
         return res.sendStatus(429);
     }
-    delayCache.set(req.ip, timesSeen += 1);
+    delayCache.set(req.ip, (timesSeen += 1));
 
     setTimeout(next, 1000);
 };
@@ -220,7 +217,10 @@ middleware.addUploadHeaders = function addUploadHeaders(req, res, next) {
     const extname = path.extname(req.path);
     if (req.path.startsWith('/uploads/files/') && middleware.regexes.timestampedUpload.test(basename)) {
         basename = basename.slice(14);
-        res.header('Content-Disposition', `${extname.startsWith('.htm') ? 'attachment' : 'inline'}; filename="${basename}"`);
+        res.header(
+            'Content-Disposition',
+            `${extname.startsWith('.htm') ? 'attachment' : 'inline'}; filename="${basename}"`
+        );
     }
 
     next();
@@ -250,5 +250,9 @@ middleware.checkRequired = function (fields, req, res, next) {
         return next();
     }
 
-    controllers.helpers.formatApiResponse(400, res, new Error(`[[error:required-parameters-missing, ${missing.join(' ')}]]`));
+    controllers.helpers.formatApiResponse(
+        400,
+        res,
+        new Error(`[[error:required-parameters-missing, ${missing.join(' ')}]]`)
+    );
 };

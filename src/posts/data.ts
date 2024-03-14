@@ -1,8 +1,8 @@
 import db from '../database';
 import plugins from '../plugins';
+import { TopicObject } from '../types/topic';
 import utils from '../utils';
 import { CategoryObject } from './category';
-import { TopicObject } from '../types/topic';
 import { UserObjectSlim } from './user';
 
 interface PostObjectNew {
@@ -36,17 +36,11 @@ interface PostResult {
 }
 
 interface PostsFunctions {
-  getPostsFields: (
-    pids: number[],
-    fields: string[]
-  ) => Promise<PostObjectNew[]>;
+  getPostsFields: (pids: number[], fields: string[]) => Promise<PostObjectNew[]>;
   getPostData: (pid: number) => Promise<PostObjectNew | null>;
   getPostsData: (pids: number[]) => Promise<PostObjectNew[]>;
   getPostField: (pid: number, field: string) => Promise<number | null>;
-  getPostFields: (
-    pid: number,
-    fields: string[]
-  ) => Promise<PostObjectNew | null>;
+  getPostFields: (pid: number, fields: string[]) => Promise<PostObjectNew | null>;
   setPostField: (pid: number, field: string, value: boolean) => Promise<void>;
   setPostFields: (pid: number, data: object) => Promise<void>;
 }
@@ -83,37 +77,26 @@ export default function (Posts: PostsFunctions) {
             if (post.hasOwnProperty('edited')) {
                 // The next line calls a function in a module that has not been updated to TS yet
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                post.editedISO = (
-          post.edited !== 0 ? utils.toISOString(post.edited) : ''
-        ) as string;
+                post.editedISO = (post.edited !== 0 ? utils.toISOString(post.edited) : '') as string;
             }
         }
     }
 
-    Posts.getPostsFields = async function (
-        pids: number[],
-        fields: string[]
-    ): Promise<PostObjectNew[]> {
+    Posts.getPostsFields = async function (pids: number[], fields: string[]): Promise<PostObjectNew[]> {
         if (!Array.isArray(pids) || !pids.length) {
             return [];
         }
         const keys = pids.map(pid => `post:${pid}`);
         // The next line calls a function in a module that has not been updated to TS yet
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-        const postData: PostObjectNew[] = (await db.getObjects(
-            keys,
-            fields
-        )) as PostObjectNew[];
+        const postData: PostObjectNew[] = (await db.getObjects(keys, fields)) as PostObjectNew[];
         // The next line calls a function in a module that has not been updated to TS yet
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-        const result: PostResult = (await plugins.hooks.fire(
-            'filter:post.getFields',
-            {
-                pids: pids,
-                posts: postData,
-                fields: fields,
-            }
-        )) as PostResult;
+        const result: PostResult = (await plugins.hooks.fire('filter:post.getFields', {
+            pids: pids,
+            posts: postData,
+            fields: fields,
+        })) as PostResult;
         result.posts.forEach((post: PostObjectNew) => modifyPost(post, fields));
         return result.posts;
     };
@@ -136,24 +119,16 @@ export default function (Posts: PostsFunctions) {
         }
     };
 
-    Posts.getPostsData = async function (
-        pids: number[]
-    ): Promise<PostObjectNew[]> {
+    Posts.getPostsData = async function (pids: number[]): Promise<PostObjectNew[]> {
         return Posts.getPostsFields(pids, []);
     };
 
-    Posts.getPostField = async function (
-        pid: number,
-        field: string
-    ): Promise<number | null> {
+    Posts.getPostField = async function (pid: number, field: string): Promise<number | null> {
         const post: PostObjectNew | null = await Posts.getPostFields(pid, [field]);
         return (post ? post[field] : null) as number | null;
     };
 
-    Posts.getPostFields = async function (
-        pid: number,
-        fields: string[]
-    ): Promise<PostObjectNew | null> {
+    Posts.getPostFields = async function (pid: number, fields: string[]): Promise<PostObjectNew | null> {
         const posts: PostObjectNew[] = await Posts.getPostsFields([pid], fields);
         return posts ? posts[0] : null;
     };
@@ -176,10 +151,7 @@ export default function (Posts: PostsFunctions) {
         }
     };
 
-    Posts.setPostFields = async function (
-        pid: number,
-        data: dataObj
-    ): Promise<void> {
+    Posts.setPostFields = async function (pid: number, data: dataObj): Promise<void> {
     // The next line calls a function in a module that has not been updated to TS yet
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         await db.setObject(`post:${pid}`, data);

@@ -1,6 +1,11 @@
 'use strict';
 
-define('forum/account/theme', ['forum/account/header', 'storage', 'settings', 'alerts'], function (header, Storage, settings, alerts) {
+define('forum/account/theme', ['forum/account/header', 'storage', 'settings', 'alerts'], function (
+    header,
+    Storage,
+    settings,
+    alerts
+) {
     const Theme = {};
 
     Theme.init = () => {
@@ -20,7 +25,9 @@ define('forum/account/theme', ['forum/account/header', 'storage', 'settings', 'a
         try {
             const parsed = JSON.parse(autohideNavbarEnvs) || ['xs', 'sm'];
             parsed.forEach((env) => {
-                const optionEl = document.getElementById('persona:navbar:autohide').querySelector(`option[value="${env}"]`);
+                const optionEl = document
+                    .getElementById('persona:navbar:autohide')
+                    .querySelector(`option[value="${env}"]`);
                 optionEl.selected = true;
             });
         } catch (e) {

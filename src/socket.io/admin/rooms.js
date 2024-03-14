@@ -48,7 +48,6 @@ SocketRooms.getTotalGuestCount = function (callback) {
     }, 100);
 };
 
-
 SocketRooms.getAll = async function () {
     pubsub.publish('sync:stats:start');
 
@@ -75,7 +74,10 @@ SocketRooms.getAll = async function () {
         totals.users.category += instance.users.category;
 
         instance.topics.forEach((topic) => {
-            totals.topics[topic.tid] = totals.topics[topic.tid] || { count: 0, tid: topic.tid };
+            totals.topics[topic.tid] = totals.topics[topic.tid] || {
+                count: 0,
+                tid: topic.tid,
+            };
             totals.topics[topic.tid].count += topic.count;
         });
     }

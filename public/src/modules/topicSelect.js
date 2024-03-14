@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('topicSelect', ['components'], function (components) {
     const TopicSelect = {};
     let lastSelected;
@@ -51,7 +50,10 @@ define('topicSelect', ['components'], function (components) {
     TopicSelect.unselectAll = function () {
         if (topicsContainer) {
             topicsContainer.find('[component="category/topic"].selected').removeClass('selected');
-            topicsContainer.find('[component="topic/select"]').toggleClass('fa-check-square-o', false).toggleClass('fa-square-o', true);
+            topicsContainer
+                .find('[component="topic/select"]')
+                .toggleClass('fa-check-square-o', false)
+                .toggleClass('fa-square-o', true);
         }
     };
 

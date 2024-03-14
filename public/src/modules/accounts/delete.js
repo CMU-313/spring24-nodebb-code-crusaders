@@ -4,13 +4,7 @@ define('accounts/delete', ['api', 'bootbox', 'alerts'], function (api, bootbox, 
     const Delete = {};
 
     Delete.account = function (uid, callback) {
-        executeAction(
-            uid,
-            '[[user:delete_this_account_confirm]]',
-            '/account',
-            '[[user:account-deleted]]',
-            callback
-        );
+        executeAction(uid, '[[user:delete_this_account_confirm]]', '/account', '[[user:account-deleted]]', callback);
     };
 
     Delete.content = function (uid, callback) {
@@ -24,13 +18,7 @@ define('accounts/delete', ['api', 'bootbox', 'alerts'], function (api, bootbox, 
     };
 
     Delete.purge = function (uid, callback) {
-        executeAction(
-            uid,
-            '[[user:delete_all_confirm]]',
-            '',
-            '[[user:account-deleted]]',
-            callback
-        );
+        executeAction(uid, '[[user:delete_all_confirm]]', '', '[[user:account-deleted]]', callback);
     };
 
     function executeAction(uid, confirmText, path, successText, callback) {
@@ -39,13 +27,15 @@ define('accounts/delete', ['api', 'bootbox', 'alerts'], function (api, bootbox, 
                 return;
             }
 
-            api.del(`/users/${uid}${path}`, {}).then(() => {
-                alerts.success(successText);
+            api.del(`/users/${uid}${path}`, {})
+                .then(() => {
+                    alerts.success(successText);
 
-                if (typeof callback === 'function') {
-                    return callback();
-                }
-            }).catch(alerts.error);
+                    if (typeof callback === 'function') {
+                        return callback();
+                    }
+                })
+                .catch(alerts.error);
         });
     }
 

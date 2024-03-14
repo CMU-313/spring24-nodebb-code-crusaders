@@ -11,7 +11,7 @@ get:
         type: string
       example: admin
   responses:
-    "200":
+    '200':
       description: Successful export of user uploads
       content:
         application/zip:

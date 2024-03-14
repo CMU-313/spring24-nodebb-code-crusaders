@@ -1,9 +1,7 @@
 'use strict';
 
-
 define('admin/extend/rewards', ['alerts'], function (alerts) {
     const rewards = {};
-
 
     let available;
     let active;
@@ -42,7 +40,9 @@ define('admin/extend/rewards', ['alerts'], function (alerts) {
             .on('click', '.toggle', function () {
                 const btn = $(this);
                 const disabled = btn.hasClass('btn-success');
-                btn.toggleClass('btn-warning').toggleClass('btn-success').translateHtml('[[admin/extend/rewards:' + (disabled ? 'disable' : 'enable') + ']]');
+                btn.toggleClass('btn-warning')
+                    .toggleClass('btn-success')
+                    .translateHtml('[[admin/extend/rewards:' + (disabled ? 'disable' : 'enable') + ']]');
                 // send disable api call
                 return false;
             });
@@ -127,13 +127,15 @@ define('admin/extend/rewards', ['alerts'], function (alerts) {
         const ul = $('#active');
 
         const data = {
-            active: [{
-                disabled: true,
-                value: '',
-                claimable: 1,
-                rid: null,
-                id: null,
-            }],
+            active: [
+                {
+                    disabled: true,
+                    value: '',
+                    claimable: 1,
+                    rid: null,
+                    id: null,
+                },
+            ],
             conditions: conditions,
             conditionals: conditionals,
             rewards: available,

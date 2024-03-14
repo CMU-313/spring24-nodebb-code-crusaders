@@ -59,7 +59,9 @@ const templateToData = {
         getTopics: async (sets, req, start, stop) => {
             let pids = await db.getSortedSetRevRangeByScore(sets, start, stop - start + 1, '+inf', 1);
             pids = await privileges.posts.filter('topics:read', pids, req.uid);
-            const postObjs = await posts.getPostSummaryByPids(pids, req.uid, { stripTags: false });
+            const postObjs = await posts.getPostSummaryByPids(pids, req.uid, {
+                stripTags: false,
+            });
             return { posts: postObjs, nextStart: stop + 1 };
         },
         getItemCount: async (sets) => {
@@ -78,7 +80,9 @@ const templateToData = {
         getTopics: async (sets, req, start, stop) => {
             let pids = await db.getSortedSetRangeByScore(sets, start, stop - start + 1, '-inf', -1);
             pids = await privileges.posts.filter('topics:read', pids, req.uid);
-            const postObjs = await posts.getPostSummaryByPids(pids, req.uid, { stripTags: false });
+            const postObjs = await posts.getPostSummaryByPids(pids, req.uid, {
+                stripTags: false,
+            });
             return { posts: postObjs, nextStart: stop + 1 };
         },
         getItemCount: async (sets) => {
@@ -109,7 +113,8 @@ const templateToData = {
             const sortSet = map[sort];
             let tids = await db.getSortedSetRevRange(set, 0, -1);
             const scores = await db.sortedSetScores(sortSet, tids);
-            tids = tids.map((tid, i) => ({ tid: tid, score: scores[i] }))
+            tids = tids
+                .map((tid, i) => ({ tid: tid, score: scores[i] }))
                 .sort((a, b) => b.score - a.score)
                 .slice(start, stop + 1)
                 .map(t => t.tid);
@@ -218,9 +223,12 @@ async function getPostsFromUserSet(template, req, res, next) {
 
     userData.noItemsFoundKey = data.noItemsFoundKey;
     userData.title = `[[pages:${template}, ${userData.username}]]`;
-    userData.breadcrumbs = helpers.buildBreadcrumbs([{ text: userData.username, url: `/user/${userData.userslug}` }, { text: data.crumb }]);
+    userData.breadcrumbs = helpers.buildBreadcrumbs([
+        { text: userData.username, url: `/user/${userData.userslug}` },
+        { text: data.crumb },
+    ]);
     userData.showSort = template === 'account/watched';
-    const baseUrl = (req.baseUrl + req.path.replace(/^\/api/, ''));
+    const baseUrl = req.baseUrl + req.path.replace(/^\/api/, '');
     userData.sortOptions = [
         { url: `${baseUrl}?sort=votes`, name: '[[global:votes]]' },
         { url: `${baseUrl}?sort=posts`, name: '[[global:posts]]' },

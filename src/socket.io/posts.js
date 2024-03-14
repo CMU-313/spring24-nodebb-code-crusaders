@@ -29,7 +29,10 @@ SocketPosts.getRawPost = async function (socket, pid) {
         throw new Error('[[error:no-post]]');
     }
     postData.pid = pid;
-    const result = await plugins.hooks.fire('filter:post.getRawPost', { uid: socket.uid, postData: postData });
+    const result = await plugins.hooks.fire('filter:post.getRawPost', {
+        uid: socket.uid,
+        postData: postData,
+    });
     return result.postData.content;
 };
 
@@ -53,7 +56,9 @@ SocketPosts.getPostSummaryByIndex = async function (socket, data) {
         throw new Error('[[error:no-privileges]]');
     }
 
-    const postsData = await posts.getPostSummaryByPids([pid], socket.uid, { stripTags: false });
+    const postsData = await posts.getPostSummaryByPids([pid], socket.uid, {
+        stripTags: false,
+    });
     posts.modifyPostByPrivilege(postsData[0], topicPrivileges);
     return postsData[0];
 };
@@ -69,7 +74,9 @@ SocketPosts.getPostSummaryByPid = async function (socket, data) {
         throw new Error('[[error:no-privileges]]');
     }
 
-    const postsData = await posts.getPostSummaryByPids([pid], socket.uid, { stripTags: false });
+    const postsData = await posts.getPostSummaryByPids([pid], socket.uid, {
+        stripTags: false,
+    });
     posts.modifyPostByPrivilege(postsData[0], topicPrivileges);
     return postsData[0];
 };
@@ -145,7 +152,12 @@ SocketPosts.notify = async function (socket, data) {
     await canEditQueue(socket, data, 'notify');
     const result = await posts.getFromQueue(data.id);
     if (result) {
-        await sendQueueNotification('post-queue-notify', result.uid, `/post-queue/${data.id}`, validator.escape(String(data.message)));
+        await sendQueueNotification(
+            'post-queue-notify',
+            result.uid,
+            `/post-queue/${data.id}`,
+            validator.escape(String(data.message))
+        );
     }
 };
 
@@ -176,7 +188,9 @@ SocketPosts.editQueuedContent = async function (socket, data) {
     }
     await posts.editQueuedContent(socket.uid, data);
     if (data.content) {
-        return await plugins.hooks.fire('filter:parse.post', { postData: data });
+        return await plugins.hooks.fire('filter:parse.post', {
+            postData: data,
+        });
     }
     return { postData: data };
 };

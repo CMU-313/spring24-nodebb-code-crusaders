@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('forum/topic/fork', ['components', 'postSelect', 'alerts'], function (components, postSelect, alerts) {
     const Fork = {};
     let forkModal;
@@ -45,37 +44,41 @@ define('forum/topic/fork', ['components', 'postSelect', 'alerts'], function (com
 
     function createTopicFromPosts() {
         forkCommit.attr('disabled', true);
-        socket.emit('topics.createTopicFromPosts', {
-            title: forkModal.find('#fork-title').val(),
-            pids: postSelect.pids,
-            fromTid: fromTid,
-        }, function (err, newTopic) {
-            function fadeOutAndRemove(pid) {
-                components.get('post', 'pid', pid).fadeOut(500, function () {
-                    $(this).remove();
+        socket.emit(
+            'topics.createTopicFromPosts',
+            {
+                title: forkModal.find('#fork-title').val(),
+                pids: postSelect.pids,
+                fromTid: fromTid,
+            },
+            function (err, newTopic) {
+                function fadeOutAndRemove(pid) {
+                    components.get('post', 'pid', pid).fadeOut(500, function () {
+                        $(this).remove();
+                    });
+                }
+                forkCommit.removeAttr('disabled');
+                if (err) {
+                    return alerts.error(err.message);
+                }
+
+                alerts.alert({
+                    timeout: 5000,
+                    title: '[[global:alert.success]]',
+                    message: '[[topic:fork_success]]',
+                    type: 'success',
+                    clickfn: function () {
+                        ajaxify.go('topic/' + newTopic.slug);
+                    },
                 });
+
+                postSelect.pids.forEach(function (pid) {
+                    fadeOutAndRemove(pid);
+                });
+
+                closeForkModal();
             }
-            forkCommit.removeAttr('disabled');
-            if (err) {
-                return alerts.error(err.message);
-            }
-
-            alerts.alert({
-                timeout: 5000,
-                title: '[[global:alert.success]]',
-                message: '[[topic:fork_success]]',
-                type: 'success',
-                clickfn: function () {
-                    ajaxify.go('topic/' + newTopic.slug);
-                },
-            });
-
-            postSelect.pids.forEach(function (pid) {
-                fadeOutAndRemove(pid);
-            });
-
-            closeForkModal();
-        });
+        );
     }
 
     function showPostsSelected() {

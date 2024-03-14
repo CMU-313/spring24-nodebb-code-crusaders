@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('admin/extend/widgets', [
     'bootbox',
     'alerts',
@@ -56,28 +55,36 @@ define('admin/extend/widgets', [
                 distance: 10,
             })
             .each(function () {
-                $(this).attr('data-container-html', $(this).attr('data-container-html').replace(/\\\{([\s\S]*?)\\\}/g, '{$1}'));
+                $(this).attr(
+                    'data-container-html',
+                    $(this)
+                        .attr('data-container-html')
+                        .replace(/\\\{([\s\S]*?)\\\}/g, '{$1}')
+                );
             });
 
-        $('#widgets .widget-area').sortable({
-            update: function (event, ui) {
-                createDatePicker(ui.item);
-                appendToggle(ui.item);
-            },
-            connectWith: 'div',
-        }).on('click', '.delete-widget', function () {
-            const panel = $(this).parents('.widget-panel');
+        $('#widgets .widget-area')
+            .sortable({
+                update: function (event, ui) {
+                    createDatePicker(ui.item);
+                    appendToggle(ui.item);
+                },
+                connectWith: 'div',
+            })
+            .on('click', '.delete-widget', function () {
+                const panel = $(this).parents('.widget-panel');
 
-            bootbox.confirm('[[admin/extend/widgets:alert.confirm-delete]]', function (confirm) {
-                if (confirm) {
-                    panel.remove();
+                bootbox.confirm('[[admin/extend/widgets:alert.confirm-delete]]', function (confirm) {
+                    if (confirm) {
+                        panel.remove();
+                    }
+                });
+            })
+            .on('mouseup', '> .panel > .panel-heading', function (evt) {
+                if (!($(this).parent().is('.ui-sortable-helper') || $(evt.target).closest('.delete-widget').length)) {
+                    $(this).parent().children('.panel-body').toggleClass('hidden');
                 }
             });
-        }).on('mouseup', '> .panel > .panel-heading', function (evt) {
-            if (!($(this).parent().is('.ui-sortable-helper') || $(evt.target).closest('.delete-widget').length)) {
-                $(this).parent().children('.panel-body').toggleClass('hidden');
-            }
-        });
 
         $('#save').on('click', saveWidgets);
 
@@ -100,9 +107,7 @@ define('admin/extend/widgets', [
                             if (data[d].name) {
                                 if (widgetData[data[d].name]) {
                                     if (!Array.isArray(widgetData[data[d].name])) {
-                                        widgetData[data[d].name] = [
-                                            widgetData[data[d].name],
-                                        ];
+                                        widgetData[data[d].name] = [widgetData[data[d].name]];
                                     }
                                     widgetData[data[d].name].push(data[d].value);
                                 } else {
@@ -150,12 +155,19 @@ define('admin/extend/widgets', [
                 classList.push($(this).attr('data-class'));
             });
 
-            container
-                .removeClass(classList.join(' '))
-                .addClass(btn.attr('data-class'));
+            container.removeClass(classList.join(' ')).addClass(btn.attr('data-class'));
 
-            container.attr('data-container-html', container.attr('data-container-html')
-                .replace(/class="[a-zA-Z0-9-\s]+"/, 'class="' + container[0].className.replace(' pointer ui-draggable ui-draggable-handle', '') + '"'));
+            container.attr(
+                'data-container-html',
+                container
+                    .attr('data-container-html')
+                    .replace(
+                        /class="[a-zA-Z0-9-\s]+"/,
+                        'class="' +
+                            container[0].className.replace(' pointer ui-draggable ui-draggable-handle', '') +
+                            '"'
+                    )
+            );
         });
     }
 
@@ -170,7 +182,9 @@ define('admin/extend/widgets', [
 
     function appendToggle(el) {
         if (!el.hasClass('block')) {
-            el.addClass('block').css('width', '').css('height', '')
+            el.addClass('block')
+                .css('width', '')
+                .css('height', '')
                 .droppable({
                     accept: '[data-container-html]',
                     drop: function (event, ui) {
@@ -182,7 +196,9 @@ define('admin/extend/widgets', [
                     hoverClass: 'panel-info',
                 })
                 .children('.panel-heading')
-                .append('<div class="pull-right pointer"><span class="delete-widget"><i class="fa fa-times-circle"></i></span></div><div class="pull-left pointer"><span class="toggle-widget"><i class="fa fa-chevron-circle-down"></i></span>&nbsp;</div>')
+                .append(
+                    '<div class="pull-right pointer"><span class="delete-widget"><i class="fa fa-times-circle"></i></span></div><div class="pull-left pointer"><span class="toggle-widget"><i class="fa fa-chevron-circle-down"></i></span>&nbsp;</div>'
+                )
                 .children('small')
                 .html('');
         }
@@ -214,13 +230,17 @@ define('admin/extend/widgets', [
 
             for (let i = 0; i < areas.length; i += 1) {
                 const area = areas[i];
-                const widgetArea = $('#widgets .area[data-template="' + area.template + '"][data-location="' + area.location + '"]').find('.widget-area');
+                const widgetArea = $(
+                    '#widgets .area[data-template="' + area.template + '"][data-location="' + area.location + '"]'
+                ).find('.widget-area');
 
                 widgetArea.html('');
 
                 for (let k = 0; k < area.data.length; k += 1) {
                     const widgetData = area.data[k];
-                    const widgetEl = $('.available-widgets [data-widget="' + widgetData.widget + '"]').clone(true).removeClass('hide');
+                    const widgetEl = $('.available-widgets [data-widget="' + widgetData.widget + '"]')
+                        .clone(true)
+                        .removeClass('hide');
 
                     widgetArea.append(populateWidget(widgetEl, widgetData.data));
                     appendToggle(widgetEl);
@@ -251,21 +271,36 @@ define('admin/extend/widgets', [
             const currentTemplate = $('#active-widgets .active.tab-pane[data-template] .area');
             const templateToClone = $('#active-widgets .tab-pane[data-template="' + template + '"] .area');
 
-            const currentAreas = currentTemplate.map(function () {
-                return $(this).attr('data-location');
-            }).get();
+            const currentAreas = currentTemplate
+                .map(function () {
+                    return $(this).attr('data-location');
+                })
+                .get();
 
-            const areasToClone = templateToClone.map(function () {
-                const location = $(this).attr('data-location');
-                return currentAreas.indexOf(location) !== -1 ? location : undefined;
-            }).get().filter(function (i) { return i; });
+            const areasToClone = templateToClone
+                .map(function () {
+                    const location = $(this).attr('data-location');
+                    return currentAreas.indexOf(location) !== -1 ? location : undefined;
+                })
+                .get()
+                .filter(function (i) {
+                    return i;
+                });
 
             function clone(location) {
-                $('#active-widgets .tab-pane[data-template="' + template + '"] [data-location="' + location + '"]').each(function () {
-                    $(this).find('[data-widget]').each(function () {
-                        const widget = $(this).clone(true);
-                        $('#active-widgets .active.tab-pane[data-template]:not([data-template="global"]) [data-location="' + location + '"] .widget-area').append(widget);
-                    });
+                $(
+                    '#active-widgets .tab-pane[data-template="' + template + '"] [data-location="' + location + '"]'
+                ).each(function () {
+                    $(this)
+                        .find('[data-widget]')
+                        .each(function () {
+                            const widget = $(this).clone(true);
+                            $(
+                                '#active-widgets .active.tab-pane[data-template]:not([data-template="global"]) [data-location="' +
+                                    location +
+                                    '"] .widget-area'
+                            ).append(widget);
+                        });
                 });
             }
 

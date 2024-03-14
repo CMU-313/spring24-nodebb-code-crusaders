@@ -30,20 +30,28 @@ module.exports = function (middleware) {
                 options.loggedIn = req.uid > 0;
                 options.relative_path = relative_path;
                 options.template = { name: template, [template]: true };
-                options.url = (req.baseUrl + req.path.replace(/^\/api/, ''));
+                options.url = req.baseUrl + req.path.replace(/^\/api/, '');
                 options.bodyClass = helpers.buildBodyClass(req, res, options);
 
                 if (req.loggedIn) {
                     res.set('cache-control', 'private');
                 }
 
-                const buildResult = await plugins.hooks.fire(`filter:${template}.build`, { req: req, res: res, templateData: options });
+                const buildResult = await plugins.hooks.fire(`filter:${template}.build`, {
+                    req: req,
+                    res: res,
+                    templateData: options,
+                });
                 if (res.headersSent) {
                     return;
                 }
                 const templateToRender = buildResult.templateData.templateToRender || template;
 
-                const renderResult = await plugins.hooks.fire('filter:middleware.render', { req: req, res: res, templateData: buildResult.templateData });
+                const renderResult = await plugins.hooks.fire('filter:middleware.render', {
+                    req: req,
+                    res: res,
+                    templateData: buildResult.templateData,
+                });
                 if (res.headersSent) {
                     return;
                 }
@@ -75,12 +83,9 @@ module.exports = function (middleware) {
                     footer: renderHeaderFooter('renderFooter', req, res, options),
                 });
 
-                const str = `${results.header +
-                    (res.locals.postHeader || '') +
-                    results.content
-                }<script id="ajaxify-data" type="application/json">${
-                    optionsString
-                }</script>${
+                const str = `${
+                    results.header + (res.locals.postHeader || '') + results.content
+                }<script id="ajaxify-data" type="application/json">${optionsString}</script>${
                     res.locals.preFooter || ''
                 }${results.footer}`;
 

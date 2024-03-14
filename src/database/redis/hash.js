@@ -42,7 +42,9 @@ module.exports = function (module) {
             return;
         }
         if (Array.isArray(args[1])) {
-            console.warn('[deprecated] db.setObjectBulk(keys, data) usage is deprecated, please use db.setObjectBulk(data)');
+            console.warn(
+                '[deprecated] db.setObjectBulk(keys, data) usage is deprecated, please use db.setObjectBulk(data)'
+            );
             // conver old format to new format for backwards compatibility
             data = args[0].map((key, i) => [key, args[1][i]]);
         }

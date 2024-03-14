@@ -102,8 +102,11 @@ app.onDomReady();
         require(['translator'], function (translator) {
             url = url
                 .replace(/\/\d+$/, '')
-                .split('/').slice(0, 3).join('/')
-                .split(/[?#]/)[0].replace(/(\/+$)|(^\/+)/, '');
+                .split('/')
+                .slice(0, 3)
+                .join('/')
+                .split(/[?#]/)[0]
+                .replace(/(\/+$)|(^\/+)/, '');
 
             // If index is requested, load the dashboard
             if (url === 'admin') {
@@ -114,17 +117,18 @@ app.onDomReady();
             let fallback;
 
             $('#main-menu li').removeClass('active');
-            $('#main-menu a').removeClass('active').filter('[href="' + url + '"]').each(function () {
-                const menu = $(this);
-                if (menu.parent().attr('data-link')) {
-                    return;
-                }
+            $('#main-menu a')
+                .removeClass('active')
+                .filter('[href="' + url + '"]')
+                .each(function () {
+                    const menu = $(this);
+                    if (menu.parent().attr('data-link')) {
+                        return;
+                    }
 
-                menu
-                    .parent().addClass('active')
-                    .parents('.menu-item').addClass('active');
-                fallback = menu.text();
-            });
+                    menu.parent().addClass('active').parents('.menu-item').addClass('active');
+                    fallback = menu.text();
+                });
 
             let mainTitle;
             let pageTitle;
@@ -135,9 +139,11 @@ app.onDomReady();
                 const matches = url.match(/admin\/(.+?)\/(.+?)$/);
                 if (matches) {
                     mainTitle = '[[admin/menu:' + matches[1] + '/' + matches[2] + ']]';
-                    pageTitle = '[[admin/menu:section-' +
+                    pageTitle =
+                        '[[admin/menu:section-' +
                         (matches[1] === 'development' ? 'advanced' : matches[1]) +
-                        ']]' + (matches[2] ? (' > ' + mainTitle) : '');
+                        ']]' +
+                        (matches[2] ? ' > ' + mainTitle : '');
                     if (matches[2] === 'settings') {
                         mainTitle = translator.compile('admin/menu:settings.page-title', mainTitle);
                     }
@@ -164,21 +170,25 @@ app.onDomReady();
             // otherwise it can be unloaded when rebuild & restart is run
             // the client can't fetch the template file, resulting in an error
             benchpress.render('alert', {}).then(function () {
-                $('.rebuild-and-restart').off('click').on('click', function () {
-                    bootbox.confirm('[[admin/admin:alert.confirm-rebuild-and-restart]]', function (confirm) {
-                        if (confirm) {
-                            instance.rebuildAndRestart();
-                        }
+                $('.rebuild-and-restart')
+                    .off('click')
+                    .on('click', function () {
+                        bootbox.confirm('[[admin/admin:alert.confirm-rebuild-and-restart]]', function (confirm) {
+                            if (confirm) {
+                                instance.rebuildAndRestart();
+                            }
+                        });
                     });
-                });
 
-                $('.restart').off('click').on('click', function () {
-                    bootbox.confirm('[[admin/admin:alert.confirm-restart]]', function (confirm) {
-                        if (confirm) {
-                            instance.restart();
-                        }
+                $('.restart')
+                    .off('click')
+                    .on('click', function () {
+                        bootbox.confirm('[[admin/admin:alert.confirm-restart]]', function (confirm) {
+                            if (confirm) {
+                                instance.restart();
+                            }
+                        });
                     });
-                });
             });
         });
     }
@@ -226,7 +236,7 @@ app.onDomReady();
 
             function onOpeningMenu() {
                 $('#header').css({
-                    top: ($('#panel').position().top * -1) + 'px',
+                    top: $('#panel').position().top * -1 + 'px',
                     position: 'absolute',
                 });
             }
@@ -241,4 +251,4 @@ app.onDomReady();
             });
         });
     }
-}());
+})();

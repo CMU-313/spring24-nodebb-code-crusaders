@@ -24,7 +24,6 @@ export type FlagNotesObject = {
   notes: Note[];
 };
 
-
 export interface Note {
   uid: number;
   content: string;
@@ -45,7 +44,8 @@ export type FlagObject = {
   target: object;
   assignee: number;
   reports: Reports;
-} & FlagHistoryObject & FlagNotesObject;
+} & FlagHistoryObject &
+  FlagNotesObject;
 
 export interface Reports {
   value: string;

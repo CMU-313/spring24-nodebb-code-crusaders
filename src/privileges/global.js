@@ -1,4 +1,3 @@
-
 'use strict';
 
 const _ = require('lodash');
@@ -36,12 +35,12 @@ const _privilegeMap = new Map([
 ]);
 
 privsGlobal.getUserPrivilegeList = async () => await plugins.hooks.fire('filter:privileges.global.list', Array.from(_privilegeMap.keys()));
-privsGlobal.getGroupPrivilegeList = async () => await plugins.hooks.fire('filter:privileges.global.groups.list', Array.from(_privilegeMap.keys()).map(privilege => `groups:${privilege}`));
+privsGlobal.getGroupPrivilegeList = async () => await plugins.hooks.fire(
+    'filter:privileges.global.groups.list',
+    Array.from(_privilegeMap.keys()).map(privilege => `groups:${privilege}`)
+);
 privsGlobal.getPrivilegeList = async () => {
-    const [user, group] = await Promise.all([
-        privsGlobal.getUserPrivilegeList(),
-        privsGlobal.getGroupPrivilegeList(),
-    ]);
+    const [user, group] = await Promise.all([privsGlobal.getUserPrivilegeList(), privsGlobal.getGroupPrivilegeList()]);
     return user.concat(group);
 };
 

@@ -35,6 +35,9 @@ uploadsController.get = async function (req, res, next) {
     userData.pagination = pagination.create(page, pageCount, req.query);
     userData.privateUploads = meta.config.privateUploads === 1;
     userData.title = `[[pages:account/uploads, ${userData.username}]]`;
-    userData.breadcrumbs = helpers.buildBreadcrumbs([{ text: userData.username, url: `/user/${userData.userslug}` }, { text: '[[global:uploads]]' }]);
+    userData.breadcrumbs = helpers.buildBreadcrumbs([
+        { text: userData.username, url: `/user/${userData.userslug}` },
+        { text: '[[global:uploads]]' },
+    ]);
     res.render('account/uploads', userData);
 };

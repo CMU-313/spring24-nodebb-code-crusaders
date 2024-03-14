@@ -50,7 +50,9 @@ define('admin/manage/privileges', [
             const member = $rowEl.attr('data-group-name') || $rowEl.attr('data-uid');
             const isPrivate = parseInt($rowEl.attr('data-private') || 0, 10);
             const isGroup = $rowEl.attr('data-group-name') !== undefined;
-            const isBanned = (isGroup && $rowEl.attr('data-group-name') === 'banned-users') || $rowEl.attr('data-banned') !== undefined;
+            const isBanned =
+                (isGroup && $rowEl.attr('data-group-name') === 'banned-users') ||
+                $rowEl.attr('data-banned') !== undefined;
             const sourceGroupName = isBanned ? 'banned-users' : 'registered-users';
             const delta = $checkboxEl.prop('checked') === ($wrapperEl.attr('data-value') === 'true') ? null : state;
 
@@ -102,7 +104,9 @@ define('admin/manage/privileges', [
         containerEl.addEventListener('change', (e) => {
             const subselector = e.target.closest('td[data-privilege] input');
             if (subselector) {
-                document.getElementById('discard').style.display = containerEl.querySelectorAll('td[data-delta]').length ? 'unset' : 'none';
+                document.getElementById('discard').style.display = containerEl.querySelectorAll('td[data-delta]').length ?
+                    'unset' :
+                    'none';
             }
         });
 
@@ -142,11 +146,14 @@ define('admin/manage/privileges', [
 
         function throwConfirmModal(method, onConfirm) {
             const privilegeSubset = getPrivilegeSubset();
-            bootbox.confirm(`[[admin/manage/privileges:alert.confirm-${method}, ${privilegeSubset}]]<br /><br />[[admin/manage/privileges:alert.no-undo]]`, function (ok) {
-                if (ok) {
-                    onConfirm.call();
+            bootbox.confirm(
+                `[[admin/manage/privileges:alert.confirm-${method}, ${privilegeSubset}]]<br /><br />[[admin/manage/privileges:alert.no-undo]]`,
+                function (ok) {
+                    if (ok) {
+                        onConfirm.call();
+                    }
                 }
-            });
+            );
         }
     };
 
@@ -181,25 +188,34 @@ define('admin/manage/privileges', [
     };
 
     Privileges.refreshPrivilegeTable = function (groupToHighlight) {
-        api.get(`/categories/${cid}/privileges`, {}).then((privileges) => {
-            ajaxify.data.privileges = { ...ajaxify.data.privileges, ...privileges };
-            const tpl = parseInt(cid, 10) ? 'admin/partials/privileges/category' : 'admin/partials/privileges/global';
-            const isAdminPriv = ajaxify.currentPage.endsWith('admin/manage/privileges/admin');
-            app.parseAndTranslate(tpl, { privileges, isAdminPriv }).then((html) => {
-                // Get currently selected filters
-                const btnIndices = $('.privilege-filters button.btn-warning').map((idx, el) => $(el).index()).get();
-                $('.privilege-table-container').html(html);
-                Privileges.exposeAssumedPrivileges();
-                document.querySelectorAll('.privilege-filters').forEach((con, i) => {
-                    // Three buttons, placed in reverse order
-                    const lastIdx = $('.privilege-filters').first().find('button').length - 1;
-                    const idx = btnIndices[i] === undefined ? lastIdx : btnIndices[i];
-                    con.querySelectorAll('button')[idx].click();
-                });
+        api.get(`/categories/${cid}/privileges`, {})
+            .then((privileges) => {
+                ajaxify.data.privileges = {
+                    ...ajaxify.data.privileges,
+                    ...privileges,
+                };
+                const tpl = parseInt(cid, 10) ?
+                    'admin/partials/privileges/category' :
+                    'admin/partials/privileges/global';
+                const isAdminPriv = ajaxify.currentPage.endsWith('admin/manage/privileges/admin');
+                app.parseAndTranslate(tpl, { privileges, isAdminPriv }).then((html) => {
+                    // Get currently selected filters
+                    const btnIndices = $('.privilege-filters button.btn-warning')
+                        .map((idx, el) => $(el).index())
+                        .get();
+                    $('.privilege-table-container').html(html);
+                    Privileges.exposeAssumedPrivileges();
+                    document.querySelectorAll('.privilege-filters').forEach((con, i) => {
+                        // Three buttons, placed in reverse order
+                        const lastIdx = $('.privilege-filters').first().find('button').length - 1;
+                        const idx = btnIndices[i] === undefined ? lastIdx : btnIndices[i];
+                        con.querySelectorAll('button')[idx].click();
+                    });
 
-                hightlightRowByDataAttr('data-group-name', groupToHighlight);
-            });
-        }).catch(alert.error);
+                    hightlightRowByDataAttr('data-group-name', groupToHighlight);
+                });
+            })
+            .catch(alert.error);
     };
 
     Privileges.exposeAssumedPrivileges = function () {
@@ -234,12 +250,16 @@ define('admin/manage/privileges', [
         applyPrivilegesToColumn(inputSelectorFn, sourceChecked);
     };
 
-    Privileges.setPrivilege = (member, privilege, state) => api[state ? 'put' : 'delete'](`/categories/${isNaN(cid) ? 0 : cid}/privileges/${encodeURIComponent(privilege)}`, { member });
+    Privileges.setPrivilege = (member, privilege, state) => api[state ? 'put' : 'delete'](
+        `/categories/${isNaN(cid) ? 0 : cid}/privileges/${encodeURIComponent(privilege)}`,
+        { member }
+    );
 
     Privileges.addUserToPrivilegeTable = function () {
         const modal = bootbox.dialog({
             title: '[[admin/manage/categories:alert.find-user]]',
-            message: '<input class="form-control input-lg" placeholder="[[admin/manage/categories:alert.user-search]]" />',
+            message:
+                '<input class="form-control input-lg" placeholder="[[admin/manage/categories:alert.user-search]]" />',
             show: true,
         });
 
@@ -258,7 +278,8 @@ define('admin/manage/privileges', [
     Privileges.addGroupToPrivilegeTable = function () {
         const modal = bootbox.dialog({
             title: '[[admin/manage/categories:alert.find-group]]',
-            message: '<input class="form-control input-lg" placeholder="[[admin/manage/categories:alert.group-search]]" />',
+            message:
+                '<input class="form-control input-lg" placeholder="[[admin/manage/categories:alert.group-search]]" />',
             show: true,
         });
 
@@ -292,8 +313,10 @@ define('admin/manage/privileges', [
 
     Privileges.copyPrivilegesFromCategory = function (cid, group) {
         const privilegeSubset = getPrivilegeSubset();
-        const message = '<br>' +
-            (group ? `[[admin/manage/privileges:alert.copyPrivilegesFromGroup-warning, ${privilegeSubset}]]` :
+        const message =
+            '<br>' +
+            (group ?
+                `[[admin/manage/privileges:alert.copyPrivilegesFromGroup-warning, ${privilegeSubset}]]` :
                 `[[admin/manage/privileges:alert.copyPrivilegesFrom-warning, ${privilegeSubset}]]`) +
             '<br><br>[[admin/manage/privileges:alert.no-undo]]';
         categorySelector.modal({
@@ -302,17 +325,21 @@ define('admin/manage/privileges', [
             localCategories: [],
             showLinks: true,
             onSubmit: function (selectedCategory) {
-                socket.emit('admin.categories.copyPrivilegesFrom', {
-                    toCid: cid,
-                    filter: getPrivilegeFilter(),
-                    fromCid: selectedCategory.cid,
-                    group: group,
-                }, function (err) {
-                    if (err) {
-                        return alerts.error(err);
+                socket.emit(
+                    'admin.categories.copyPrivilegesFrom',
+                    {
+                        toCid: cid,
+                        filter: getPrivilegeFilter(),
+                        fromCid: selectedCategory.cid,
+                        group: group,
+                    },
+                    function (err) {
+                        if (err) {
+                            return alerts.error(err);
+                        }
+                        ajaxify.refresh();
                     }
-                    ajaxify.refresh();
-                });
+                );
             },
         });
     };
@@ -338,17 +365,23 @@ define('admin/manage/privileges', [
             });
 
         // Also apply to non-group privileges
-        return privs.concat(privs.map(function (priv) {
-            if (priv.startsWith('groups:')) {
-                return priv.slice(7);
-            }
+        return privs
+            .concat(
+                privs.map(function (priv) {
+                    if (priv.startsWith('groups:')) {
+                        return priv.slice(7);
+                    }
 
-            return false;
-        })).filter(Boolean);
+                    return false;
+                })
+            )
+            .filter(Boolean);
     }
 
     function getPrivilegeFromColumn(sourceGroupName, columnNo) {
-        return $(`.privilege-table tr[data-group-name="${sourceGroupName}"] td:nth-child(${columnNo}) input[type="checkbox"]`)[0].checked;
+        return $(
+            `.privilege-table tr[data-group-name="${sourceGroupName}"] td:nth-child(${columnNo}) input[type="checkbox"]`
+        )[0].checked;
     }
 
     function applyPrivileges(privs, inputSelectorFn) {
@@ -405,25 +438,30 @@ define('admin/manage/privileges', [
             return memo;
         }, {});
 
-        app.parseAndTranslate('admin/partials/privileges/' + ((isNaN(cid) || cid === 0) ? 'global' : 'category'), 'privileges.groups', {
-            privileges: {
-                groups: [
-                    {
-                        name: group,
-                        nameEscaped: translator.escape(group),
-                        privileges: privilegeSet,
-                    },
-                ],
+        app.parseAndTranslate(
+            'admin/partials/privileges/' + (isNaN(cid) || cid === 0 ? 'global' : 'category'),
+            'privileges.groups',
+            {
+                privileges: {
+                    groups: [
+                        {
+                            name: group,
+                            nameEscaped: translator.escape(group),
+                            privileges: privilegeSet,
+                        },
+                    ],
+                },
             },
-        }, function (html) {
-            const tbodyEl = document.querySelector('.privilege-table tbody');
-            const btnIdx = $('.privilege-filters').first().find('button.btn-warning').index();
-            tbodyEl.append(html.get(0));
-            Privileges.exposeAssumedPrivileges();
-            hightlightRowByDataAttr('data-group-name', group);
-            document.querySelector('.privilege-filters').querySelectorAll('button')[btnIdx].click();
-            cb();
-        });
+            function (html) {
+                const tbodyEl = document.querySelector('.privilege-table tbody');
+                const btnIdx = $('.privilege-filters').first().find('button.btn-warning').index();
+                tbodyEl.append(html.get(0));
+                Privileges.exposeAssumedPrivileges();
+                hightlightRowByDataAttr('data-group-name', group);
+                document.querySelector('.privilege-filters').querySelectorAll('button')[btnIdx].click();
+                cb();
+            }
+        );
     }
 
     async function addUserToCategory(user, cb) {
@@ -439,21 +477,25 @@ define('admin/manage/privileges', [
             return memo;
         }, {});
 
-        const html = await app.parseAndTranslate('admin/partials/privileges/' + (isNaN(cid) ? 'global' : 'category'), 'privileges.users', {
-            privileges: {
-                users: [
-                    {
-                        picture: user.picture,
-                        username: user.username,
-                        banned: user.banned,
-                        uid: user.uid,
-                        'icon:text': user['icon:text'],
-                        'icon:bgColor': user['icon:bgColor'],
-                        privileges: privilegeSet,
-                    },
-                ],
-            },
-        });
+        const html = await app.parseAndTranslate(
+            'admin/partials/privileges/' + (isNaN(cid) ? 'global' : 'category'),
+            'privileges.users',
+            {
+                privileges: {
+                    users: [
+                        {
+                            picture: user.picture,
+                            username: user.username,
+                            banned: user.banned,
+                            uid: user.uid,
+                            'icon:text': user['icon:text'],
+                            'icon:bgColor': user['icon:bgColor'],
+                            privileges: privilegeSet,
+                        },
+                    ],
+                },
+            }
+        );
 
         const tbodyEl = document.querySelectorAll('.privilege-table tbody');
         const btnIdx = $('.privilege-filters').last().find('button.btn-warning').index();
@@ -465,24 +507,31 @@ define('admin/manage/privileges', [
     }
 
     function filterPrivileges(ev) {
-        const [startIdx, endIdx] = ev.target.getAttribute('data-filter').split(',').map(i => parseInt(i, 10));
+        const [startIdx, endIdx] = ev.target
+            .getAttribute('data-filter')
+            .split(',')
+            .map(i => parseInt(i, 10));
         const rows = $(ev.target).closest('table')[0].querySelectorAll('thead tr:last-child, tbody tr ');
         rows.forEach((tr) => {
             tr.querySelectorAll('td, th').forEach((el, idx) => {
                 const offset = el.tagName.toUpperCase() === 'TH' ? 1 : 0;
-                if (idx < (SKIP_PRIV_COLS - offset)) {
+                if (idx < SKIP_PRIV_COLS - offset) {
                     return;
                 }
-                el.classList.toggle('hidden', !(idx >= (startIdx - offset) && idx <= (endIdx - offset)));
+                el.classList.toggle('hidden', !(idx >= startIdx - offset && idx <= endIdx - offset));
             });
         });
         checkboxRowSelector.updateAll();
-        $(ev.target).siblings('button').toArray().forEach(btn => btn.classList.remove('btn-warning'));
+        $(ev.target)
+            .siblings('button')
+            .toArray()
+            .forEach(btn => btn.classList.remove('btn-warning'));
         ev.target.classList.add('btn-warning');
     }
 
     function getPrivilegeFilter() {
-        const indices = document.querySelector('.privilege-filters .btn-warning')
+        const indices = document
+            .querySelector('.privilege-filters .btn-warning')
             .getAttribute('data-filter')
             .split(',')
             .map(i => parseInt(i, 10));

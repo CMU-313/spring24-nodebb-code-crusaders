@@ -80,7 +80,10 @@ groupsController.details = async function (req, res, next) {
         isAdmin: isAdmin,
         isGlobalMod: isGlobalMod,
         allowPrivateGroups: meta.config.allowPrivateGroups,
-        breadcrumbs: helpers.buildBreadcrumbs([{ text: '[[pages:groups]]', url: '/groups' }, { text: groupData.displayName }]),
+        breadcrumbs: helpers.buildBreadcrumbs([
+            { text: '[[pages:groups]]', url: '/groups' },
+            { text: groupData.displayName },
+        ]),
     });
 };
 
@@ -107,7 +110,10 @@ groupsController.members = async function (req, res, next) {
 
     const breadcrumbs = helpers.buildBreadcrumbs([
         { text: '[[pages:groups]]', url: '/groups' },
-        { text: validator.escape(String(groupName)), url: `/groups/${req.params.slug}` },
+        {
+            text: validator.escape(String(groupName)),
+            url: `/groups/${req.params.slug}`,
+        },
         { text: '[[groups:details.members]]' },
     ]);
 

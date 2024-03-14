@@ -1,4 +1,3 @@
-
 'use strict';
 
 const nconf = require('nconf');
@@ -35,7 +34,10 @@ unreadController.get = async function (req, res) {
         query: req.query,
     });
 
-    const isDisplayedAsHome = !(req.originalUrl.startsWith(`${relative_path}/api/unread`) || req.originalUrl.startsWith(`${relative_path}/unread`));
+    const isDisplayedAsHome = !(
+        req.originalUrl.startsWith(`${relative_path}/api/unread`) ||
+        req.originalUrl.startsWith(`${relative_path}/unread`)
+    );
     const baseUrl = isDisplayedAsHome ? '' : 'unread';
 
     if (isDisplayedAsHome) {
@@ -47,7 +49,11 @@ unreadController.get = async function (req, res) {
 
     data.pageCount = Math.max(1, Math.ceil(data.topicCount / userSettings.topicsPerPage));
     data.pagination = pagination.create(page, data.pageCount, req.query);
-    helpers.addLinkTags({ url: 'unread', res: req.res, tags: data.pagination.rel });
+    helpers.addLinkTags({
+        url: 'unread',
+        res: req.res,
+        tags: data.pagination.rel,
+    });
 
     if (userSettings.usePagination && (page < 1 || page > data.pageCount)) {
         req.query.page = Math.max(1, Math.min(data.pageCount, page));

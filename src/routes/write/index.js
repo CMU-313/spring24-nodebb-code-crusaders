@@ -44,7 +44,12 @@ Write.reload = async (params) => {
     router.use('/api/v3/utilities', require('./utilities')());
 
     router.get('/api/v3/ping', writeControllers.utilities.ping.get);
-    router.post('/api/v3/ping', middleware.authenticateRequest, middleware.ensureLoggedIn, writeControllers.utilities.ping.post);
+    router.post(
+        '/api/v3/ping',
+        middleware.authenticateRequest,
+        middleware.ensureLoggedIn,
+        writeControllers.utilities.ping.post
+    );
 
     /**
      * Plugins can add routes to the Write API by attaching a listener to the

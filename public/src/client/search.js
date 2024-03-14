@@ -1,13 +1,12 @@
 'use strict';
 
-
-define('forum/search', [
-    'search',
-    'autocomplete',
-    'storage',
-    'hooks',
-    'alerts',
-], function (searchModule, autocomplete, storage, hooks, alerts) {
+define('forum/search', ['search', 'autocomplete', 'storage', 'hooks', 'alerts'], function (
+    searchModule,
+    autocomplete,
+    storage,
+    hooks,
+    alerts
+) {
     const Search = {};
 
     Search.init = function () {
@@ -19,15 +18,20 @@ define('forum/search', [
             updateFormItemVisiblity(searchIn.val());
         });
 
-        searchModule.highlightMatches(searchQuery, $('.search-result-text p, .search-result-text.search-result-title a'));
+        searchModule.highlightMatches(
+            searchQuery,
+            $('.search-result-text p, .search-result-text.search-result-title a')
+        );
 
-        $('#advanced-search').off('submit').on('submit', function (e) {
-            e.preventDefault();
-            searchModule.query(getSearchDataFromDOM(), function () {
-                $('#search-input').val('');
+        $('#advanced-search')
+            .off('submit')
+            .on('submit', function (e) {
+                e.preventDefault();
+                searchModule.query(getSearchDataFromDOM(), function () {
+                    $('#search-input').val('');
+                });
+                return false;
             });
-            return false;
-        });
 
         handleSavePreferences();
 

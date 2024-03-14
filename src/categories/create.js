@@ -40,7 +40,7 @@ module.exports = function (Categories) {
             order: order,
             link: data.link || '',
             numRecentReplies: 1,
-            class: (data.class ? data.class : 'col-md-3 col-xs-6'),
+            class: data.class ? data.class : 'col-md-3 col-xs-6',
             imageClass: 'cover',
             isSection: 0,
             subCategoriesPerPage: 10,
@@ -95,11 +95,7 @@ module.exports = function (Categories) {
         await privileges.categories.give(result.modPrivileges, category.cid, ['administrators', 'Global Moderators']);
         await privileges.categories.give(result.guestPrivileges, category.cid, ['guests', 'spiders']);
 
-        cache.del([
-            'categories:cid',
-            `cid:${parentCid}:children`,
-            `cid:${parentCid}:children:all`,
-        ]);
+        cache.del(['categories:cid', `cid:${parentCid}:children`, `cid:${parentCid}:children:all`]);
         if (data.cloneFromCid && parseInt(data.cloneFromCid, 10)) {
             category = await Categories.copySettingsFrom(data.cloneFromCid, category.cid, !data.parentCid);
         }
@@ -195,7 +191,11 @@ module.exports = function (Categories) {
     async function copyTagWhitelist(fromCid, toCid) {
         const data = await db.getSortedSetRangeWithScores(`cid:${fromCid}:tag:whitelist`, 0, -1);
         await db.delete(`cid:${toCid}:tag:whitelist`);
-        await db.sortedSetAdd(`cid:${toCid}:tag:whitelist`, data.map(item => item.score), data.map(item => item.value));
+        await db.sortedSetAdd(
+            `cid:${toCid}:tag:whitelist`,
+            data.map(item => item.score),
+            data.map(item => item.value)
+        );
         cache.del(`cid:${toCid}:tag:whitelist`);
     }
 
@@ -208,7 +208,10 @@ module.exports = function (Categories) {
         } else {
             const privs = await privileges.categories.getPrivilegeList();
             const halfIdx = privs.length / 2;
-            privsToCopy = privs.slice(0, halfIdx).slice(...filter).concat(privs.slice(halfIdx).slice(...filter));
+            privsToCopy = privs
+                .slice(0, halfIdx)
+                .slice(...filter)
+                .concat(privs.slice(halfIdx).slice(...filter));
         }
 
         const data = await plugins.hooks.fire('filter:categories.copyPrivilegesFrom', {

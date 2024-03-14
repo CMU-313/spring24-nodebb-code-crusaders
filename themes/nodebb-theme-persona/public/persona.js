@@ -44,36 +44,36 @@ $(document).ready(function () {
                     navbarEl.autoHidingNavbar('setDisableAutohide', false);
                 });
 
-            hooks.fire('filter:persona.configureNavbarHiding', {
-                resizeEnvs: preference,
-            }).then(({ resizeEnvs }) => {
-                if (resizeEnvs.includes(env)) {
-                    navbarEl.autoHidingNavbar({
-                        showOnBottom: false,
-                    });
-                }
+            hooks
+                .fire('filter:persona.configureNavbarHiding', {
+                    resizeEnvs: preference,
+                })
+                .then(({ resizeEnvs }) => {
+                    if (resizeEnvs.includes(env)) {
+                        navbarEl.autoHidingNavbar({
+                            showOnBottom: false,
+                        });
+                    }
 
-                function fixTopCss(topValue) {
-                    if (ajaxify.data.template.topic) {
-                        $('.topic .topic-header').css({ top: topValue });
-                    } else {
-                        var topicListHeader = $('.topic-list-header');
-                        if (topicListHeader.length) {
-                            topicListHeader.css({ top: topValue });
+                    function fixTopCss(topValue) {
+                        if (ajaxify.data.template.topic) {
+                            $('.topic .topic-header').css({ top: topValue });
+                        } else {
+                            var topicListHeader = $('.topic-list-header');
+                            if (topicListHeader.length) {
+                                topicListHeader.css({ top: topValue });
+                            }
                         }
                     }
-                }
 
-                navbarEl.off('show.autoHidingNavbar')
-                    .on('show.autoHidingNavbar', function () {
+                    navbarEl.off('show.autoHidingNavbar').on('show.autoHidingNavbar', function () {
                         fixTopCss('');
                     });
 
-                navbarEl.off('hide.autoHidingNavbar')
-                    .on('hide.autoHidingNavbar', function () {
+                    navbarEl.off('hide.autoHidingNavbar').on('hide.autoHidingNavbar', function () {
                         fixTopCss('0px');
                     });
-            });
+                });
         });
     }
 
@@ -128,24 +128,27 @@ $(document).ready(function () {
         });
 
         function createChatIcon(data) {
-            $.getJSON(config.relative_path + '/api/user/' + app.user.userslug + '/chats/' + data.options.roomId, function (chatObj) {
-                var el = $('#taskbar [data-uuid="' + data.uuid + '"] a');
-                el.parent('[data-uuid]').attr('data-roomId', data.options.roomId);
+            $.getJSON(
+                config.relative_path + '/api/user/' + app.user.userslug + '/chats/' + data.options.roomId,
+                function (chatObj) {
+                    var el = $('#taskbar [data-uuid="' + data.uuid + '"] a');
+                    el.parent('[data-uuid]').attr('data-roomId', data.options.roomId);
 
-                if (chatObj.users.length === 1) {
-                    var user = chatObj.users[0];
-                    el.find('i').remove();
+                    if (chatObj.users.length === 1) {
+                        var user = chatObj.users[0];
+                        el.find('i').remove();
 
-                    if (user.picture) {
-                        el.css('background-image', 'url(' + user.picture + ')');
-                        el.css('background-size', 'cover');
-                    } else {
-                        el.css('background-color', user['icon:bgColor'])
-                            .text(user['icon:text'])
-                            .addClass('user-icon');
+                        if (user.picture) {
+                            el.css('background-image', 'url(' + user.picture + ')');
+                            el.css('background-size', 'cover');
+                        } else {
+                            el.css('background-color', user['icon:bgColor'])
+                                .text(user['icon:text'])
+                                .addClass('user-icon');
+                        }
                     }
                 }
-            });
+            );
         }
 
         function increaseChatCount(el) {
@@ -187,7 +190,12 @@ $(document).ready(function () {
             return;
         }
 
-        require(['pulling/build/pulling-drawer', 'storage', 'alerts', 'search'], function (Pulling, Storage, alerts, search) {
+        require(['pulling/build/pulling-drawer', 'storage', 'alerts', 'search'], function (
+            Pulling,
+            Storage,
+            alerts,
+            search
+        ) {
             if (!Pulling) {
                 return;
             }
@@ -232,7 +240,9 @@ $(document).ready(function () {
 
             function closeOnClick() {
                 navSlideout.close();
-                if (chatsSlideout) { chatsSlideout.close(); }
+                if (chatsSlideout) {
+                    chatsSlideout.close();
+                }
             }
 
             function onBeforeOpen() {
@@ -277,17 +287,18 @@ $(document).ready(function () {
             });
 
             if (chatMenuVisible) {
-                navSlideout.on('beforeopen', function () {
-                    chatsSlideout.close();
-                    chatsSlideout.disable();
-                }).on('closed', function () {
-                    chatsSlideout.enable();
-                });
+                navSlideout
+                    .on('beforeopen', function () {
+                        chatsSlideout.close();
+                        chatsSlideout.disable();
+                    })
+                    .on('closed', function () {
+                        chatsSlideout.enable();
+                    });
             }
 
             $('#menu [data-section="navigation"] ul').html(
-                $('#main-nav').html() +
-                ($('#logged-out-menu').html() || '')
+                $('#main-nav').html() + ($('#logged-out-menu').html() || '')
             );
 
             $('#user-control-list').children().clone(true, true).appendTo($('#chats-menu [data-section="profile"] ul'));
@@ -312,10 +323,12 @@ $(document).ready(function () {
             }
 
             if (chatMenuVisible) {
-                $('#mobile-chats').removeClass('hidden').on('click', function () {
-                    navSlideout.close();
-                    chatsSlideout.enable().toggle();
-                });
+                $('#mobile-chats')
+                    .removeClass('hidden')
+                    .on('click', function () {
+                        navSlideout.close();
+                        chatsSlideout.enable().toggle();
+                    });
                 $('#chats-menu').on('click', 'li[data-roomid]', function () {
                     chatsSlideout.close();
                 });
@@ -364,7 +377,8 @@ $(document).ready(function () {
 
     function setupHoverCards() {
         require(['components'], function (components) {
-            components.get('topic')
+            components
+                .get('topic')
                 .on('click', '[component="user/picture"],[component="user/status"]', generateUserCard);
         });
 
@@ -378,7 +392,7 @@ $(document).ready(function () {
     function generateUserCard(ev) {
         var avatar = $(this);
         var uid = avatar.parents('[data-uid]').attr('data-uid');
-        var data = (ajaxify.data.topics || ajaxify.data.posts);
+        var data = ajaxify.data.topics || ajaxify.data.posts;
 
         for (var i = 0, ii = data.length; i < ii; i++) {
             if (parseInt(data[i].uid, 10) === parseInt(uid, 10)) {
@@ -460,8 +474,8 @@ $(document).ready(function () {
                 }
 
                 var drop = $(this).find('b.drop').removeClass('animate');
-                var x = ev.pageX - (drop.width() / 2) - $(this).offset().left;
-                var y = ev.pageY - (drop.height() / 2) - $(this).offset().top;
+                var x = ev.pageX - drop.width() / 2 - $(this).offset().left;
+                var y = ev.pageY - drop.height() / 2 - $(this).offset().top;
 
                 drop.css({ top: y + 'px', left: x + 'px' }).addClass('animate');
             });

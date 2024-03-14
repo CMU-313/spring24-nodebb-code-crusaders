@@ -73,7 +73,7 @@ function buildBreadcrumbs(currentFolder) {
         crumbs.push({
             text: part || 'Uploads',
             url: part ?
-                (`${nconf.get('relative_path')}/admin/manage/uploads?dir=${dir}`) :
+                `${nconf.get('relative_path')}/admin/manage/uploads?dir=${dir}` :
                 `${nconf.get('relative_path')}/admin/manage/uploads`,
         });
         currentPath = dir;
@@ -167,7 +167,6 @@ uploadsController.uploadTouchIcon = async function (req, res, next) {
     }
 };
 
-
 uploadsController.uploadMaskableIcon = async function (req, res, next) {
     const uploadedFile = req.files.files[0];
     const allowedTypes = ['image/png'];
@@ -228,7 +227,9 @@ async function upload(name, req, res, next) {
 function validateUpload(res, uploadedFile, allowedTypes) {
     if (!allowedTypes.includes(uploadedFile.type)) {
         file.delete(uploadedFile.path);
-        res.json({ error: `[[error:invalid-image-type, ${allowedTypes.join('&#44; ')}]]` });
+        res.json({
+            error: `[[error:invalid-image-type, ${allowedTypes.join('&#44; ')}]]`,
+        });
         return false;
     }
 
@@ -239,7 +240,11 @@ async function uploadImage(filename, folder, uploadedFile, req, res, next) {
     let imageData;
     try {
         if (plugins.hooks.hasListeners('filter:uploadImage')) {
-            imageData = await plugins.hooks.fire('filter:uploadImage', { image: uploadedFile, uid: req.uid, folder: folder });
+            imageData = await plugins.hooks.fire('filter:uploadImage', {
+                image: uploadedFile,
+                uid: req.uid,
+                folder: folder,
+            });
         } else {
             imageData = await file.saveFileToLocal(filename, folder, uploadedFile.path);
         }
@@ -264,7 +269,12 @@ async function uploadImage(filename, folder, uploadedFile, req, res, next) {
                 'og:image:height': size.height,
             });
         }
-        res.json([{ name: uploadedFile.name, url: imageData.url.startsWith('http') ? imageData.url : nconf.get('relative_path') + imageData.url }]);
+        res.json([
+            {
+                name: uploadedFile.name,
+                url: imageData.url.startsWith('http') ? imageData.url : nconf.get('relative_path') + imageData.url,
+            },
+        ]);
     } catch (err) {
         next(err);
     } finally {

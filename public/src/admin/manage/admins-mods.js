@@ -1,8 +1,12 @@
 'use strict';
 
-define('admin/manage/admins-mods', [
-    'autocomplete', 'api', 'bootbox', 'alerts', 'categorySelector',
-], function (autocomplete, api, bootbox, alerts, categorySelector) {
+define('admin/manage/admins-mods', ['autocomplete', 'api', 'bootbox', 'alerts', 'categorySelector'], function (
+    autocomplete,
+    api,
+    bootbox,
+    alerts,
+    categorySelector
+) {
     const AdminsMods = {};
 
     AdminsMods.init = function () {
@@ -18,9 +22,14 @@ define('admin/manage/admins-mods', [
                     return;
                 }
 
-                app.parseAndTranslate('admin/manage/admins-mods', 'admins.members', { admins: { members: [ui.item.user] } }, function (html) {
-                    $('.administrator-area').prepend(html);
-                });
+                app.parseAndTranslate(
+                    'admin/manage/admins-mods',
+                    'admins.members',
+                    { admins: { members: [ui.item.user] } },
+                    function (html) {
+                        $('.administrator-area').prepend(html);
+                    }
+                );
             });
         });
 
@@ -44,19 +53,26 @@ define('admin/manage/admins-mods', [
         });
 
         autocomplete.user($('#global-mod-search'), function (ev, ui) {
-            api.put('/groups/global-moderators/membership/' + ui.item.user.uid).then(() => {
-                alerts.success('[[admin/manage/users:alerts.make-global-mod-success]]');
-                $('#global-mod-search').val('');
+            api.put('/groups/global-moderators/membership/' + ui.item.user.uid)
+                .then(() => {
+                    alerts.success('[[admin/manage/users:alerts.make-global-mod-success]]');
+                    $('#global-mod-search').val('');
 
-                if ($('.global-moderator-area [data-uid="' + ui.item.user.uid + '"]').length) {
-                    return;
-                }
+                    if ($('.global-moderator-area [data-uid="' + ui.item.user.uid + '"]').length) {
+                        return;
+                    }
 
-                app.parseAndTranslate('admin/manage/admins-mods', 'globalMods.members', { globalMods: { members: [ui.item.user] } }, function (html) {
-                    $('.global-moderator-area').prepend(html);
-                    $('#no-global-mods-warning').addClass('hidden');
-                });
-            }).catch(alerts.error);
+                    app.parseAndTranslate(
+                        'admin/manage/admins-mods',
+                        'globalMods.members',
+                        { globalMods: { members: [ui.item.user] } },
+                        function (html) {
+                            $('.global-moderator-area').prepend(html);
+                            $('#no-global-mods-warning').addClass('hidden');
+                        }
+                    );
+                })
+                .catch(alerts.error);
         });
 
         $('.global-moderator-area').on('click', '.remove-user-icon', function () {
@@ -65,17 +81,18 @@ define('admin/manage/admins-mods', [
 
             bootbox.confirm('[[admin/manage/users:alerts.confirm-remove-global-mod]]', function (confirm) {
                 if (confirm) {
-                    api.del('/groups/global-moderators/membership/' + uid).then(() => {
-                        alerts.success('[[admin/manage/users:alerts.remove-global-mod-success]]');
-                        userCard.remove();
-                        if (!$('.global-moderator-area').children().length) {
-                            $('#no-global-mods-warning').removeClass('hidden');
-                        }
-                    }).catch(alerts.error);
+                    api.del('/groups/global-moderators/membership/' + uid)
+                        .then(() => {
+                            alerts.success('[[admin/manage/users:alerts.remove-global-mod-success]]');
+                            userCard.remove();
+                            if (!$('.global-moderator-area').children().length) {
+                                $('#no-global-mods-warning').removeClass('hidden');
+                            }
+                        })
+                        .catch(alerts.error);
                 }
             });
         });
-
 
         categorySelector.init($('[component="category-selector"]'), {
             parentCid: ajaxify.data.selectedCategory ? ajaxify.data.selectedCategory.cid : 0,
@@ -99,10 +116,15 @@ define('admin/manage/admins-mods', [
                     return;
                 }
 
-                app.parseAndTranslate('admin/manage/admins-mods', 'globalMods.members', { globalMods: { members: [ui.item.user] } }, function (html) {
-                    $('.moderator-area[data-cid="' + cid + '"]').prepend(html);
-                    $('.no-moderator-warning[data-cid="' + cid + '"]').addClass('hidden');
-                });
+                app.parseAndTranslate(
+                    'admin/manage/admins-mods',
+                    'globalMods.members',
+                    { globalMods: { members: [ui.item.user] } },
+                    function (html) {
+                        $('.moderator-area[data-cid="' + cid + '"]').prepend(html);
+                        $('.no-moderator-warning[data-cid="' + cid + '"]').addClass('hidden');
+                    }
+                );
             });
         });
 

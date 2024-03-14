@@ -1,6 +1,4 @@
-
 'use strict';
-
 
 define('forum/category/tools', [
     'topicSelect',
@@ -289,20 +287,27 @@ define('forum/category/tools', [
                 handle: '[component="topic/pinned"]',
                 items: '[component="category/topic"].pinned',
                 start: function () {
-                    baseIndex = parseInt(topicListEl.find('[component="category/topic"].pinned').first().attr('data-index'), 10);
+                    baseIndex = parseInt(
+                        topicListEl.find('[component="category/topic"].pinned').first().attr('data-index'),
+                        10
+                    );
                 },
                 update: function (ev, ui) {
-                    socket.emit('topics.orderPinnedTopics', {
-                        tid: ui.item.attr('data-tid'),
-                        order: baseIndex + ui.item.index(),
-                    }, function (err) {
-                        if (err) {
-                            return alerts.error(err);
+                    socket.emit(
+                        'topics.orderPinnedTopics',
+                        {
+                            tid: ui.item.attr('data-tid'),
+                            order: baseIndex + ui.item.index(),
+                        },
+                        function (err) {
+                            if (err) {
+                                return alerts.error(err);
+                            }
+                            topicListEl.find('[component="category/topic"].pinned').each((index, el) => {
+                                $(el).attr('data-index', baseIndex + index);
+                            });
                         }
-                        topicListEl.find('[component="category/topic"].pinned').each((index, el) => {
-                            $(el).attr('data-index', baseIndex + index);
-                        });
-                    });
+                    );
                 },
             });
         });

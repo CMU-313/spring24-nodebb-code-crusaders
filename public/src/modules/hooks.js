@@ -5,9 +5,7 @@ define('hooks', [], () => {
         loaded: {},
         temporary: new Set(),
         runOnce: new Set(),
-        deprecated: {
-
-        },
+        deprecated: {},
         logs: {
             _collection: new Set(),
         },
@@ -85,7 +83,9 @@ define('hooks', [], () => {
             Hooks.loaded[hookName].delete(method);
             Hooks.logs.log(`[hooks] Unregistered ${hookName}`, method);
         } else {
-            Hooks.logs.log(`[hooks] Unregistration of ${hookName} failed, passed-in method is not a registered listener or the hook itself has no listeners, currently.`);
+            Hooks.logs.log(
+                `[hooks] Unregistration of ${hookName} failed, passed-in method is not a registered listener or the hook itself has no listeners, currently.`
+            );
         }
 
         return Hooks;
@@ -95,7 +95,9 @@ define('hooks', [], () => {
     Hooks.hasListeners = hookName => Hooks.loaded[hookName] && Hooks.loaded[hookName].size > 0;
 
     const _onHookError = (e, listener, data) => {
-        console.warn(`[hooks] Exception encountered in ${listener.name ? listener.name : 'anonymous function'}, stack trace follows.`);
+        console.warn(
+            `[hooks] Exception encountered in ${listener.name ? listener.name : 'anonymous function'}, stack trace follows.`
+        );
         console.error(e);
         return Promise.resolve(data);
     };
@@ -106,16 +108,19 @@ define('hooks', [], () => {
         }
 
         const listeners = Array.from(Hooks.loaded[hookName]);
-        return listeners.reduce((promise, listener) => promise.then((data) => {
-            try {
-                const result = listener(data);
-                return utils.isPromise(result) ?
-                    result.then(data => Promise.resolve(data)).catch(e => _onHookError(e, listener, data)) :
-                    result;
-            } catch (e) {
-                return _onHookError(e, listener, data);
-            }
-        }), Promise.resolve(data));
+        return listeners.reduce(
+            (promise, listener) => promise.then((data) => {
+                try {
+                    const result = listener(data);
+                    return utils.isPromise(result) ?
+                        result.then(data => Promise.resolve(data)).catch(e => _onHookError(e, listener, data)) :
+                        result;
+                } catch (e) {
+                    return _onHookError(e, listener, data);
+                }
+            }),
+            Promise.resolve(data)
+        );
     };
 
     const _fireActionHook = (hookName, data) => {
@@ -133,13 +138,15 @@ define('hooks', [], () => {
         }
 
         const listeners = Array.from(Hooks.loaded[hookName]);
-        await Promise.allSettled(listeners.map((listener) => {
-            try {
-                return listener(data);
-            } catch (e) {
-                return _onHookError(e, listener);
-            }
-        }));
+        await Promise.allSettled(
+            listeners.map((listener) => {
+                try {
+                    return listener(data);
+                } catch (e) {
+                    return _onHookError(e, listener);
+                }
+            })
+        );
 
         return await Promise.resolve(data);
     };

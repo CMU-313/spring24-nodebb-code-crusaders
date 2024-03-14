@@ -38,5 +38,9 @@ Admin.getAnalyticsData = async (req, res) => {
         }
     }
     const getStats = req.query.units === 'days' ? analytics.getDailyStatsForSet : analytics.getHourlyStatsForSet;
-    helpers.formatApiResponse(200, res, await getStats(`analytics:${req.params.set}`, parseInt(req.query.until, 10) || Date.now(), req.query.amount));
+    helpers.formatApiResponse(
+        200,
+        res,
+        await getStats(`analytics:${req.params.set}`, parseInt(req.query.until, 10) || Date.now(), req.query.amount)
+    );
 };

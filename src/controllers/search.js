@@ -1,4 +1,3 @@
-
 'use strict';
 
 const validator = require('validator');
@@ -29,10 +28,11 @@ searchController.search = async function (req, res, next) {
         'search:tags': privileges.global.can('search:tags', req.uid),
     });
     req.query.in = req.query.in || meta.config.searchDefaultIn || 'titlesposts';
-    let allowed = (req.query.in === 'users' && userPrivileges['search:users']) ||
-                    (req.query.in === 'tags' && userPrivileges['search:tags']) ||
-                    (req.query.in === 'categories') ||
-                    (['titles', 'titlesposts', 'posts'].includes(req.query.in) && userPrivileges['search:content']);
+    let allowed =
+        (req.query.in === 'users' && userPrivileges['search:users']) ||
+        (req.query.in === 'tags' && userPrivileges['search:tags']) ||
+        req.query.in === 'categories' ||
+        (['titles', 'titlesposts', 'posts'].includes(req.query.in) && userPrivileges['search:content']);
     ({ allowed } = await plugins.hooks.fire('filter:search.isAllowed', {
         uid: req.uid,
         query: req.query,
@@ -108,7 +108,10 @@ async function recordSearch(data) {
     if (query) {
         const cleanedQuery = String(query).trim().toLowerCase().slice(0, 255);
         if (['titles', 'titlesposts', 'posts'].includes(searchIn) && cleanedQuery.length > 2) {
-            searches[data.uid] = searches[data.uid] || { timeoutId: 0, queries: [] };
+            searches[data.uid] = searches[data.uid] || {
+                timeoutId: 0,
+                queries: [],
+            };
             searches[data.uid].queries.push(cleanedQuery);
             if (searches[data.uid].timeoutId) {
                 clearTimeout(searches[data.uid].timeoutId);

@@ -136,8 +136,18 @@ module.exports = async function (app, middleware) {
     });
 
     router.all('(/+api|/+api/*?)', middleware.prepareAPI);
-    router.all(`(/+api/admin|/+api/admin/*?${mounts.admin !== 'admin' ? `|/+api/${mounts.admin}|/+api/${mounts.admin}/*?` : ''})`, middleware.authenticateRequest, middleware.ensureLoggedIn, middleware.admin.checkPrivileges);
-    router.all(`(/+admin|/+admin/*?${mounts.admin !== 'admin' ? `|/+${mounts.admin}|/+${mounts.admin}/*?` : ''})`, middleware.ensureLoggedIn, middleware.applyCSRF, middleware.admin.checkPrivileges);
+    router.all(
+        `(/+api/admin|/+api/admin/*?${mounts.admin !== 'admin' ? `|/+api/${mounts.admin}|/+api/${mounts.admin}/*?` : ''})`,
+        middleware.authenticateRequest,
+        middleware.ensureLoggedIn,
+        middleware.admin.checkPrivileges
+    );
+    router.all(
+        `(/+admin|/+admin/*?${mounts.admin !== 'admin' ? `|/+${mounts.admin}|/+${mounts.admin}/*?` : ''})`,
+        middleware.ensureLoggedIn,
+        middleware.applyCSRF,
+        middleware.admin.checkPrivileges
+    );
 
     app.use(middleware.stripLeadingSlashes);
 
@@ -184,7 +194,10 @@ function addCoreRoutes(app, router, middleware, mounts) {
     };
 
     if (path.resolve(__dirname, '../../public/uploads') !== nconf.get('upload_path')) {
-        statics.unshift({ route: '/assets/uploads', path: nconf.get('upload_path') });
+        statics.unshift({
+            route: '/assets/uploads',
+            path: nconf.get('upload_path'),
+        });
     }
 
     statics.forEach((obj) => {
@@ -194,7 +207,9 @@ function addCoreRoutes(app, router, middleware, mounts) {
         res.redirect(`${relativePath}/assets/uploads${req.path}?${meta.config['cache-buster']}`);
     });
     app.use(`${relativePath}/plugins`, (req, res) => {
-        winston.warn(`${chalk.bold.red('[deprecation]')} The \`/plugins\` shorthand prefix is deprecated, prefix with \`/assets/plugins\` instead (path: ${req.path})`);
+        winston.warn(
+            `${chalk.bold.red('[deprecation]')} The \`/plugins\` shorthand prefix is deprecated, prefix with \`/assets/plugins\` instead (path: ${req.path})`
+        );
         res.redirect(`${relativePath}/assets/plugins${req.path}${req._parsedUrl.search || ''}`);
     });
 
@@ -213,14 +228,17 @@ function addRemountableRoutes(app, router, middleware, mounts) {
         const original = mount;
         mount = mounts[original];
 
-        if (!mount) { // do not mount at all
+        if (!mount) {
+            // do not mount at all
             winston.warn(`[router] Not mounting /${original}`);
             return;
         }
 
         if (mount !== original) {
             // Set up redirect for fallback handling (some js/tpls may still refer to the traditional mount point)
-            winston.info(`[router] /${original} prefix re-mounted to /${mount}. Requests to /${original}/* will now redirect to /${mount}`);
+            winston.info(
+                `[router] /${original} prefix re-mounted to /${mount}. Requests to /${original}/* will now redirect to /${mount}`
+            );
             router.use(new RegExp(`/(api/)?${original}`), (req, res) => {
                 controllerHelpers.redirect(res, `${nconf.get('relative_path')}/${mount}${req.path}`);
             });

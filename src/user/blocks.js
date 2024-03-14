@@ -64,7 +64,10 @@ module.exports = function (User) {
         await db.sortedSetAdd(`uid:${uid}:blocked_uids`, Date.now(), targetUid);
         await User.incrementUserFieldBy(uid, 'blocksCount', 1);
         User.blocks._cache.del(parseInt(uid, 10));
-        plugins.hooks.fire('action:user.blocks.add', { uid: uid, targetUid: targetUid });
+        plugins.hooks.fire('action:user.blocks.add', {
+            uid: uid,
+            targetUid: targetUid,
+        });
     };
 
     User.blocks.remove = async function (targetUid, uid) {
@@ -72,7 +75,10 @@ module.exports = function (User) {
         await db.sortedSetRemove(`uid:${uid}:blocked_uids`, targetUid);
         await User.decrementUserFieldBy(uid, 'blocksCount', 1);
         User.blocks._cache.del(parseInt(uid, 10));
-        plugins.hooks.fire('action:user.blocks.remove', { uid: uid, targetUid: targetUid });
+        plugins.hooks.fire('action:user.blocks.remove', {
+            uid: uid,
+            targetUid: targetUid,
+        });
     };
 
     User.blocks.applyChecks = async function (type, targetUid, uid) {
@@ -105,8 +111,13 @@ module.exports = function (User) {
         const blocked_uids = await User.blocks.list(uid);
         const blockedSet = new Set(blocked_uids);
 
-        set = set.filter(item => !blockedSet.has(parseInt(isPlain ? item : (item && item[property]), 10)));
-        const data = await plugins.hooks.fire('filter:user.blocks.filter', { set: set, property: property, uid: uid, blockedSet: blockedSet });
+        set = set.filter(item => !blockedSet.has(parseInt(isPlain ? item : item && item[property], 10)));
+        const data = await plugins.hooks.fire('filter:user.blocks.filter', {
+            set: set,
+            property: property,
+            uid: uid,
+            blockedSet: blockedSet,
+        });
 
         return data.set;
     };

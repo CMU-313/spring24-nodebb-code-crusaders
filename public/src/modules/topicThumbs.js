@@ -1,7 +1,13 @@
 'use strict';
 
 define('topicThumbs', [
-    'api', 'bootbox', 'alerts', 'uploader', 'benchpress', 'translator', 'jquery-ui/widgets/sortable',
+    'api',
+    'bootbox',
+    'alerts',
+    'uploader',
+    'benchpress',
+    'translator',
+    'jquery-ui/widgets/sortable',
 ], function (api, bootbox, alerts, uploader, Benchpress, translator) {
     const Thumbs = {};
 
@@ -20,13 +26,16 @@ define('topicThumbs', [
     };
 
     Thumbs.upload = id => new Promise((resolve) => {
-        uploader.show({
-            title: '[[topic:composer.thumb_title]]',
-            method: 'put',
-            route: config.relative_path + `/api/v3/topics/${id}/thumbs`,
-        }, function (url) {
-            resolve(url);
-        });
+        uploader.show(
+            {
+                title: '[[topic:composer.thumb_title]]',
+                method: 'put',
+                route: config.relative_path + `/api/v3/topics/${id}/thumbs`,
+            },
+            function (url) {
+                resolve(url);
+            }
+        );
     });
 
     Thumbs.modal = {};
@@ -37,49 +46,57 @@ define('topicThumbs', [
         let numThumbs;
 
         return new Promise((resolve) => {
-            Promise.all([
-                Thumbs.get(id),
-                pid ? Thumbs.getByPid(pid) : [],
-            ]).then(results => new Promise((resolve) => {
-                const thumbs = results.reduce((memo, cur) => memo.concat(cur));
-                numThumbs = thumbs.length;
+            Promise.all([Thumbs.get(id), pid ? Thumbs.getByPid(pid) : []])
+                .then(
+                    results => new Promise((resolve) => {
+                        const thumbs = results.reduce((memo, cur) => memo.concat(cur));
+                        numThumbs = thumbs.length;
 
-                resolve(thumbs);
-            })).then(thumbs => Benchpress.render('modals/topic-thumbs', { thumbs })).then((html) => {
-                if (modal) {
-                    translator.translate(html, function (translated) {
-                        modal.find('.bootbox-body').html(translated);
-                        Thumbs.modal.handleSort({ modal, numThumbs });
-                    });
-                } else {
-                    modal = bootbox.dialog({
-                        title: '[[modules:thumbs.modal.title]]',
-                        message: html,
-                        buttons: {
-                            add: {
-                                label: '<i class="fa fa-plus"></i> [[modules:thumbs.modal.add]]',
-                                className: 'btn-success',
-                                callback: () => {
-                                    Thumbs.upload(id).then(() => {
-                                        Thumbs.modal.open({ ...payload, modal });
-                                        require(['composer'], (composer) => {
-                                            composer.updateThumbCount(id, $(`[component="composer"][data-uuid="${id}"]`));
-                                            resolve();
+                        resolve(thumbs);
+                    })
+                )
+                .then(thumbs => Benchpress.render('modals/topic-thumbs', { thumbs }))
+                .then((html) => {
+                    if (modal) {
+                        translator.translate(html, function (translated) {
+                            modal.find('.bootbox-body').html(translated);
+                            Thumbs.modal.handleSort({ modal, numThumbs });
+                        });
+                    } else {
+                        modal = bootbox.dialog({
+                            title: '[[modules:thumbs.modal.title]]',
+                            message: html,
+                            buttons: {
+                                add: {
+                                    label: '<i class="fa fa-plus"></i> [[modules:thumbs.modal.add]]',
+                                    className: 'btn-success',
+                                    callback: () => {
+                                        Thumbs.upload(id).then(() => {
+                                            Thumbs.modal.open({
+                                                ...payload,
+                                                modal,
+                                            });
+                                            require(['composer'], (composer) => {
+                                                composer.updateThumbCount(
+                                                    id,
+                                                    $(`[component="composer"][data-uuid="${id}"]`)
+                                                );
+                                                resolve();
+                                            });
                                         });
-                                    });
-                                    return false;
+                                        return false;
+                                    },
+                                },
+                                close: {
+                                    label: '[[global:close]]',
+                                    className: 'btn-primary',
                                 },
                             },
-                            close: {
-                                label: '[[global:close]]',
-                                className: 'btn-primary',
-                            },
-                        },
-                    });
-                    Thumbs.modal.handleDelete({ ...payload, modal });
-                    Thumbs.modal.handleSort({ modal, numThumbs });
-                }
-            });
+                        });
+                        Thumbs.modal.handleDelete({ ...payload, modal });
+                        Thumbs.modal.handleSort({ modal, numThumbs });
+                    }
+                });
         });
     };
 
@@ -97,9 +114,11 @@ define('topicThumbs', [
                     const path = ev.target.closest('.media[data-path]').getAttribute('data-path');
                     api.del(`/topics/${id}/thumbs`, {
                         path: path,
-                    }).then(() => {
-                        Thumbs.modal.open(payload);
-                    }).catch(alerts.error);
+                    })
+                        .then(() => {
+                            Thumbs.modal.open(payload);
+                        })
+                        .catch(alerts.error);
                 });
             }
         });

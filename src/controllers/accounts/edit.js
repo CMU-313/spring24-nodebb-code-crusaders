@@ -21,19 +21,40 @@ editController.get = async function (req, res, next) {
     userData.maximumSignatureLength = meta.config.maximumSignatureLength;
     userData.maximumAboutMeLength = meta.config.maximumAboutMeLength;
     userData.maximumProfileImageSize = meta.config.maximumProfileImageSize;
-    userData.allowProfilePicture = !userData.isSelf || !!meta.config['reputation:disabled'] || userData.reputation >= meta.config['min:rep:profile-picture'];
-    userData.allowCoverPicture = !userData.isSelf || !!meta.config['reputation:disabled'] || userData.reputation >= meta.config['min:rep:cover-picture'];
+    userData.allowProfilePicture =
+        !userData.isSelf ||
+        !!meta.config['reputation:disabled'] ||
+        userData.reputation >= meta.config['min:rep:profile-picture'];
+    userData.allowCoverPicture =
+        !userData.isSelf ||
+        !!meta.config['reputation:disabled'] ||
+        userData.reputation >= meta.config['min:rep:cover-picture'];
     userData.allowProfileImageUploads = meta.config.allowProfileImageUploads;
-    userData.allowedProfileImageExtensions = user.getAllowedProfileImageExtensions().map(ext => `.${ext}`).join(', ');
+    userData.allowedProfileImageExtensions = user
+        .getAllowedProfileImageExtensions()
+        .map(ext => `.${ext}`)
+        .join(', ');
     userData.allowMultipleBadges = meta.config.allowMultipleBadges === 1;
     userData.allowAccountDelete = meta.config.allowAccountDelete === 1;
-    userData.allowWebsite = !userData.isSelf || !!meta.config['reputation:disabled'] || userData.reputation >= meta.config['min:rep:website'];
-    userData.allowAboutMe = !userData.isSelf || !!meta.config['reputation:disabled'] || userData.reputation >= meta.config['min:rep:aboutme'];
-    userData.allowSignature = canUseSignature && (!userData.isSelf || !!meta.config['reputation:disabled'] || userData.reputation >= meta.config['min:rep:signature']);
+    userData.allowWebsite =
+        !userData.isSelf ||
+        !!meta.config['reputation:disabled'] ||
+        userData.reputation >= meta.config['min:rep:website'];
+    userData.allowAboutMe =
+        !userData.isSelf ||
+        !!meta.config['reputation:disabled'] ||
+        userData.reputation >= meta.config['min:rep:aboutme'];
+    userData.allowSignature =
+        canUseSignature &&
+        (!userData.isSelf ||
+            !!meta.config['reputation:disabled'] ||
+            userData.reputation >= meta.config['min:rep:signature']);
     userData.profileImageDimension = meta.config.profileImageDimension;
     userData.defaultAvatar = user.getDefaultAvatar();
 
-    userData.groups = userData.groups.filter(g => g && g.userTitleEnabled && !groups.isPrivilegeGroup(g.name) && g.name !== 'registered-users');
+    userData.groups = userData.groups.filter(
+        g => g && g.userTitleEnabled && !groups.isPrivilegeGroup(g.name) && g.name !== 'registered-users'
+    );
 
     if (!userData.allowMultipleBadges) {
         userData.groupTitle = userData.groupTitleArray[0];
@@ -157,10 +178,12 @@ editController.uploadPicture = async function (req, res, next) {
             file: userPhoto,
         });
 
-        res.json([{
-            name: userPhoto.name,
-            url: image.url,
-        }]);
+        res.json([
+            {
+                name: userPhoto.name,
+                url: image.url,
+            },
+        ]);
     } catch (err) {
         next(err);
     } finally {

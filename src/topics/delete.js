@@ -8,7 +8,6 @@ const categories = require('../categories');
 const plugins = require('../plugins');
 const batch = require('../batch');
 
-
 module.exports = function (Topics) {
     Topics.delete = async function (tid, uid) {
         await removeTopicPidsFromCid(tid);
@@ -20,19 +19,13 @@ module.exports = function (Topics) {
     };
 
     async function removeTopicPidsFromCid(tid) {
-        const [cid, pids] = await Promise.all([
-            Topics.getTopicField(tid, 'cid'),
-            Topics.getPids(tid),
-        ]);
+        const [cid, pids] = await Promise.all([Topics.getTopicField(tid, 'cid'), Topics.getPids(tid)]);
         await db.sortedSetRemove(`cid:${cid}:pids`, pids);
         await categories.updateRecentTidForCid(cid);
     }
 
     async function addTopicPidsToCid(tid) {
-        const [cid, pids] = await Promise.all([
-            Topics.getTopicField(tid, 'cid'),
-            Topics.getPids(tid),
-        ]);
+        const [cid, pids] = await Promise.all([Topics.getTopicField(tid, 'cid'), Topics.getPids(tid)]);
         let postData = await posts.getPostsFields(pids, ['pid', 'timestamp', 'deleted']);
         postData = postData.filter(post => post && !post.deleted);
         const pidsToAdd = postData.map(post => post.pid);
@@ -42,29 +35,25 @@ module.exports = function (Topics) {
     }
 
     Topics.restore = async function (tid) {
-        await Promise.all([
-            Topics.deleteTopicFields(tid, [
-                'deleterUid', 'deletedTimestamp',
-            ]),
-            addTopicPidsToCid(tid),
-        ]);
+        await Promise.all([Topics.deleteTopicFields(tid, ['deleterUid', 'deletedTimestamp']), addTopicPidsToCid(tid)]);
         await Topics.setTopicField(tid, 'deleted', 0);
     };
 
     Topics.purgePostsAndTopic = async function (tid, uid) {
         const mainPid = await Topics.getTopicField(tid, 'mainPid');
-        await batch.processSortedSet(`tid:${tid}:posts`, async (pids) => {
-            await posts.purge(pids, uid);
-        }, { alwaysStartAt: 0, batch: 500 });
+        await batch.processSortedSet(
+            `tid:${tid}:posts`,
+            async (pids) => {
+                await posts.purge(pids, uid);
+            },
+            { alwaysStartAt: 0, batch: 500 }
+        );
         await posts.purge(mainPid, uid);
         await Topics.purge(tid, uid);
     };
 
     Topics.purge = async function (tid, uid) {
-        const [deletedTopic, tags] = await Promise.all([
-            Topics.getTopicData(tid),
-            Topics.getTopicTags(tid),
-        ]);
+        const [deletedTopic, tags] = await Promise.all([Topics.getTopicData(tid), Topics.getTopicTags(tid)]);
         if (!deletedTopic) {
             return;
         }
@@ -80,21 +69,20 @@ module.exports = function (Topics) {
                 `tid:${tid}:bookmarks`,
                 `tid:${tid}:posters`,
             ]),
-            db.sortedSetsRemove([
-                'topics:tid',
-                'topics:recent',
-                'topics:posts',
-                'topics:views',
-                'topics:votes',
-                'topics:scheduled',
-            ], tid),
+            db.sortedSetsRemove(
+                ['topics:tid', 'topics:recent', 'topics:posts', 'topics:views', 'topics:votes', 'topics:scheduled'],
+                tid
+            ),
             deleteTopicFromCategoryAndUser(tid),
             Topics.deleteTopicTags(tid),
             Topics.events.purge(tid),
             Topics.thumbs.deleteAll(tid),
             reduceCounters(tid),
         ]);
-        plugins.hooks.fire('action:topic.purge', { topic: deletedTopic, uid: uid });
+        plugins.hooks.fire('action:topic.purge', {
+            topic: deletedTopic,
+            uid: uid,
+        });
         await db.delete(`topic:${tid}`);
     };
 
@@ -111,17 +99,20 @@ module.exports = function (Topics) {
     async function deleteTopicFromCategoryAndUser(tid) {
         const topicData = await Topics.getTopicFields(tid, ['cid', 'uid']);
         await Promise.all([
-            db.sortedSetsRemove([
-                `cid:${topicData.cid}:tids`,
-                `cid:${topicData.cid}:tids:pinned`,
-                `cid:${topicData.cid}:tids:posts`,
-                `cid:${topicData.cid}:tids:lastposttime`,
-                `cid:${topicData.cid}:tids:votes`,
-                `cid:${topicData.cid}:tids:views`,
-                `cid:${topicData.cid}:recent_tids`,
-                `cid:${topicData.cid}:uid:${topicData.uid}:tids`,
-                `uid:${topicData.uid}:topics`,
-            ], tid),
+            db.sortedSetsRemove(
+                [
+                    `cid:${topicData.cid}:tids`,
+                    `cid:${topicData.cid}:tids:pinned`,
+                    `cid:${topicData.cid}:tids:posts`,
+                    `cid:${topicData.cid}:tids:lastposttime`,
+                    `cid:${topicData.cid}:tids:votes`,
+                    `cid:${topicData.cid}:tids:views`,
+                    `cid:${topicData.cid}:recent_tids`,
+                    `cid:${topicData.cid}:uid:${topicData.uid}:tids`,
+                    `uid:${topicData.uid}:topics`,
+                ],
+                tid
+            ),
             user.decrementUserFieldBy(topicData.uid, 'topiccount', 1),
         ]);
         await categories.updateRecentTidForCid(topicData.cid);

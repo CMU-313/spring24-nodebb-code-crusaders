@@ -1,4 +1,3 @@
-
 'use strict';
 
 const db = require('../database');
@@ -62,7 +61,7 @@ module.exports = function (Topics) {
             await Topics.movePostToTopic(uid, pid, tid, scheduled);
         }
 
-        await Topics.updateLastPostTime(tid, scheduled ? (postData.timestamp + 1) : Date.now());
+        await Topics.updateLastPostTime(tid, scheduled ? postData.timestamp + 1 : Date.now());
 
         await Promise.all([
             Topics.setTopicFields(tid, {
@@ -70,10 +69,19 @@ module.exports = function (Topics) {
                 downvotes: postData.downvotes,
             }),
             db.sortedSetsAdd(['topics:votes', `cid:${cid}:tids:votes`], postData.votes, tid),
-            Topics.events.log(fromTid, { type: 'fork', uid, href: `/topic/${tid}`, timestamp: postData.timestamp }),
+            Topics.events.log(fromTid, {
+                type: 'fork',
+                uid,
+                href: `/topic/${tid}`,
+                timestamp: postData.timestamp,
+            }),
         ]);
 
-        plugins.hooks.fire('action:topic.fork', { tid: tid, fromTid: fromTid, uid: uid });
+        plugins.hooks.fire('action:topic.fork', {
+            tid: tid,
+            fromTid: fromTid,
+            uid: uid,
+        });
 
         return await Topics.getTopicData(tid);
     };
@@ -114,7 +122,11 @@ module.exports = function (Topics) {
             Topics.updateLastPostTimeFromLastPid(tid),
             Topics.updateLastPostTimeFromLastPid(postData.tid),
         ]);
-        plugins.hooks.fire('action:post.move', { uid: callerUid, post: postData, tid: tid });
+        plugins.hooks.fire('action:post.move', {
+            uid: callerUid,
+            post: postData,
+            tid: tid,
+        });
     };
 
     async function updateCategory(postData, toTid) {
@@ -147,7 +159,9 @@ module.exports = function (Topics) {
             db.sortedSetAdd(`cid:${topicData[1].cid}:uid:${postData.uid}:pids`, postData.timestamp, postData.pid),
         ];
         if (postData.votes > 0 || postData.votes < 0) {
-            tasks.push(db.sortedSetAdd(`cid:${topicData[1].cid}:uid:${postData.uid}:pids:votes`, postData.votes, postData.pid));
+            tasks.push(
+                db.sortedSetAdd(`cid:${topicData[1].cid}:uid:${postData.uid}:pids:votes`, postData.votes, postData.pid)
+            );
         }
 
         await Promise.all(tasks);

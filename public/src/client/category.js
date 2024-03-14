@@ -30,7 +30,13 @@ define('forum/category', [
         sort.handleSort('categoryTopicSort', 'category/' + ajaxify.data.slug);
 
         if (!config.usePagination) {
-            navigator.init('[component="category/topic"]', ajaxify.data.topic_count, Category.toTop, Category.toBottom, Category.navigatorCallback);
+            navigator.init(
+                '[component="category/topic"]',
+                ajaxify.data.topic_count,
+                Category.toTop,
+                Category.toBottom,
+                Category.navigatorCallback
+            );
         } else {
             navigator.disable();
         }
@@ -64,54 +70,62 @@ define('forum/category', [
     }
 
     function handleIgnoreWatch(cid) {
-        $('[component="category/watching"], [component="category/ignoring"], [component="category/notwatching"]').on('click', function () {
-            const $this = $(this);
-            const state = $this.attr('data-state');
+        $('[component="category/watching"], [component="category/ignoring"], [component="category/notwatching"]').on(
+            'click',
+            function () {
+                const $this = $(this);
+                const state = $this.attr('data-state');
 
-            socket.emit('categories.setWatchState', { cid: cid, state: state }, function (err) {
-                if (err) {
-                    return alerts.error(err);
-                }
+                socket.emit('categories.setWatchState', { cid: cid, state: state }, function (err) {
+                    if (err) {
+                        return alerts.error(err);
+                    }
 
-                $('[component="category/watching/menu"]').toggleClass('hidden', state !== 'watching');
-                $('[component="category/watching/check"]').toggleClass('fa-check', state === 'watching');
+                    $('[component="category/watching/menu"]').toggleClass('hidden', state !== 'watching');
+                    $('[component="category/watching/check"]').toggleClass('fa-check', state === 'watching');
 
-                $('[component="category/notwatching/menu"]').toggleClass('hidden', state !== 'notwatching');
-                $('[component="category/notwatching/check"]').toggleClass('fa-check', state === 'notwatching');
+                    $('[component="category/notwatching/menu"]').toggleClass('hidden', state !== 'notwatching');
+                    $('[component="category/notwatching/check"]').toggleClass('fa-check', state === 'notwatching');
 
-                $('[component="category/ignoring/menu"]').toggleClass('hidden', state !== 'ignoring');
-                $('[component="category/ignoring/check"]').toggleClass('fa-check', state === 'ignoring');
+                    $('[component="category/ignoring/menu"]').toggleClass('hidden', state !== 'ignoring');
+                    $('[component="category/ignoring/check"]').toggleClass('fa-check', state === 'ignoring');
 
-                alerts.success('[[category:' + state + '.message]]');
-            });
-        });
+                    alerts.success('[[category:' + state + '.message]]');
+                });
+            }
+        );
     }
 
     function handleLoadMoreSubcategories() {
         $('[component="category/load-more-subcategories"]').on('click', function () {
             const btn = $(this);
-            socket.emit('categories.loadMoreSubCategories', {
-                cid: ajaxify.data.cid,
-                start: ajaxify.data.nextSubCategoryStart,
-            }, function (err, data) {
-                if (err) {
-                    return alerts.error(err);
+            socket.emit(
+                'categories.loadMoreSubCategories',
+                {
+                    cid: ajaxify.data.cid,
+                    start: ajaxify.data.nextSubCategoryStart,
+                },
+                function (err, data) {
+                    if (err) {
+                        return alerts.error(err);
+                    }
+                    btn.toggleClass('hidden', !data.length || data.length < ajaxify.data.subCategoriesPerPage);
+                    if (!data.length) {
+                        return;
+                    }
+                    app.parseAndTranslate('category', 'children', { children: data }, function (html) {
+                        html.find('.timeago').timeago();
+                        $('[component="category/subcategory/container"]').append(html);
+                        utils.makeNumbersHumanReadable(html.find('.human-readable-number'));
+                        app.createUserTooltips(html);
+                        ajaxify.data.nextSubCategoryStart += ajaxify.data.subCategoriesPerPage;
+                        ajaxify.data.subCategoriesLeft -= data.length;
+                        btn.toggleClass('hidden', ajaxify.data.subCategoriesLeft <= 0).translateText(
+                            '[[category:x-more-categories, ' + ajaxify.data.subCategoriesLeft + ']]'
+                        );
+                    });
                 }
-                btn.toggleClass('hidden', !data.length || data.length < ajaxify.data.subCategoriesPerPage);
-                if (!data.length) {
-                    return;
-                }
-                app.parseAndTranslate('category', 'children', { children: data }, function (html) {
-                    html.find('.timeago').timeago();
-                    $('[component="category/subcategory/container"]').append(html);
-                    utils.makeNumbersHumanReadable(html.find('.human-readable-number'));
-                    app.createUserTooltips(html);
-                    ajaxify.data.nextSubCategoryStart += ajaxify.data.subCategoriesPerPage;
-                    ajaxify.data.subCategoriesLeft -= data.length;
-                    btn.toggleClass('hidden', ajaxify.data.subCategoriesLeft <= 0)
-                        .translateText('[[category:x-more-categories, ' + ajaxify.data.subCategoriesLeft + ']]');
-                });
-            });
+            );
             return false;
         });
     }
@@ -139,16 +153,20 @@ define('forum/category', [
 
         hooks.fire('action:topics.loading');
         const params = utils.params();
-        infinitescroll.loadMore('categories.loadMore', {
-            cid: ajaxify.data.cid,
-            after: after,
-            direction: direction,
-            query: params,
-            categoryTopicSort: config.categoryTopicSort,
-        }, function (data, done) {
-            hooks.fire('action:topics.loaded', { topics: data.topics });
-            callback(data, done);
-        });
+        infinitescroll.loadMore(
+            'categories.loadMore',
+            {
+                cid: ajaxify.data.cid,
+                after: after,
+                direction: direction,
+                query: params,
+                categoryTopicSort: config.categoryTopicSort,
+            },
+            function (data, done) {
+                hooks.fire('action:topics.loaded', { topics: data.topics });
+                callback(data, done);
+            }
+        );
     }
 
     return Category;

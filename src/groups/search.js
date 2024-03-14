@@ -13,9 +13,11 @@ module.exports = function (Groups) {
         if (!options.hideEphemeralGroups) {
             groupNames = Groups.ephemeralGroups.concat(groupNames);
         }
-        groupNames = groupNames.filter(name => name.toLowerCase().includes(query) &&
-            name !== Groups.BANNED_USERS && // hide banned-users in searches
-            !Groups.isPrivilegeGroup(name));
+        groupNames = groupNames.filter(
+            name => name.toLowerCase().includes(query) &&
+                name !== Groups.BANNED_USERS && // hide banned-users in searches
+                !Groups.isPrivilegeGroup(name)
+        );
         groupNames = groupNames.slice(0, 100);
 
         let groupsData;
@@ -34,8 +36,7 @@ module.exports = function (Groups) {
     Groups.sort = function (strategy, groups) {
         switch (strategy) {
         case 'count':
-            groups.sort((a, b) => a.slug > b.slug)
-                .sort((a, b) => b.memberCount - a.memberCount);
+            groups.sort((a, b) => a.slug > b.slug).sort((a, b) => b.memberCount - a.memberCount);
             break;
 
         case 'date':

@@ -16,10 +16,9 @@ module.exports = function (Groups) {
 
         // Only process those groups that have the cid in its memberPostCids setting (or no setting at all)
         const groupData = await groups.getGroupsFields(groupNames, ['memberPostCids']);
-        groupNames = groupNames.filter((groupName, idx) => (
-            !groupData[idx].memberPostCidsArray.length ||
-            groupData[idx].memberPostCidsArray.includes(postData.cid)
-        ));
+        groupNames = groupNames.filter(
+            (groupName, idx) => !groupData[idx].memberPostCidsArray.length || groupData[idx].memberPostCidsArray.includes(postData.cid)
+        );
 
         const keys = groupNames.map(groupName => `group:${groupName}:member:pids`);
         await db.sortedSetsAdd(keys, postData.timestamp, postData.pid);
@@ -39,6 +38,8 @@ module.exports = function (Groups) {
     Groups.getLatestMemberPosts = async function (groupName, max, uid) {
         let pids = await db.getSortedSetRevRange(`group:${groupName}:member:pids`, 0, max - 1);
         pids = await privileges.posts.filter('topics:read', pids, uid);
-        return await posts.getPostSummaryByPids(pids, uid, { stripTags: false });
+        return await posts.getPostSummaryByPids(pids, uid, {
+            stripTags: false,
+        });
     };
 };

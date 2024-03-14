@@ -20,19 +20,22 @@ describe('image', () => {
     });
 
     it('should resize an image', (done) => {
-        image.resizeImage({
-            path: path.join(__dirname, 'files/normalise.jpg'),
-            target: path.join(__dirname, 'files/normalise-resized.jpg'),
-            width: 50,
-            height: 40,
-        }, (err) => {
-            assert.ifError(err);
-            image.size(path.join(__dirname, 'files/normalise-resized.jpg'), (err, bitmap) => {
+        image.resizeImage(
+            {
+                path: path.join(__dirname, 'files/normalise.jpg'),
+                target: path.join(__dirname, 'files/normalise-resized.jpg'),
+                width: 50,
+                height: 40,
+            },
+            (err) => {
                 assert.ifError(err);
-                assert.equal(bitmap.width, 50);
-                assert.equal(bitmap.height, 40);
-                done();
-            });
-        });
+                image.size(path.join(__dirname, 'files/normalise-resized.jpg'), (err, bitmap) => {
+                    assert.ifError(err);
+                    assert.equal(bitmap.width, 50);
+                    assert.equal(bitmap.height, 40);
+                    done();
+                });
+            }
+        );
     });
 });

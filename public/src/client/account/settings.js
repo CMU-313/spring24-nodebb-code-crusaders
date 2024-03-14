@@ -1,14 +1,21 @@
 'use strict';
 
-
-define('forum/account/settings', [
-    'forum/account/header', 'components', 'translator', 'api', 'alerts',
-], function (header, components, translator, api, alerts) {
+define('forum/account/settings', ['forum/account/header', 'components', 'translator', 'api', 'alerts'], function (
+    header,
+    components,
+    translator,
+    api,
+    alerts
+) {
     const AccountSettings = {};
 
     // If page skin is changed but not saved, switch the skin back
     $(window).on('action:ajaxify.start', function () {
-        if (ajaxify.data.template.name === 'account/settings' && $('#bootswatchSkin').length && $('#bootswatchSkin').val() !== config.bootswatchSkin) {
+        if (
+            ajaxify.data.template.name === 'account/settings' &&
+            $('#bootswatchSkin').length &&
+            $('#bootswatchSkin').val() !== config.bootswatchSkin
+        ) {
             reskin(config.bootswatchSkin);
         }
     });
@@ -46,23 +53,25 @@ define('forum/account/settings', [
     function loadSettings() {
         const settings = {};
 
-        $('.account').find('input, textarea, select').each(function (id, input) {
-            input = $(input);
-            const setting = input.attr('data-property');
-            if (input.is('select')) {
-                settings[setting] = input.val();
-                return;
-            }
+        $('.account')
+            .find('input, textarea, select')
+            .each(function (id, input) {
+                input = $(input);
+                const setting = input.attr('data-property');
+                if (input.is('select')) {
+                    settings[setting] = input.val();
+                    return;
+                }
 
-            switch (input.attr('type')) {
-            case 'checkbox':
-                settings[setting] = input.is(':checked') ? 1 : 0;
-                break;
-            default:
-                settings[setting] = input.val();
-                break;
-            }
-        });
+                switch (input.attr('type')) {
+                case 'checkbox':
+                    settings[setting] = input.is(':checked') ? 1 : 0;
+                    break;
+                default:
+                    settings[setting] = input.val();
+                    break;
+                }
+            });
 
         return settings;
     }
@@ -107,16 +116,20 @@ define('forum/account/settings', [
     }
 
     function reskin(skinName) {
-        const clientEl = Array.prototype.filter.call(document.querySelectorAll('link[rel="stylesheet"]'), function (el) {
-            return el.href.indexOf(config.relative_path + '/assets/client') !== -1;
-        })[0] || null;
+        const clientEl =
+            Array.prototype.filter.call(document.querySelectorAll('link[rel="stylesheet"]'), function (el) {
+                return el.href.indexOf(config.relative_path + '/assets/client') !== -1;
+            })[0] || null;
         if (!clientEl) {
             return;
         }
 
-        const currentSkinClassName = $('body').attr('class').split(/\s+/).filter(function (className) {
-            return className.startsWith('skin-');
-        });
+        const currentSkinClassName = $('body')
+            .attr('class')
+            .split(/\s+/)
+            .filter(function (className) {
+                return className.startsWith('skin-');
+            });
         if (!currentSkinClassName[0]) {
             return;
         }

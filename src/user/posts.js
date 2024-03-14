@@ -32,7 +32,7 @@ module.exports = function (User) {
 
         const now = Date.now();
         if (userData.mutedUntil > now) {
-            let muteLeft = ((userData.mutedUntil - now) / (1000 * 60));
+            let muteLeft = (userData.mutedUntil - now) / (1000 * 60);
             if (muteLeft > 60) {
                 muteLeft = (muteLeft / 60).toFixed(0);
                 throw new Error(`[[error:user-muted-for-hours, ${muteLeft}]]`);
@@ -52,7 +52,9 @@ module.exports = function (User) {
             meta.config.newbiePostDelayThreshold > userData.reputation &&
             now - lasttime < meta.config.newbiePostDelay * 1000
         ) {
-            throw new Error(`[[error:too-many-posts-newbie, ${meta.config.newbiePostDelay}, ${meta.config.newbiePostDelayThreshold}]]`);
+            throw new Error(
+                `[[error:too-many-posts-newbie, ${meta.config.newbiePostDelay}, ${meta.config.newbiePostDelayThreshold}]]`
+            );
         } else if (now - lasttime < meta.config.postDelay * 1000) {
             throw new Error(`[[error:too-many-posts, ${meta.config.postDelay}]]`);
         }
@@ -70,10 +72,11 @@ module.exports = function (User) {
     };
 
     User.addPostIdToUser = async function (postData) {
-        await db.sortedSetsAdd([
-            `uid:${postData.uid}:posts`,
-            `cid:${postData.cid}:uid:${postData.uid}:pids`,
-        ], postData.timestamp, postData.pid);
+        await db.sortedSetsAdd(
+            [`uid:${postData.uid}:posts`, `cid:${postData.cid}:uid:${postData.uid}:pids`],
+            postData.timestamp,
+            postData.pid
+        );
         await User.updatePostCount(postData.uid);
     };
 
@@ -84,7 +87,7 @@ module.exports = function (User) {
         if (uids.length) {
             const counts = await db.sortedSetsCard(uids.map(uid => `uid:${uid}:posts`));
             await Promise.all([
-                db.setObjectBulk(uids.map((uid, index) => ([`user:${uid}`, { postcount: counts[index] }]))),
+                db.setObjectBulk(uids.map((uid, index) => [`user:${uid}`, { postcount: counts[index] }])),
                 db.sortedSetAdd('users:postcount', counts, uids),
             ]);
         }

@@ -50,18 +50,21 @@ module.exports = function (grunt) {
             }
         }
 
-        const styleUpdated_Client = pluginList.map(p => `node_modules/${p}/*.less`)
+        const styleUpdated_Client = pluginList
+            .map(p => `node_modules/${p}/*.less`)
             .concat(pluginList.map(p => `node_modules/${p}/*.css`))
             .concat(pluginList.map(p => `node_modules/${p}/+(public|static|less)/**/*.less`))
             .concat(pluginList.map(p => `node_modules/${p}/+(public|static)/**/*.css`));
 
-        const styleUpdated_Admin = pluginList.map(p => `node_modules/${p}/*.less`)
+        const styleUpdated_Admin = pluginList
+            .map(p => `node_modules/${p}/*.less`)
             .concat(pluginList.map(p => `node_modules/${p}/*.css`))
             .concat(pluginList.map(p => `node_modules/${p}/+(public|static|less)/**/*.less`))
             .concat(pluginList.map(p => `node_modules/${p}/+(public|static)/**/*.css`));
 
         const clientUpdated = pluginList.map(p => `node_modules/${p}/+(public|static)/**/*.js`);
-        const serverUpdated = pluginList.map(p => `node_modules/${p}/*.js`)
+        const serverUpdated = pluginList
+            .map(p => `node_modules/${p}/*.js`)
             .concat(pluginList.map(p => `node_modules/${p}/+(lib|src)/**/*.js`));
 
         const templatesUpdated = pluginList.map(p => `node_modules/${p}/+(public|static|templates)/**/*.tpl`);
@@ -69,21 +72,13 @@ module.exports = function (grunt) {
 
         grunt.config(['watch'], {
             styleUpdated_Client: {
-                files: [
-                    'public/less/**/*.less',
-                    'themes/**/*.less',
-                    ...styleUpdated_Client,
-                ],
+                files: ['public/less/**/*.less', 'themes/**/*.less', ...styleUpdated_Client],
                 options: {
                     interval: 1000,
                 },
             },
             styleUpdated_Admin: {
-                files: [
-                    'public/less/**/*.less',
-                    'themes/**/*.less',
-                    ...styleUpdated_Admin,
-                ],
+                files: ['public/less/**/*.less', 'themes/**/*.less', ...styleUpdated_Admin],
                 options: {
                     interval: 1000,
                 },
@@ -115,32 +110,19 @@ module.exports = function (grunt) {
                 },
             },
             typescriptUpdated: {
-                files: [
-                    'install/*.ts',
-                    'src/**/*.ts',
-                    'public/src/**/*.ts',
-                    'public/vendor/**/*.ts',
-                ],
+                files: ['install/*.ts', 'src/**/*.ts', 'public/src/**/*.ts', 'public/vendor/**/*.ts'],
                 options: {
                     interval: 1000,
                 },
             },
             templatesUpdated: {
-                files: [
-                    'src/views/**/*.tpl',
-                    'themes/**/*.tpl',
-                    ...templatesUpdated,
-                ],
+                files: ['src/views/**/*.tpl', 'themes/**/*.tpl', ...templatesUpdated],
                 options: {
                     interval: 1000,
                 },
             },
             langUpdated: {
-                files: [
-                    'public/language/en-GB/*.json',
-                    'public/language/en-GB/**/*.json',
-                    ...langUpdated,
-                ],
+                files: ['public/language/en-GB/*.json', 'public/language/en-GB/**/*.json', ...langUpdated],
                 options: {
                     interval: 1000,
                 },
