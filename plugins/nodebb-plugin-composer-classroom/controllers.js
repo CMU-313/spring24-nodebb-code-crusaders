@@ -1,9 +1,9 @@
-'use strict'
+'use strict';
 
-const Controllers = {}
+const Controllers = {};
 
 Controllers.renderAdminPage = function (req, res) {
-  res.render('admin/plugins/composer-default', {})
-}
+	res.render('admin/plugins/composer-default', {});
+};
 
-module.exports = Controllers
+module.exports = Controllers;

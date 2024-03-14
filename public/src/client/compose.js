@@ -1,18 +1,18 @@
-'use strict'
+'use strict';
 
 define('forum/compose', ['hooks'], function (hooks) {
-  const Compose = {}
+    const Compose = {};
 
-  Compose.init = function () {
-    const container = $('.composer')
-    console.log(container)
+    Compose.init = function () {
+        const container = $('.composer');
+        console.log(container);
 
-    if (container.length) {
-      hooks.fire('action:composer.enhance', {
-        container
-      })
-    }
-  }
+        if (container.length) {
+            hooks.fire('action:composer.enhance', {
+                container,
+            });
+        }
+    };
 
-  return Compose
-})
+    return Compose;
+});
