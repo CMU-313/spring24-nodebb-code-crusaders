@@ -1,4 +1,5 @@
 'use strict';
+// @flow
 
 const request = require('request');
 
