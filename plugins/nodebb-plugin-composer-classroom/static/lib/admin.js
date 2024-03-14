@@ -1,7 +1,7 @@
 'use strict';
 
 define('admin/plugins/composer-default', ['settings', 'alerts'], function (Settings, alerts) {
-	var ACP = {};
+	const ACP = {};
 
 	ACP.init = function () {
 		Settings.load('composer-default', $('.composer-default-settings'));

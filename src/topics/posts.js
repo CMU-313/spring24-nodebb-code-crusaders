@@ -1,4 +1,3 @@
-
 'use strict';
 
 const _ = require('lodash');
@@ -69,7 +68,7 @@ module.exports = function (Topics) {
 
         const result = await plugins.hooks.fire('filter:topic.getPosts', {
             topic: topicData,
-            uid: uid,
+            uid,
             posts: await Topics.addPostData(postData, uid),
         });
         return result.posts;
@@ -150,7 +149,7 @@ module.exports = function (Topics) {
 
         const result = await plugins.hooks.fire('filter:topics.addPostData', {
             posts: postData,
-            uid: uid,
+            uid,
         });
         return result.posts;
     };

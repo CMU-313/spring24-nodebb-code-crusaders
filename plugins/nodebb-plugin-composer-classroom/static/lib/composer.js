@@ -45,7 +45,7 @@ define('composer', [
 	search,
 	screenfull
 ) {
-	var composer = {
+	const composer = {
 		active: undefined,
 		posts: {},
 		bsEnvironment: undefined,
@@ -67,7 +67,7 @@ define('composer', [
 	});
 
 	$(window).on('popstate', function () {
-		var env = utils.findBootstrapEnvironment();
+		const env = utils.findBootstrapEnvironment();
 		if (composer.active && (env === 'xs' || env === 'sm')) {
 			if (!composer.posts[composer.active].modified) {
 				composer.discard(composer.active);
@@ -98,7 +98,7 @@ define('composer', [
 	});
 
 	function removeComposerHistory() {
-		var env = composer.bsEnvironment;
+		const env = composer.bsEnvironment;
 		if (
 			ajaxify.data.template.compose === true ||
             env === 'xs' ||
@@ -109,8 +109,8 @@ define('composer', [
 	}
 
 	function onWindowResize() {
-		var env = utils.findBootstrapEnvironment();
-		var isMobile = env === 'xs' || env === 'sm';
+		const env = utils.findBootstrapEnvironment();
+		const isMobile = env === 'xs' || env === 'sm';
 
 		if (preview.toggle) {
 			if (preview.env !== env && isMobile) {
@@ -157,8 +157,8 @@ define('composer', [
 
 	function alreadyOpen(post) {
 		// If a composer for the same cid/tid/pid is already open, return the uuid, else return bool false
-		var type;
-		var id;
+		let type;
+		let id;
 
 		if (post.hasOwnProperty('cid')) {
 			type = 'cid';
@@ -167,11 +167,11 @@ define('composer', [
 		} else if (post.hasOwnProperty('pid')) {
 			type = 'pid';
 		}
-
+		// eslint-disable-next-line prefer-const
 		id = post[type];
 
 		// Find a match
-		for (var uuid in composer.posts) {
+		for (const uuid in composer.posts) {
 			if (
 				composer.posts[uuid].hasOwnProperty(type) &&
                 id === composer.posts[uuid][type]
@@ -185,15 +185,15 @@ define('composer', [
 	}
 
 	function push(post) {
-		var uuid = utils.generateUUID();
-		var existingUUID = alreadyOpen(post);
+		const uuid = utils.generateUUID();
+		const existingUUID = alreadyOpen(post);
 
 		if (existingUUID) {
 			taskbar.updateActive(existingUUID);
 			return composer.load(existingUUID);
 		}
 
-		var actionText = '[[topic:composer.new_topic]]';
+		let actionText = '[[topic:composer.new_topic]]';
 		if (post.action === 'posts.reply') {
 			actionText = '[[topic:composer.replying_to]]';
 		} else if (post.action === 'posts.edit') {
@@ -241,7 +241,7 @@ define('composer', [
 				type: 'danger',
 				timeout: 10000,
 				title: '',
-				message: message,
+				message,
 				alert_id: 'post_error',
 			});
 		}
@@ -249,7 +249,7 @@ define('composer', [
 
 	composer.findByTid = function (tid) {
 		// Iterates through the initialised composers and returns the uuid of the matching composer
-		for (var uuid in composer.posts) {
+		for (const uuid in composer.posts) {
 			if (
 				composer.posts.hasOwnProperty(uuid) &&
                 composer.posts[uuid].hasOwnProperty('tid') &&
@@ -267,7 +267,7 @@ define('composer', [
 	};
 
 	composer.newTopic = async (data) => {
-		var pushData = {
+		let pushData = {
 			action: 'topics.post',
 			cid: data.cid,
 			handle: data.handle,
@@ -282,8 +282,8 @@ define('composer', [
 		};
 
 		({ pushData } = await hooks.fire('filter:composer.topic.push', {
-			data: data,
-			pushData: pushData,
+			data,
+			pushData,
 		}));
 
 		push(pushData);
@@ -300,7 +300,7 @@ define('composer', [
 	) {
 		uuid = uuid || composer.active;
 
-		var escapedTitle = (title || '')
+		const escapedTitle = (title || '')
 			.replace(/([\\`*_{}[\]()#+\-.!])/g, '\\$1')
 			.replace(/\[/g, '&#91;')
 			.replace(/\]/g, '&#93;')
@@ -310,7 +310,7 @@ define('composer', [
 		if (text) {
 			text = '> ' + text.replace(/\n/g, '\n> ') + '\n\n';
 		}
-		var link =
+		const link =
             '[' +
             escapedTitle +
             '](' +
@@ -345,9 +345,9 @@ define('composer', [
 			composer.load(uuid);
 		}
 
-		var postContainer = $('.composer[data-uuid="' + uuid + '"]');
-		var bodyEl = postContainer.find('textarea');
-		var prevText = bodyEl.val();
+		const postContainer = $('.composer[data-uuid="' + uuid + '"]');
+		const bodyEl = postContainer.find('textarea');
+		const prevText = bodyEl.val();
 		if (title && (selectedPid || toPid)) {
 			translator.translate(
 				'[[modules:composer.user_said_in, ' +
@@ -379,9 +379,9 @@ define('composer', [
 		translator.translate(text, config.defaultLang, function (translated) {
 			push({
 				action: 'posts.reply',
-				tid: tid,
-				toPid: toPid,
-				title: title,
+				tid,
+				toPid,
+				title,
 				body: translated,
 				modified: !!(
 					(title && title.length) ||
@@ -405,7 +405,7 @@ define('composer', [
 	};
 
 	composer.load = function (post_uuid) {
-		var postContainer = $('.composer[data-uuid="' + post_uuid + '"]');
+		const postContainer = $('.composer[data-uuid="' + post_uuid + '"]');
 		if (postContainer.length) {
 			activate(post_uuid);
 			resize.reposition(postContainer);
@@ -440,8 +440,8 @@ define('composer', [
 			postContainer.attr('data-uuid', post_uuid);
 		}
 
-		var bodyEl = postContainer.find('textarea');
-		var submitBtn = postContainer.find('.composer-submit');
+		const bodyEl = postContainer.find('textarea');
+		const submitBtn = postContainer.find('.composer-submit');
 
 		categoryList.init(postContainer, composer.posts[post_uuid]);
 		scheduler.init(postContainer, composer.posts);
@@ -497,7 +497,7 @@ define('composer', [
 
 			formatting.exitFullscreen();
 
-			var btn = $(this).prop('disabled', true);
+			const btn = $(this).prop('disabled', true);
 			translator.translate(
 				'[[modules:composer.discard]]',
 				function (translated) {
@@ -568,12 +568,12 @@ define('composer', [
 	}
 
 	async function createNewComposer(post_uuid) {
-		var postData = composer.posts[post_uuid];
+		let postData = composer.posts[post_uuid];
 
-		var isTopic = postData ? postData.hasOwnProperty('cid') : false;
-		var isMain = postData ? !!postData.isMain : false;
-		var isEditing = postData ? !!postData.pid : false;
-		var isGuestPost = postData ? parseInt(postData.uid, 10) === 0 : false;
+		const isTopic = postData ? postData.hasOwnProperty('cid') : false;
+		const isMain = postData ? !!postData.isMain : false;
+		const isEditing = postData ? !!postData.pid : false;
+		const isGuestPost = postData ? parseInt(postData.uid, 10) === 0 : false;
 		const isScheduled = postData.timestamp > Date.now();
 
 		// see
@@ -581,15 +581,15 @@ define('composer', [
 		// https://github.com/NodeBB/NodeBB/issues/1951
 		// remove when 1951 is resolved
 
-		var title = postData.title
+		const title = postData.title
 			.replace(/%/g, '&#37;')
 			.replace(/,/g, '&#44;');
 		postData.category = await getSelectedCategory(postData);
 		const privileges = postData.category ?
 			postData.category.privileges :
 			ajaxify.data.privileges;
-		var data = {
-			title: title,
+		let data = {
+			title,
 			titleLength: title.length,
 			body: postData.body,
 			mobile:
@@ -602,8 +602,8 @@ define('composer', [
 			maximumPostLength: config.maximumPostLength,
 			minimumTagLength: config.minimumTagLength,
 			maximumTagLength: config.maximumTagLength,
-			isTopic: isTopic,
-			isEditing: isEditing,
+			isTopic,
+			isEditing,
 			canSchedule: !!(
 				isMain &&
                 privileges &&
@@ -642,7 +642,7 @@ define('composer', [
 		({ postData, createData: data } = await hooks.fire(
 			'filter:composer.create',
 			{
-				postData: postData,
+				postData,
 				createData: data,
 			}
 		));
@@ -661,7 +661,7 @@ define('composer', [
 
 			$(document.body).append(composerTemplate);
 
-			var postContainer = $(composerTemplate[0]);
+			const postContainer = $(composerTemplate[0]);
 
 			resize.reposition(postContainer);
 			composer.enhance(postContainer, post_uuid, postData);
@@ -687,12 +687,12 @@ define('composer', [
 				composer.bsEnvironment === 'xs' ||
                 composer.bsEnvironment === 'sm'
 			) {
-				var submitBtns = postContainer.find('.composer-submit');
-				var mobileSubmitBtn = postContainer.find(
+				const submitBtns = postContainer.find('.composer-submit');
+				const mobileSubmitBtn = postContainer.find(
 					'.mobile-navbar .composer-submit'
 				);
-				var textareaEl = postContainer.find('.write');
-				var idx = textareaEl.attr('tabindex');
+				const textareaEl = postContainer.find('.write');
+				const idx = textareaEl.attr('tabindex');
 
 				submitBtns.removeAttr('tabindex');
 				mobileSubmitBtn.attr('tabindex', parseInt(idx, 10) + 1);
@@ -703,8 +703,8 @@ define('composer', [
 			}
 
 			$(window).trigger('action:composer.loaded', {
-				postContainer: postContainer,
-				post_uuid: post_uuid,
+				postContainer,
+				post_uuid,
 				composerData: composer.posts[post_uuid],
 				formatting: composer.formatting,
 			});
@@ -716,8 +716,8 @@ define('composer', [
 	}
 
 	function mobileHistoryAppend() {
-		var path = 'compose?p=' + window.location.pathname;
-		var returnPath =
+		const path = 'compose?p=' + window.location.pathname;
+		let returnPath =
             window.location.pathname.slice(1) + window.location.search;
 
 		// Remove relative path from returnPath
@@ -729,7 +729,7 @@ define('composer', [
 		window.history.replaceState(
 			{
 				url: null,
-				returnPath: returnPath,
+				returnPath,
 			},
 			returnPath,
 			config.relative_path + '/' + returnPath
@@ -746,7 +746,7 @@ define('composer', [
 	}
 
 	function handleHelp(postContainer) {
-		var helpBtn = postContainer.find('.help');
+		const helpBtn = postContainer.find('.help');
 		socket.emit('plugins.composer.renderHelp', function (err, html) {
 			if (!err && html && html.length > 0) {
 				helpBtn.removeClass('hidden');
@@ -758,12 +758,12 @@ define('composer', [
 	}
 
 	function handleSearch(postContainer) {
-		var uuid = postContainer.attr('data-uuid');
-		var isEditing =
+		const uuid = postContainer.attr('data-uuid');
+		const isEditing =
             composer.posts[uuid] &&
             composer.posts[uuid].action === 'posts.edit';
-		var env = utils.findBootstrapEnvironment();
-		var isMobile = env === 'xs' || env === 'sm';
+		const env = utils.findBootstrapEnvironment();
+		const isMobile = env === 'xs' || env === 'sm';
 		if (isEditing || isMobile) {
 			return;
 		}
@@ -784,13 +784,13 @@ define('composer', [
 
 		composer.active = post_uuid;
 		$(window).trigger('action:composer.activate', {
-			post_uuid: post_uuid,
+			post_uuid,
 		});
 	}
 
 	function focusElements(postContainer) {
 		setTimeout(function () {
-			var title = postContainer.find('input.title');
+			const title = postContainer.find('input.title');
 
 			if (title.length) {
 				title.focus();
@@ -801,14 +801,14 @@ define('composer', [
 	}
 
 	async function post(post_uuid) {
-		var postData = composer.posts[post_uuid];
-		var postContainer = $('.composer[data-uuid="' + post_uuid + '"]');
-		var handleEl = postContainer.find('.handle');
-		var titleEl = postContainer.find('.title');
-		var bodyEl = postContainer.find('textarea');
-		var anonymousToggle = anonymousObject.getBtnState();
-		var thumbEl = postContainer.find('input#topic-thumb-url');
-		var onComposeRoute =
+		const postData = composer.posts[post_uuid];
+		const postContainer = $('.composer[data-uuid="' + post_uuid + '"]');
+		const handleEl = postContainer.find('.handle');
+		const titleEl = postContainer.find('.title');
+		const bodyEl = postContainer.find('textarea');
+		const anonymousToggle = anonymousObject.getBtnState();
+		const thumbEl = postContainer.find('input#topic-thumb-url');
+		const onComposeRoute =
             postData.hasOwnProperty('template') &&
             postData.template.compose === true;
 		const submitBtn = postContainer.find('.composer-submit');
@@ -819,22 +819,22 @@ define('composer', [
 			thumbEl.val(thumbEl.val().trim());
 		}
 
-		var action = postData.action;
+		const action = postData.action;
 
-		var checkTitle =
+		const checkTitle =
             (postData.hasOwnProperty('cid') || parseInt(postData.pid, 10)) &&
             postContainer.find('input.title').length;
-		var isCategorySelected =
+		const isCategorySelected =
             !checkTitle || (checkTitle && parseInt(postData.cid, 10));
 
 		// Specifically for checking title/body length via plugins
-		var payload = {
-			post_uuid: post_uuid,
-			postData: postData,
-			postContainer: postContainer,
-			titleEl: titleEl,
+		const payload = {
+			post_uuid,
+			postData,
+			postContainer,
+			titleEl,
 			titleLen: titleEl.val().length,
-			bodyEl: bodyEl,
+			bodyEl,
 			bodyLen: bodyEl.val().length,
 		};
 
@@ -934,11 +934,11 @@ define('composer', [
 				timestamp: scheduler.getTimestamp(),
 			};
 		}
-		var submitHookData = {
+		const submitHookData = {
 			composerEl: postContainer,
-			action: action,
-			composerData: composerData,
-			postData: postData,
+			action,
+			composerData,
+			postData,
 			redirect: true,
 		};
 
@@ -946,10 +946,10 @@ define('composer', [
 		hooks.fire('action:composer.submit', Object.freeze(submitHookData));
 
 		// Minimize composer (and set textarea as readonly) while submitting
-		var taskbarIconEl = $(
+		const taskbarIconEl = $(
 			'#taskbar .composer[data-uuid="' + post_uuid + '"] i'
 		);
-		var textareaEl = postContainer.find('.write');
+		const textareaEl = postContainer.find('.write');
 		taskbarIconEl
 			.removeClass('fa-plus')
 			.addClass('fa-circle-o-notch fa-spin');
@@ -1005,8 +1005,8 @@ define('composer', [
 				}
 
 				hooks.fire('action:composer.' + action, {
-					composerData: composerData,
-					data: data,
+					composerData,
+					data,
 				});
 			})
 			.catch((err) => {
@@ -1032,8 +1032,8 @@ define('composer', [
 
 	composer.discard = function (post_uuid) {
 		if (composer.posts[post_uuid]) {
-			var postData = composer.posts[post_uuid];
-			var postContainer = $('.composer[data-uuid="' + post_uuid + '"]');
+			const postData = composer.posts[post_uuid];
+			const postContainer = $('.composer[data-uuid="' + post_uuid + '"]');
 			postContainer.remove();
 			drafts.removeDraft(postData.save_id);
 			topicThumbs.deleteAll(post_uuid);
@@ -1042,8 +1042,8 @@ define('composer', [
 			$('[data-action="post"]').removeAttr('disabled');
 
 			hooks.fire('action:composer.discard', {
-				post_uuid: post_uuid,
-				postData: postData,
+				post_uuid,
+				postData,
 			});
 			delete composer.posts[post_uuid];
 			composer.active = undefined;
@@ -1056,12 +1056,12 @@ define('composer', [
 	composer.close = composer.discard;
 
 	composer.minimize = function (post_uuid) {
-		var postContainer = $('.composer[data-uuid="' + post_uuid + '"]');
+		const postContainer = $('.composer[data-uuid="' + post_uuid + '"]');
 		postContainer.css('visibility', 'hidden');
 		composer.active = undefined;
 		taskbar.minimize('composer', post_uuid);
 		$(window).trigger('action:composer.minimize', {
-			post_uuid: post_uuid,
+			post_uuid,
 		});
 
 		onHide();

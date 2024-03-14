@@ -1,7 +1,7 @@
 'use strict';
 
 define('composer/preview', ['hooks'], function (hooks) {
-	var preview = {};
+	const preview = {};
 
 	preview.render = function (postContainer, callback) {
 		callback = callback || function () {};
@@ -9,7 +9,7 @@ define('composer/preview', ['hooks'], function (hooks) {
 			return callback();
 		}
 
-		var textarea = postContainer.find('textarea');
+		const textarea = postContainer.find('textarea');
 
 		socket.emit('plugins.composer.renderPreview', textarea.val(), function (err, preview) {
 			if (err) {
@@ -27,17 +27,17 @@ define('composer/preview', ['hooks'], function (hooks) {
 		if (!postContainer.find('.preview-container').is(':visible')) {
 			return;
 		}
-		var textarea = postContainer.find('textarea');
-		var preview = postContainer.find('.preview');
+		const textarea = postContainer.find('textarea');
+		const preview = postContainer.find('.preview');
 
 		if (textarea.length && preview.length) {
-			var diff = textarea[0].scrollHeight - textarea.height();
+			const diff = textarea[0].scrollHeight - textarea.height();
 
 			if (diff === 0) {
 				return;
 			}
 
-			var scrollPercent = textarea.scrollTop() / diff;
+			const scrollPercent = textarea.scrollTop() / diff;
 
 			preview.scrollTop(Math.max(preview[0].scrollHeight - preview.height(), 0) * scrollPercent);
 		}
@@ -45,10 +45,10 @@ define('composer/preview', ['hooks'], function (hooks) {
 
 	preview.handleToggler = function (postContainer) {
 		preview.env = utils.findBootstrapEnvironment();
-		var showBtn = postContainer.find('.write-container .toggle-preview');
-		var hideBtn = postContainer.find('.preview-container .toggle-preview');
-		var previewContainer = $('.preview-container');
-		var writeContainer = $('.write-container');
+		const showBtn = postContainer.find('.write-container .toggle-preview');
+		const hideBtn = postContainer.find('.preview-container .toggle-preview');
+		const previewContainer = $('.preview-container');
+		const writeContainer = $('.write-container');
 
 		function hidePreview() {
 			togglePreview(false);

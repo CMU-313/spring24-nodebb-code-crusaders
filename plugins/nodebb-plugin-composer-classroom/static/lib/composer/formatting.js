@@ -6,22 +6,22 @@ define('composer/formatting', [
 	'topicThumbs',
 	'screenfull',
 ], function (preview, resize, topicThumbs, screenfull) {
-	var formatting = {};
+	const formatting = {};
 
-	var formattingDispatchTable = {
+	const formattingDispatchTable = {
 		picture: function () {
-			var postContainer = this;
+			const postContainer = this;
 			postContainer.find('#files').click();
 		},
 
 		upload: function () {
-			var postContainer = this;
+			const postContainer = this;
 			postContainer.find('#files').click();
 		},
 
 		thumbs: function () {
 			formatting.exitFullscreen();
-			var postContainer = this;
+			const postContainer = this;
 			require(['composer'], function (composer) {
 				const uuid = postContainer.get(0).getAttribute('data-uuid');
 				const composerObj = composer.posts[uuid];
@@ -43,12 +43,12 @@ define('composer/formatting', [
 		},
 
 		tags: function () {
-			var postContainer = this;
+			const postContainer = this;
 			postContainer.find('.tags-container').toggleClass('hidden');
 		},
 
 		zen: function () {
-			var postContainer = this;
+			const postContainer = this;
 			$(window).one('resize', function () {
 				function onResize() {
 					if (!screenfull.isFullscreen) {
@@ -74,12 +74,12 @@ define('composer/formatting', [
 
 			screenfull.toggle(postContainer.get(0));
 			$(window).trigger('action:composer.fullscreen', {
-				postContainer: postContainer,
+				postContainer,
 			});
 		},
 	};
 
-	var buttons = [];
+	const buttons = [];
 
 	formatting.exitFullscreen = function () {
 		if (screenfull.isEnabled && screenfull.isFullscreen) {
@@ -88,7 +88,7 @@ define('composer/formatting', [
 	};
 
 	formatting.addComposerButtons = function () {
-		for (var x = 0, numButtons = buttons.length; x < numButtons; x++) {
+		for (let x = 0, numButtons = buttons.length; x < numButtons; x++) {
 			$('.formatting-bar .formatting-group #fileForm').before(
 				'<li tabindex="-1" data-format="' +
                     buttons[x].name +
@@ -121,8 +121,8 @@ define('composer/formatting', [
 
 	formatting.addHandler = function (postContainer) {
 		postContainer.on('click', '.formatting-bar li', function (event) {
-			var format = $(this).attr('data-format');
-			var textarea = $(this)
+			const format = $(this).attr('data-format');
+			const textarea = $(this)
 				.parents('[component="composer"]')
 				.find('textarea')[0];
 

@@ -190,47 +190,47 @@ plugin.filterComposerBuild = async function (hookData) {
 	const cid = parseInt(req.query.cid, 10);
 	const topicTitle = topicData && topicData.title ? topicData.title.replace(/%/g, '&#37;').replace(/,/g, '&#44;') : validator.escape(String(req.query.title || ''));
 	return {
-		req: req,
-		res: res,
+		req,
+		res,
 		templateData: {
 			disabled: !req.query.pid && !req.query.tid && !req.query.cid,
 			pid: parseInt(req.query.pid, 10),
 			tid: parseInt(req.query.tid, 10),
 			cid: cid || (topicData ? topicData.cid : null),
-			action: action,
+			action,
 			toPid: parseInt(req.query.toPid, 10),
-			discardRoute: discardRoute,
+			discardRoute,
 
 			resizable: false,
 			allowTopicsThumbnail: parseInt(meta.config.allowTopicsThumbnail, 10) === 1 && isMain,
 
 			// can't use title property as that is used for page title
-			topicTitle: topicTitle,
+			topicTitle,
 			titleLength: topicTitle ? topicTitle.length : 0,
 			topic: topicData,
 			thumb: topicData ? topicData.thumb : '',
-			body: body,
+			body,
 
-			isMain: isMain,
+			isMain,
 			isTopicOrMain: !!req.query.cid || isMain,
 			maximumTitleLength: meta.config.maximumTitleLength,
 			maximumPostLength: meta.config.maximumPostLength,
 			minimumTagLength: meta.config.minimumTagLength || 3,
 			maximumTagLength: meta.config.maximumTagLength || 15,
-			tagWhitelist: tagWhitelist,
+			tagWhitelist,
 			selectedCategory: cid ? categoryData : null,
 			minTags: categoryData.minTags,
 			maxTags: categoryData.maxTags,
 
 			isTopic: !!req.query.cid,
-			isEditing: isEditing,
+			isEditing,
 			canSchedule: canScheduleTopics,
 			showHandleInput: meta.config.allowGuestHandles === 1 &&
 				(req.uid === 0 || (isEditing && isGuestPost && (isAdmin || isMod))),
 			handle: postData ? postData.handle || '' : undefined,
-			formatting: formatting,
+			formatting,
 			isAdminOrMod: isAdmin || isMod,
-			save_id: save_id,
+			save_id,
 			privileges: globalPrivileges,
 		},
 	};

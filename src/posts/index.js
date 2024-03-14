@@ -10,7 +10,6 @@ const plugins = require('../plugins');
 
 const Posts = module.exports;
 
-
 require('./data').default(Posts);
 require('./create')(Posts);
 require('./delete')(Posts);
@@ -52,8 +51,8 @@ Posts.getPostsByPids = async function (pids, uid) {
     let posts = await Posts.getPostsData(pids);
     posts = await Promise.all(posts.map(Posts.parsePost));
     const data = await plugins.hooks.fire('filter:post.getPosts', {
-        posts: posts,
-        uid: uid,
+        posts,
+        uid,
     });
     if (!data || !Array.isArray(data.posts)) {
         return [];
@@ -67,7 +66,7 @@ Posts.getPostSummariesFromSet = async function (set, uid, start, stop) {
     const posts = await Posts.getPostSummaryByPids(pids, uid, {
         stripTags: false,
     });
-    return { posts: posts, nextStart: stop + 1 };
+    return { posts, nextStart: stop + 1 };
 };
 
 Posts.getPidIndex = async function (pid, tid, topicPostSort) {

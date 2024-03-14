@@ -1,4 +1,3 @@
-
 'use strict';
 
 const _ = require('lodash');
@@ -50,14 +49,14 @@ privsTopics.get = async function (tid, uid) {
         purge: (privData.purge && (isOwner || isModerator)) || isAdministrator,
 
         view_thread_tools: editable || deletable,
-        editable: editable,
-        deletable: deletable,
+        editable,
+        deletable,
         view_deleted: isAdminOrMod || isOwner || privData['posts:view_deleted'],
         view_scheduled: privData['topics:schedule'] || isAdministrator,
-        isAdminOrMod: isAdminOrMod,
-        disabled: disabled,
-        tid: tid,
-        uid: uid,
+        isAdminOrMod,
+        disabled,
+        tid,
+        uid,
     });
 };
 
@@ -90,9 +89,9 @@ privsTopics.filterTids = async function (privilege, tids, uid) {
     )).map(t => t.tid);
 
     const data = await plugins.hooks.fire('filter:privileges.topics.filter', {
-        privilege: privilege,
-        uid: uid,
-        tids: tids,
+        privilege,
+        uid,
+        tids,
     });
     return data ? data.tids : [];
 };

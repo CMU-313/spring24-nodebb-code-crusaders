@@ -1,6 +1,5 @@
 'use strict';
 
-
 define('forum/compose', ['hooks'], function (hooks) {
     const Compose = {};
 
@@ -10,7 +9,7 @@ define('forum/compose', ['hooks'], function (hooks) {
 
         if (container.length) {
             hooks.fire('action:composer.enhance', {
-                container: container,
+                container,
             });
         }
     };

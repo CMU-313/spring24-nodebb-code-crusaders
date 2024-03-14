@@ -126,7 +126,7 @@ function forkWorker(index, isPrimary) {
     process.env.port = ports[index];
 
     const worker = fork(appPath, args, {
-        silent: silent,
+        silent,
         env: process.env,
     });
 
@@ -201,7 +201,7 @@ function killWorkers() {
 
 fs.open(pathToConfig, 'r', (err) => {
     if (err) {
-        // No config detected, kickstart web installer
+    // No config detected, kickstart web installer
         fork('app');
         return;
     }

@@ -1,16 +1,16 @@
 'use strict';
 
 define('composer/controls', ['composer/preview'], function (preview) {
-	var controls = {};
+	const controls = {};
 
 	/** ********************************************** */
 	/* Rich Textarea Controls                        */
 	/** ********************************************** */
 	controls.insertIntoTextarea = function (textarea, value) {
-		var payload = {
+		const payload = {
 			context: this,
-			textarea: textarea,
-			value: value,
+			textarea,
+			value,
 			preventDefault: false,
 		};
 		$(window).trigger('action:composer.insertIntoTextarea', payload);
@@ -19,9 +19,9 @@ define('composer/controls', ['composer/preview'], function (preview) {
 			return;
 		}
 
-		var $textarea = $(payload.textarea);
-		var currentVal = $textarea.val();
-		var postContainer = $textarea.parents('[component="composer"]');
+		const $textarea = $(payload.textarea);
+		const currentVal = $textarea.val();
+		const postContainer = $textarea.parents('[component="composer"]');
 
 		$textarea.val(
 			currentVal.slice(0, payload.textarea.selectionStart) +
@@ -33,11 +33,11 @@ define('composer/controls', ['composer/preview'], function (preview) {
 	};
 
 	controls.wrapSelectionInTextareaWith = function (textarea, leading, trailing) {
-		var payload = {
+		const payload = {
 			context: this,
-			textarea: textarea,
-			leading: leading,
-			trailing: trailing,
+			textarea,
+			leading,
+			trailing,
 			preventDefault: false,
 		};
 		$(window).trigger('action:composer.wrapSelectionInTextareaWith', payload);
@@ -50,10 +50,10 @@ define('composer/controls', ['composer/preview'], function (preview) {
 			trailing = leading;
 		}
 
-		var $textarea = $(textarea);
-		var currentVal = $textarea.val();
+		const $textarea = $(textarea);
+		const currentVal = $textarea.val();
 
-		var matches = /^(\s*)([\s\S]*?)(\s*)$/.exec(currentVal.slice(textarea.selectionStart, textarea.selectionEnd));
+		let matches = /^(\s*)([\s\S]*?)(\s*)$/.exec(currentVal.slice(textarea.selectionStart, textarea.selectionEnd));
 
 		if (!matches[2]) {
 			// selection is entirely whitespace
@@ -74,11 +74,11 @@ define('composer/controls', ['composer/preview'], function (preview) {
 	};
 
 	controls.updateTextareaSelection = function (textarea, start, end) {
-		var payload = {
+		const payload = {
 			context: this,
-			textarea: textarea,
-			start: start,
-			end: end,
+			textarea,
+			start,
+			end,
 			preventDefault: false,
 		};
 		$(window).trigger('action:composer.updateTextareaSelection', payload);
@@ -93,12 +93,12 @@ define('composer/controls', ['composer/preview'], function (preview) {
 
 	controls.getBlockData = function (textareaEl, query, selectionStart) {
 		// Determines whether the cursor is sitting inside a block-type element (bold, italic, etc.)
-		var value = textareaEl.value;
+		let value = textareaEl.value;
 		query = query.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
-		var regex = new RegExp(query, 'g');
-		var match;
-		var matchIndices = [];
-		var payload;
+		const regex = new RegExp(query, 'g');
+		let match;
+		const matchIndices = [];
+		let payload;
 
 		// Isolate the line the cursor is on
 		value = value.split('\n').reduce(function (memo, line) {
@@ -120,6 +120,7 @@ define('composer/controls', ['composer/preview'], function (preview) {
 			matchIndices.push(match.index);
 		}
 
+		// eslint-disable-next-line prefer-const
 		payload = {
 			in: !!(matchIndices.reduce(function (memo, cur) {
 				if (selectionStart >= cur + 2) {

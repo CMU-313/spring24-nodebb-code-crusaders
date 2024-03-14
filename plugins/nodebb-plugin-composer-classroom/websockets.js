@@ -30,14 +30,14 @@ Sockets.push = async function (socket, pid) {
 	}
 
 	const result = await plugins.hooks.fire('filter:composer.push', {
-		pid: pid,
+		pid,
 		uid: postData.uid,
 		handle: parseInt(meta.config.allowGuestHandles, 10) ? postData.handle : undefined,
 		body: postData.content,
 		title: topic.title,
 		thumb: topic.thumb,
-		tags: tags,
-		isMain: isMain,
+		tags,
+		isMain,
 		timestamp: postData.timestamp,
 	});
 	return result;

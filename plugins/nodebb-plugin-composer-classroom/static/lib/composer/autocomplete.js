@@ -3,7 +3,7 @@
 define('composer/autocomplete', [
 	'composer/preview', '@textcomplete/core', '@textcomplete/textarea', '@textcomplete/contenteditable',
 ], function (preview, { Textcomplete }, { TextareaEditor }, { ContenteditableEditor }) {
-	var autocomplete = {
+	const autocomplete = {
 		_active: {},
 	};
 
@@ -15,9 +15,9 @@ define('composer/autocomplete', [
 	});
 
 	autocomplete.init = function (postContainer, post_uuid) {
-		var element = postContainer.find('.write');
-		var dropdownClass = 'composer-autocomplete-dropdown-' + post_uuid;
-		var timer;
+		const element = postContainer.find('.write');
+		const dropdownClass = 'composer-autocomplete-dropdown-' + post_uuid;
+		let timer;
 
 		if (!element.length) {
 			/**
@@ -29,8 +29,8 @@ define('composer/autocomplete', [
 			return;
 		}
 
-		var data = {
-			element: element,
+		const data = {
+			element,
 			strategies: [],
 			options: {
 				style: {
@@ -43,13 +43,13 @@ define('composer/autocomplete', [
 		element.on('keyup', function () {
 			clearTimeout(timer);
 			timer = setTimeout(function () {
-				var dropdown = document.querySelector('.' + dropdownClass);
+				const dropdown = document.querySelector('.' + dropdownClass);
 				if (dropdown) {
-					var pos = dropdown.getBoundingClientRect();
+					const pos = dropdown.getBoundingClientRect();
 
-					var margin = parseFloat(dropdown.style.marginTop, 10) || 0;
+					const margin = parseFloat(dropdown.style.marginTop, 10) || 0;
 
-					var offset = window.innerHeight + margin - 10 - pos.bottom;
+					const offset = window.innerHeight + margin - 10 - pos.bottom;
 					dropdown.style.marginTop = Math.min(offset, 0) + 'px';
 				}
 			}, 0);
@@ -70,7 +70,7 @@ define('composer/autocomplete', [
 		if (!targetEl) {
 			return;
 		}
-		var editor;
+		let editor;
 		if (targetEl.nodeName === 'TEXTAREA') {
 			editor = new TextareaEditor(targetEl);
 		} else if (targetEl.nodeName === 'DIV' && targetEl.getAttribute('contenteditable') === 'true') {
@@ -80,7 +80,7 @@ define('composer/autocomplete', [
 		// yuku-t/textcomplete inherits directionality from target element itself
 		targetEl.setAttribute('dir', document.querySelector('html').getAttribute('data-dir'));
 
-		var textcomplete = new Textcomplete(editor, strategies, {
+		const textcomplete = new Textcomplete(editor, strategies, {
 			dropdown: options,
 		});
 		textcomplete.on('rendered', function () {

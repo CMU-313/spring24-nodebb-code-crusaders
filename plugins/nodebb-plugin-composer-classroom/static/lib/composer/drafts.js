@@ -1,11 +1,11 @@
 'use strict';
 
 define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
-	var drafts = {};
-	var saveThrottleId;
+	const drafts = {};
+	let saveThrottleId;
 
 	drafts.init = function (postContainer, postData) {
-		var draftIconEl = postContainer.find('.draft-icon');
+		const draftIconEl = postContainer.find('.draft-icon');
 		function saveThrottle() {
 			resetTimeout();
 
@@ -28,7 +28,7 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 
 		$(window).on('unload', function () {
 			// Update visibility on all open composers
-			var open = [];
+			let open = [];
 			try {
 				open = localStorage.getItem('drafts:open');
 				open = JSON.parse(open) || [];
@@ -69,9 +69,9 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 	}
 
 	drafts.get = function (save_id) {
-		var uid = save_id.split(':')[1];
-		var storage = getStorage(uid);
-		var draft = {
+		const uid = save_id.split(':')[1];
+		const storage = getStorage(uid);
+		const draft = {
 			text: storage.getItem(save_id),
 		};
 		['cid', 'title', 'tags', 'uuid'].forEach(function (key) {
@@ -85,9 +85,9 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 		}
 
 		$(window).trigger('action:composer.drafts.get', {
-			save_id: save_id,
-			draft: draft,
-			storage: storage,
+			save_id,
+			draft,
+			storage,
 		});
 		return draft;
 	};
@@ -101,8 +101,8 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 		) {
 			const titleEl = postContainer.find('input.title');
 			const title = titleEl && titleEl.val();
-			var raw = postContainer.find('textarea').val();
-			var storage = getStorage(app.user.uid);
+			const raw = postContainer.find('textarea').val();
+			const storage = getStorage(app.user.uid);
 
 			if (
 				postData.hasOwnProperty('cid') &&
@@ -130,14 +130,14 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 					storage.setItem(postData.save_id + ':title', title);
 				}
 				if (!app.user.uid) {
-					var handle = postContainer.find('input.handle').val();
+					const handle = postContainer.find('input.handle').val();
 					storage.setItem(postData.save_id + ':handle', handle);
 				}
 
 				$(window).trigger('action:composer.drafts.save', {
-					storage: storage,
-					postData: postData,
-					postContainer: postContainer,
+					storage,
+					postData,
+					postContainer,
 				});
 				draftIconEl.toggleClass('active', true);
 			} else {
@@ -154,8 +154,8 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 		// Remove save_id from list of open and available drafts
 		drafts.updateVisibility('available', save_id);
 		drafts.updateVisibility('open', save_id);
-		var uid = save_id.split(':')[1];
-		var storage = getStorage(uid);
+		const uid = save_id.split(':')[1];
+		const storage = getStorage(uid);
 		const keys = Object.keys(storage).filter(key => key.startsWith(save_id));
 		keys.forEach(key => storage.removeItem(key));
 	};
@@ -167,7 +167,7 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 		) {
 			return;
 		}
-		var open = [];
+		let open = [];
 		try {
 			open = localStorage.getItem('drafts:' + set);
 			open = open ? JSON.parse(open) : [];
@@ -177,7 +177,7 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 			);
 			open = [];
 		}
-		var idx = open.indexOf(save_id);
+		const idx = open.indexOf(save_id);
 
 		if (add && idx === -1) {
 			open.push(save_id);
@@ -191,13 +191,13 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 	drafts.migrateGuest = function () {
 		// If any drafts are made while as guest, and user then logs in, assume control of those drafts
 		if (canSave('localStorage') && app.user.uid) {
-			var test = /^composer:\d+:\w+:\d+(:\w+)?$/;
-			var keys = Object.keys(sessionStorage).filter(function (key) {
+			const test = /^composer:\d+:\w+:\d+(:\w+)?$/;
+			const keys = Object.keys(sessionStorage).filter(function (key) {
 				return test.test(key);
 			});
-			var migrated = new Set([]);
-			var renamed = keys.map(function (key) {
-				var parts = key.split(':');
+			const migrated = new Set([]);
+			const renamed = keys.map(function (key) {
+				const parts = key.split(':');
 				parts[1] = app.user.uid;
 
 				migrated.add(parts.slice(0, 4).join(':'));
@@ -242,8 +242,8 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 			return;
 		}
 		// Load drafts if they were open
-		var available;
-		var open = [];
+		let available;
+		let open = [];
 		try {
 			available = localStorage.getItem('drafts:available');
 			open = localStorage.getItem('drafts:open');
@@ -263,11 +263,11 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 				if (!save_id) {
 					return;
 				}
-				var saveObj = save_id.split(':');
-				var uid = saveObj[1];
-				var type = saveObj[2];
-				var id = saveObj[3];
-				var draft = drafts.get(save_id);
+				const saveObj = save_id.split(':');
+				const uid = saveObj[1];
+				const type = saveObj[2];
+				const id = saveObj[3];
+				const draft = drafts.get(save_id);
 
 				// If draft is already open, do nothing
 				if (open.indexOf(save_id) !== -1) {
@@ -297,8 +297,10 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 							cid: id,
 							handle:
 								app.user && app.user.uid ?
-									undefined :
-									utils.escapeHTML(draft.handle),
+								// eslint-disable-next-line no-mixed-spaces-and-tabs
+								  undefined :
+								// eslint-disable-next-line no-mixed-spaces-and-tabs
+								  utils.escapeHTML(draft.handle),
 							title: utils.escapeHTML(draft.title),
 							body: utils.escapeHTML(draft.text),
 							tags: String(draft.tags || '').split(','),
@@ -325,10 +327,10 @@ define('composer/drafts', ['api', 'alerts'], function (api, alerts) {
 
 	// Feature detection courtesy of: https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
 	function canSave(type) {
-		var storage;
+		let storage;
 		try {
 			storage = window[type];
-			var x = '__storage_test__';
+			const x = '__storage_test__';
 			storage.setItem(x, x);
 			storage.removeItem(x);
 			return true;

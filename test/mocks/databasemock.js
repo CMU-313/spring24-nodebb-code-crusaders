@@ -15,7 +15,6 @@ const util = require('util');
 process.env.NODE_ENV = process.env.TEST_ENV || 'production';
 global.env = process.env.NODE_ENV || 'production';
 
-
 const winston = require('winston');
 const packageInfo = require('../../package.json');
 
@@ -145,7 +144,6 @@ before(async function () {
     nconf.set('runJobs', false);
     nconf.set('jobsDisabled', false);
 
-
     await db.init();
     if (db.hasOwnProperty('createIndices')) {
         await db.createIndices();
@@ -173,7 +171,7 @@ before(async function () {
 
     // Iterate over all of the test suites/contexts
     this.test.parent.suites.forEach((suite) => {
-        // Attach an afterAll listener that resets the defaults
+    // Attach an afterAll listener that resets the defaults
         suite.afterAll(async () => {
             await setupMockDefaults();
         });
@@ -219,7 +217,7 @@ async function setupMockDefaults() {
         'test/uploads/profile',
     ];
     for (const folder of folders) {
-        /* eslint-disable no-await-in-loop */
+    /* eslint-disable no-await-in-loop */
         await mkdirp(folder);
     }
 }

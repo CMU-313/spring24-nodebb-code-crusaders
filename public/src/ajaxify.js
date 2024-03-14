@@ -4,7 +4,7 @@ const hooks = require('./modules/hooks');
 const { render } = require('./widgets');
 
 window.ajaxify = window.ajaxify || {};
-ajaxify.widgets = { render: render };
+ajaxify.widgets = { render };
 (function () {
     let apiXHR = null;
     let ajaxifyTimer;
@@ -16,7 +16,7 @@ ajaxify.widgets = { render: render };
     ajaxify.currentPage = null;
 
     ajaxify.go = function (url, callback, quiet) {
-        // Automatically reconnect to socket and re-ajaxify on success
+    // Automatically reconnect to socket and re-ajaxify on success
         if (!socket.connected) {
             app.reconnect();
 
@@ -58,7 +58,7 @@ ajaxify.widgets = { render: render };
 
         // If any listeners alter url and set it to an empty string, abort the ajaxification
         if (url === null) {
-            hooks.fire('action:ajaxify.end', { url: url, tpl_url: ajaxify.data.template.name, title: ajaxify.data.title });
+            hooks.fire('action:ajaxify.end', { url, tpl_url: ajaxify.data.template.name, title: ajaxify.data.title });
             return false;
         }
 
@@ -114,7 +114,7 @@ ajaxify.widgets = { render: render };
         url = ajaxify.removeRelativePath(url.replace(/^\/|\/$/g, ''));
 
         const payload = {
-            url: url,
+            url,
         };
 
         hooks.logs.collect();
@@ -129,7 +129,7 @@ ajaxify.widgets = { render: render };
         ajaxify.currentPage = url.split(/[?#]/)[0];
         if (window.history && window.history.pushState) {
             window.history[!quiet ? 'pushState' : 'replaceState']({
-                url: url,
+                url,
             }, url, config.relative_path + '/' + url);
         }
     };
@@ -218,7 +218,7 @@ ajaxify.widgets = { render: render };
 
             // Allow translation strings in title on ajaxify (#5927)
             title = translator.unescape(title);
-            const data = { title: title };
+            const data = { title };
             hooks.fire('action:ajaxify.updateTitle', data);
             translator.translate(data.title, function (translated) {
                 window.document.title = $('<div></div>').html(translated).text();
@@ -294,17 +294,17 @@ ajaxify.widgets = { render: render };
     }
 
     ajaxify.end = function (url, tpl_url) {
-        // Scroll back to top of page
+    // Scroll back to top of page
         if (!ajaxify.isCold()) {
             window.scrollTo(0, 0);
         }
         ajaxify.loadScript(tpl_url, function done() {
-            hooks.fire('action:ajaxify.end', { url: url, tpl_url: tpl_url, title: ajaxify.data.title });
+            hooks.fire('action:ajaxify.end', { url, tpl_url, title: ajaxify.data.title });
             hooks.logs.flush();
         });
         ajaxify.widgets.render(tpl_url);
 
-        hooks.fire('action:ajaxify.contentLoaded', { url: url, tpl: tpl_url });
+        hooks.fire('action:ajaxify.contentLoaded', { url, tpl: tpl_url });
 
         app.processPage();
     };
@@ -341,7 +341,7 @@ ajaxify.widgets = { render: render };
             location = '';
         }
         const data = {
-            tpl_url: tpl_url,
+            tpl_url,
             scripts: [location + tpl_url],
         };
 
@@ -392,7 +392,7 @@ ajaxify.widgets = { render: render };
     ajaxify.loadData = function (url, callback) {
         url = ajaxify.removeRelativePath(url);
 
-        hooks.fire('action:ajaxify.loadingData', { url: url });
+        hooks.fire('action:ajaxify.loadingData', { url });
 
         apiXHR = $.ajax({
             url: config.relative_path + '/api/' + url,
@@ -418,7 +418,7 @@ ajaxify.widgets = { render: render };
                 ajaxify.data = data;
                 data.config = config;
 
-                hooks.fire('action:ajaxify.dataLoaded', { url: url, data: data });
+                hooks.fire('action:ajaxify.dataLoaded', { url, data });
 
                 callback(null, data);
             },
@@ -429,8 +429,8 @@ ajaxify.widgets = { render: render };
                     data.responseJSON.error = '[[error:no-connection]]';
                 }
                 callback({
-                    data: data,
-                    textStatus: textStatus,
+                    data,
+                    textStatus,
                 });
             },
         });
@@ -588,7 +588,7 @@ $(document).ready(function () {
     }
 
     if (window.history && window.history.pushState) {
-        // Progressive Enhancement, ajaxify available only to modern browsers
+    // Progressive Enhancement, ajaxify available only to modern browsers
         ajaxifyAnchors();
     }
 });

@@ -80,7 +80,6 @@ function loadConfig(configFile) {
     nconf.set('upload_path', path.resolve(nconf.get('base_dir'), nconf.get('upload_path')));
     nconf.set('upload_url', '/assets/uploads');
 
-
     // nconf defaults, if not set in config
     if (!nconf.get('sessionKey')) {
         nconf.set('sessionKey', 'express.sid');
