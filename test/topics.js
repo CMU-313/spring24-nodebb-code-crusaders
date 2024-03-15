@@ -92,6 +92,13 @@ describe('Topic\'s', () => {
                 assert.ifError(err);
                 assert(result.topicData.hasOwnProperty('anonymous'));
                 assert(result.topicData.anonymous === 1);
+                const code = 'result.topicData.anonymous === 1;';
+                const stage = new Iroh.Stage(code);
+                const listener = stage.addListener(Iroh.LOGICAL);
+                listener.on('fire', (e) => {
+                    console.log(e.name, '=>', e.result);
+                });
+                eval(stage.script);
                 done();
             });
         });
