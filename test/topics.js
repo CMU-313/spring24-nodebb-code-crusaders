@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+
 'use strict';
 
 const async = require('async');
@@ -8,6 +10,7 @@ const mockdate = require('mockdate');
 const nconf = require('nconf');
 const request = require('request');
 const util = require('util');
+const Iroh = require('iroh');
 
 const sleep = util.promisify(setTimeout);
 
@@ -24,6 +27,95 @@ const helpers = require('./helpers');
 const socketPosts = require('../src/socket.io/posts');
 const socketTopics = require('../src/socket.io/topics');
 const apiTopics = require('../src/api/topics');
+
+function attachListeners(stage) {
+    // if
+    stage.addListener(Iroh.IF)
+        .on('enter', (e) => {
+            console.log(`${' '.repeat(e.indent)} if`, e.value);
+        })
+        .on('leave', (e) => {
+            console.log(`${' '.repeat(e.indent)} if end`);
+        });
+
+    // else
+    stage.addListener(Iroh.ELSE)
+        .on('enter', (e) => {
+            console.log(`${' '.repeat(e.indent)} else`);
+        })
+        .on('leave', (e) => {
+            console.log(`${' '.repeat(e.indent)} else end`);
+        });
+
+    // loop
+    stage.addListener(Iroh.LOOP)
+        .on('enter', (e) => {
+            console.log(`${' '.repeat(e.indent)} loop`);
+        })
+        .on('leave', (e) => {
+            console.log(`${' '.repeat(e.indent)} loop end`);
+        });
+
+    // switch
+    stage.addListener(Iroh.SWITCH)
+        .on('enter', (e) => {
+            console.log(`${' '.repeat(e.indent)} switch`);
+        })
+        .on('leave', (e) => {
+            console.log(`${' '.repeat(e.indent)} switch end`);
+        });
+
+    // case, default
+    stage.addListener(Iroh.CASE)
+        .on('enter', (e) => {
+            console.log(' '.repeat(e.indent) + (e.default ? 'default' : 'case'), e.value);
+        })
+        .on('leave', (e) => {
+            console.log(`${' '.repeat(e.indent) + (e.default ? 'default' : 'case')} end`);
+        });
+
+    // function call
+    stage.addListener(Iroh.CALL)
+        .on('before', (e) => {
+            let external = e.external ? '#external' : '';
+            console.log(`${' '.repeat(e.indent)} call`, e.name, external, '(', e.arguments, ')');
+        })
+        .on('after', (e) => {
+            let external = e.external ? '#external' : '';
+            console.log(`${' '.repeat(e.indent)} call`, e.name, 'end', external, '->', [e.return]);
+        });
+
+    // function
+    stage.addListener(Iroh.FUNCTION)
+        .on('enter', (e) => {
+            let sloppy = e.sloppy ? '#sloppy' : '';
+            if (e.sloppy) {
+                console.log(`${' '.repeat(e.indent)} call`, e.name, sloppy, '(', e.arguments, ')');
+            }
+        })
+        .on('leave', (e) => {
+            let sloppy = e.sloppy ? '#sloppy' : '';
+            if (e.sloppy) {
+                // eslint-disable-next-line no-void
+                console.log(`${' '.repeat(e.indent)} call`, e.name, 'end', sloppy, '->');
+            }
+        })
+        .on('return', (e) => {
+            let sloppy = e.sloppy ? '#sloppy' : '';
+            if (e.sloppy) {
+                console.log(`${' '.repeat(e.indent)} call`, e.name, 'end', sloppy, '->', [e.return]);
+            }
+        });
+
+    // program
+    stage.addListener(Iroh.PROGRAM)
+        .on('enter', (e) => {
+            console.log(`${' '.repeat(e.indent)} Program`);
+        })
+        .on('leave', (e) => {
+            console.log(`${' '.repeat(e.indent)} Program end`, '->', e.return);
+        });
+}
 
 const requestType = util.promisify((type, url, opts, cb) => {
     request[type](url, opts, (err, res, body) => cb(err, { res: res, body: body }));
@@ -82,18 +174,37 @@ describe('Topic\'s', () => {
         });
 
         it('should create a new topic anonymously', (done) => {
+            function handler(err, result) {
+                assert.ifError(err);
+                assert(result.topicData.hasOwnProperty('anonymous'));
+                assert(result.topicData.anonymous === 1);
+                done();
+            }
+            let code = `
             topics.post({
                 uid: topic.userId,
                 title: topic.title,
                 content: topic.content,
                 cid: topic.categoryId,
                 anonymous: 1,
-            }, (err, result) => {
-                assert.ifError(err);
-                assert(result.topicData.hasOwnProperty('anonymous'));
-                assert(result.topicData.anonymous === 1);
-                done();
-            });
+            }, handler);`;
+            let stage = new Iroh.Stage(code);
+            attachListeners(stage);
+            console.log('IROH SHOULD RUN');
+            // eslint-disable-next-line no-eval
+            eval(stage.script);
+            // topics.post({
+            //     uid: topic.userId,
+            //     title: topic.title,
+            //     content: topic.content,
+            //     cid: topic.categoryId,
+            //     anonymous: 1,
+            // }, (err, result) => {
+            //     assert.ifError(err);
+            //     assert(result.topicData.hasOwnProperty('anonymous'));
+            //     assert(result.topicData.anonymous === 1);
+            //     done();
+            // });
         });
 
         it('should default to creating new topics nonanonymously', (done) => {

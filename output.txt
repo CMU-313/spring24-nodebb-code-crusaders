@@ -1,0 +1,95 @@
+
+> nodebb@2.8.1 test
+> npx tsc && nyc --reporter=html --reporter=text-summary mocha -f anonymously
+
+info: configJSON
+info: {
+    "url": "http://127.0.0.1:4567",
+    "secret": "1f25b19d-c229-4354-95b3-dce7a813a224",
+    "database": "redis",
+    "redis": {
+        "host": "127.0.0.1",
+        "port": "6379",
+        "password": "",
+        "database": "0"
+    },
+    "test_database": {
+        "host": "127.0.0.1",
+        "port": "6379",
+        "password": "",
+        "database": "1"
+    },
+    "port": "4567"
+}
+info: database config redis {"database":"1","host":"127.0.0.1","password":"","port":"6379"}
+info: environment production
+
+info: test_database flushed
+info: Populating database with default configs, if not already set...
+
+info: Giving default global privileges...
+
+info: Enabling modified plugins
+
+info: [install/enableDefaultPlugins] activating default plugins {"0":"nodebb-plugin-dbsearch","1":"nodebb-widget-essentials","2":"nodebb-plugin-composer-classroom"}
+info: [socket.io] Restricting access to origin: *:*
+
+warn: [plugins/load] The following plugins may not be compatible with your version of NodeBB. This may cause unintended behaviour or crashing. In the event of an unresponsive NodeBB caused by this plugin, run `./nodebb reset -p PLUGINNAME` to disable it.
+  * nodebb-plugin-dbsearch
+
+info: [api] Adding 0 route(s) to `api/v3/plugins`
+info: [router] Routes added
+info: 🎉 NodeBB Ready
+info: 🤝 Enabling 'trust proxy'
+info: 📡 NodeBB is now listening on: 0.0.0.0:4567
+info: 🔗 Canonical URL: http://127.0.0.1:4567
+IROH SHOULD RUN
+ Program
+  call post #external ( [
+  {
+    uid: 1,
+    title: 'Test Topic Title',
+    content: 'The content of test topic',
+    cid: 1,
+    anonymous: 1
+  },
+  [Function: handler]
+] )
+  call post end #external -> [
+  Promise {
+    undefined,
+    [Symbol(async_id_symbol)]: 7318,
+    [Symbol(trigger_async_id_symbol)]: 7315,
+    [Symbol(kResourceStore)]: undefined
+  }
+]
+ Program end -> Promise {
+  undefined,
+  [Symbol(async_id_symbol)]: 7318,
+  [Symbol(trigger_async_id_symbol)]: 7315,
+  [Symbol(kResourceStore)]: undefined
+}
+1
+
+  ..
+
+
+info test_database flushed
+info Populating database with default configs, if not already set...
+
+info Giving default global privileges...
+
+info Enabling modified plugins
+
+info [install/enableDefaultPlugins] activating default plugins
+
+
+  2 passing (1s)
+
+
+=============================== Coverage summary ===============================
+Statements   : 31.87% ( 7706/24174 )
+Branches     : 12.96% ( 1550/11955 )
+Functions    : 18.49% ( 824/4455 )
+Lines        : 32.65% ( 7579/23206 )
+================================================================================
