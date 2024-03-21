@@ -24,8 +24,12 @@
     ]
   },
   "lint-staged": {
-    "*.js": [
+    "*.{js,ts,mjs,cjs}": [
+      "prettier --write",
       "eslint --fix"
+    ],
+    "./**/*.json": [
+      "prettier --write"
     ]
   },
   "dependencies": {
