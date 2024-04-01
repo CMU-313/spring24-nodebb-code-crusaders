@@ -30,7 +30,7 @@ jobs:
         include:
           # only run coverage once
           - os: ubuntu-latest
-            node: 16
+            node: 18
             coverage: true
           # test under development once
           - database: mongo-dev
