@@ -66,6 +66,10 @@ get:
                     type: boolean
                   anonymous:
                     type: number
+                  isEnglish:
+                    type: number
+                  translatedContent:
+                    type: string
 put:
   tags:
     - posts

@@ -184,6 +184,9 @@ TopicObject:
           description: '`pinExpiry` rendered as an ISO 8601 format'
         index:
           type: number
+        isEnglish:
+          type: number
+          description: Whether or not the topic content is in English
       required:
         - tid
 TopicObjectSlim:
@@ -280,5 +283,8 @@ TopicObjectSlim:
         numThumbs:
           type: number
           description: The number of thumbnails associated with this topic
+        isEnglish:
+          type: number
+          description: Whether or not the topic content is in English
       required:
         - tid
