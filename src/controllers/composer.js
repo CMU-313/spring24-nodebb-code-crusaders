@@ -13,12 +13,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.post = exports.get = void 0;
-const nconf_1 = __importDefault(require("nconf"));
+// This is one of the two example TypeScript files included with the NodeBB repository
+// It is meant to serve as an example to assist you with your HW1 translation
 const plugins_1 = __importDefault(require("../plugins"));
 const posts_1 = __importDefault(require("../posts"));
 const topics_1 = __importDefault(require("../topics"));
 const user_1 = __importDefault(require("../user"));
 const helpers_1 = __importDefault(require("./helpers"));
+const nconf_1 = __importDefault(require("nconf"));
 function get(req, res, callback) {
     return __awaiter(this, void 0, void 0, function* () {
         res.locals.metaTags = Object.assign(Object.assign({}, res.locals.metaTags), { name: 'robots', content: 'noindex' });

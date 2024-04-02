@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.setActivePostSharingNetworks = exports.getActivePostSharing = exports.getPostSharing = void 0;
 // This is one of the two example TypeScript files included with the NodeBB repository
 // It is meant to serve as an example to assist you with your HW1 translation
-const lodash_1 = __importDefault(require("lodash"));
 const database_1 = __importDefault(require("./database"));
 const plugins_1 = __importDefault(require("./plugins"));
+const lodash_1 = __importDefault(require("lodash"));
 let postSharing = null;
 function getPostSharing() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -53,7 +53,7 @@ exports.getPostSharing = getPostSharing;
 function getActivePostSharing() {
     return __awaiter(this, void 0, void 0, function* () {
         const networks = yield getPostSharing();
-        return networks.filter(network => network && network.activated);
+        return networks.filter((network) => network && network.activated);
     });
 }
 exports.getActivePostSharing = getActivePostSharing;

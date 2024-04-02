@@ -87,8 +87,8 @@ define('forum/topic', [
     };
 
     function configurePostToggle() {
-        $(".topic").on("click", ".view-original-btn", function () {
-            console.log("clicked");
+        $('.topic').on('click', '.view-original-btn', function () {
+            console.log('clicked');
             console.log(this);
             // Toggle the visibility of the next .original-content div
             $(this).closest('.sensitive-content-message').next('.original-content').toggle();
@@ -103,10 +103,6 @@ define('forum/topic', [
             }
         });
     }
-
-
-
-
 
     function handleTopicSearch() {
         require(['mousetrap'], (mousetrap) => {

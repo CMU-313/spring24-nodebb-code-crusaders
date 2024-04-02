@@ -143,4 +143,3 @@ PostObject:
     isEnglish:
       type: number
       description: Whether or not the topic content is in English
-

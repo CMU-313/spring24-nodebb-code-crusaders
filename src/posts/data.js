@@ -48,7 +48,7 @@ function default_1(Posts) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 post.editedISO = (post.edited !== 0 ? utils_1.default.toISOString(post.edited) : '');
             }
-            post.isEnglish = post.isEnglish == "true";
+            post.isEnglish = post.isEnglish === 'true';
         }
     }
     Posts.getPostsFields = function (pids, fields) {
@@ -56,7 +56,7 @@ function default_1(Posts) {
             if (!Array.isArray(pids) || !pids.length) {
                 return [];
             }
-            const keys = pids.map(pid => `post:${pid}`);
+            const keys = pids.map((pid) => `post:${pid}`);
             // The next line calls a function in a module that has not been updated to TS yet
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             const postData = (yield database_1.default.getObjects(keys, fields));

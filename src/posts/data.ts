@@ -80,7 +80,7 @@ export default function (Posts: PostsFunctions) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 post.editedISO = (post.edited !== 0 ? utils.toISOString(post.edited) : '') as string;
             }
-            post.isEnglish = post.isEnglish == "true";
+            post.isEnglish = post.isEnglish === 'true';
         }
     }
 
