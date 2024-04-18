@@ -9,6 +9,7 @@ logs/
 /public/uploads
 /public/vendor
 /public/src/modules/string.js
+/public/language
 .idea/
 .vscode/
 *.ipr
@@ -18,3 +19,4 @@ logs/
 .eslintrc
 test/files
 *.min.js
+themes/
